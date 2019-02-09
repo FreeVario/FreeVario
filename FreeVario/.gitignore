@@ -1,0 +1,64 @@
+/Debug/
+/Middlewares/
+/Drivers/
+/Inc/
+/startup/
+/.settings/
+/FreeVarioF4.elf.launch
+/STM32F407VE_FLASH.ld
+/syscalls.c
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+.c9
+.tmp
+.log
+/.cproject
+/.mxproject
+/.project
+/.cproject (conflicted copy 2018-12-19 194956)
+/Src/bsp_driver_sd.c
+/Src/sd_diskio.c               
+/Src/usbd_cdc_if.c
+/Src/fatfs.c
+/Src/stm32f4xx_hal_msp.c      
+/Src/usbd_conf.c
+/Src/fatfs_platform.c
+/Src/stm32f4xx_hal_timebase_TIM.c
+/Src/usbd_desc.c
+/Src/freertos.c
+/Src/usb_device.c
+/Src/system_stm32f4xx.c
+
+/.code_review_properties
+/STM32F405RG_FLASH.ld
