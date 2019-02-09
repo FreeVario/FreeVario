@@ -36,12 +36,22 @@
 extern settings_t conf; //declared at fvconf.h. So yes, you must include both files
 
 typedef struct {
-	uint32_t takeoffTime;
+	uint16_t takeoffYear;
+	uint8_t takeoffMonth;
+	uint8_t takeoffDate;
+	uint8_t takeoffHour;
+	uint8_t takeoffMinute;
+	uint8_t takeoffSeconds;
 	uint32_t takeoffTemp;
 	uint32_t takeoffAltitude;
 	uint32_t takeoffLocationLAT;
 	uint32_t takeoffLocationLON;
-	uint32_t landingTime;
+	uint16_t landingYear;
+	uint8_t landingMonth;
+	uint8_t landingDate;
+	uint8_t landingHour;
+	uint8_t landingMinute;
+	uint8_t landingSeconds;
 	uint32_t landingLocationLAT;
 	uint32_t landingLocationLON;
 	uint32_t landingAltitude;

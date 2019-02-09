@@ -292,7 +292,7 @@ void StartDefaultTask(void const * argument)
 		}
 
 		if (hgps.fix > 0 && !HasSetTime ) {
-			setRTCFromHgps(&hgps, &hrtc,conf.gmtoffset);
+			setRTCFromHgps(&hgps, &hrtc,conf.gmtoffset); //util.c
 			HasSetTime=1;
 
 		}
@@ -312,7 +312,7 @@ void StartDefaultTask(void const * argument)
 				activity.takeoffLocationLAT = (int32_t)(hgps.latitude*1000000);
 				activity.takeoffLocationLON = (int32_t)(hgps.longitude*1000000);
 				activity.takeoffTemp = sensors.temperature;
-				activity.takeoffTime = hgps.date;
+				setActivityTakeoffTime(&hrtc, &activity); //util.c
 				activity.isFlying = 1;
 
 			xTaskNotify(xLogDataNotify, 0x01, eSetValueWithOverwrite);
@@ -352,7 +352,7 @@ void StartDefaultTask(void const * argument)
 				activity.landingLocationLAT = (int32_t)(hgps.latitude*1000000);
 				activity.landingLocationLON = (int32_t)(hgps.longitude*1000000);
 				activity.MaxAltitudeGainedMeters = activity.MaxAltitudeMeters - activity.takeoffAltitude;
-
+				setActivityLandTime(&hrtc, &activity); //util.c
 
 
 				activity.landed = 0;

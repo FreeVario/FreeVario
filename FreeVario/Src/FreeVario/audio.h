@@ -14,6 +14,7 @@
 
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
+#include "../fvconfig.h"
 #include <stdlib.h>
 #include <bmp280.h>
 #include <globaldata.h>

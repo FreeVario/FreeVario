@@ -11,7 +11,7 @@
 
 #ifndef FANET_H_
 #define FANET_H_
-
+#include "../fvconfig.h"
 
 
 

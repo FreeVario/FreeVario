@@ -37,13 +37,31 @@ void writeFlightLogSummaryFile(){
 				} else {
 					/* Write data to the text file */
 
-					sprintf(wtext,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
-							activity.currentLogID,activity.takeoffTime,activity.takeoffAltitude,
-							activity.takeoffTemp, activity.landingTime, activity.landingAltitude,
-							activity.MaxAltitudeMeters,activity.MaxAltitudeGainedMeters,
-							activity.MaxVarioMs,activity.MaxVarioSinkMs,
-							activity.takeoffLocationLAT, activity.takeoffLocationLON,
-							activity.landingLocationLAT,activity.landingLocationLON);
+					sprintf(wtext,"%d,%u-%02u-%02u %02u:%02u:%02u,%d,%d,%u-%02u-%02u %02u:%02u:%02u,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
+							activity.currentLogID,
+							activity.takeoffDate,
+							activity.takeoffMonth,
+							activity.takeoffYear,
+							activity.takeoffHour,
+							activity.takeoffMinute,
+							activity.takeoffSeconds,
+							activity.takeoffAltitude,
+							activity.takeoffTemp,
+							activity.landingDate,
+							activity.landingMonth,
+							activity.landingYear,
+							activity.landingHour,
+							activity.landingMinute,
+							activity.landingSeconds,
+							activity.landingAltitude,
+							activity.MaxAltitudeMeters,
+							activity.MaxAltitudeGainedMeters,
+							activity.MaxVarioMs,
+							activity.MaxVarioSinkMs,
+							activity.takeoffLocationLAT,
+							activity.takeoffLocationLON,
+							activity.landingLocationLAT,
+							activity.landingLocationLON);
 
 					res = f_write(&logSumFile, wtext, strlen(wtext),
 							(void *) &byteswritten);
