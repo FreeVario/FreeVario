@@ -11,12 +11,13 @@
 //////////////////////////////////////////////////
 /*
  * CUBE MX Build Notes
- *
+ * Checkout GIT
+ * Load the IOC file
  * Check the clock frequencies (underclock to save power)
  * Re-Check the xtal frequency
- * Set Default task as weak and rest as external
- * Don't use the queue function
- *
+ * Generate project
+ * Add sub directories to include paths
+ * Compile and test
  */
 
 /////////////////////////////////////////////////

@@ -12,8 +12,6 @@
  * Processor, channel and pin mappings
  * Only this file should needed to be configured when changing processors
  * Better use FV_ preamble to avoid conflicts
- *  Created on: Feb 8, 2018
- *      Author: marco
  */
 
 #ifndef FVCONFIG_HAL_H_
