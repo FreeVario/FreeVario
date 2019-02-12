@@ -27,6 +27,8 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
+#include "fatfs.h"
+#include "usb_device.h"
 #include <displaytask.h>
 #include <globaldata.h>
 #include <stdlib.h>
@@ -56,7 +58,7 @@ __IO uint8_t UserPowerButton = 0;
 __IO uint8_t UserOptButton = 0;
 uint8_t SDcardMounted = 0;
 uint8_t HasSetTime = 0;
-uint32_t landedcheck=0;
+
 
 /*  FreeRtos-------------------------------------------------------------------*/
 
@@ -244,6 +246,7 @@ void StartDefaultTask(void const * argument)
   xSemaphoreGive(confMutexHandle);
   xSemaphoreGive(sdCardMutexHandle);
 
+  TickType_t landedcheck=0;
 
   uint8_t switchs=0;
 

@@ -154,7 +154,7 @@ void NMEA_getNmeaPcProbe(uint8_t * buffer, int16_t aax, int16_t aay,
 		ch = 0;
 	}
 
-	sprintf(nmeaVario, "$PCPROBE,T,,,,,");
+	//sprintf(nmeaVario, "$PCPROBE,T,,,,,");
 
 	sprintf(nmeaVario, "$PCPROBE,T,,,,,%02x,%02x,%02x,%02x,%02x,%02x,,,%1X*",
 			(int) aax / 1000, (int) aay / 1000, (int) aaz / 1000,

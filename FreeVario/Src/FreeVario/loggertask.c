@@ -31,12 +31,14 @@ void StartLoggerTask(void const * argument)
 	configASSERT(xLogDataNotify == NULL);
 	xLogDataNotify = xTaskGetCurrentTaskHandle();
 	datalog.isLogging=0;
+	TickType_t updateLogBooktime=0;
 	osDelay(4000); //wait for setup of environment
 	/* Infinite loop */
 	for (;;) {
 
 
 		times = xTaskGetTickCount();
+		updateLogBooktime = xTaskGetTickCount();
 
 		if (!SDcardMounted) { //can't continue without a SD card
 			xLogDataNotify = NULL;
@@ -77,9 +79,9 @@ void StartLoggerTask(void const * argument)
 				}
 			}
 
-			if (ulNotifiedValue  == 2) { //flying
+	//		if (ulNotifiedValue  == 2) { //flying (not used)
 
-			}
+	//		}
 
 			if (ulNotifiedValue == 3) { //landed
 				if ( xSemaphoreTake(sdCardMutexHandle,
@@ -101,6 +103,9 @@ void StartLoggerTask(void const * argument)
 					(TickType_t ) 600) == pdTRUE) {
 				//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 				writeDataLogFile(&dataLogFile);
+				if (xTaskGetTickCount() - updateLogBooktime > UPDATELOGFILETIME){ //update Summary log in case of program crash
+					writeFlightLogSummaryFile();
+				}
 
 				xSemaphoreGive(sdCardMutexHandle);
 			}
