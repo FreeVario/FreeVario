@@ -23,7 +23,7 @@ void setupAudio(audio_t * audio) {
 	 HAL_TIMEx_PWMN_Start(&FV_TONETMR, FV_TONECHN);
 	 FV_TONEHALTMR->PSC  = SystemCoreClock/10000000;
 	 toneconstant(audio, 1000);
-	 osDelay(100);
+	 osDelay(10);
 	 noTone();
 }
 

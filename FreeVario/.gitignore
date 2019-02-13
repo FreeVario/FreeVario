@@ -5,6 +5,7 @@
 /startup/
 /.settings/
 /FreeVarioF4.elf.launch
+/FreeVario.elf.launch
 /FreeVarioBoardF4.elf.launch
 /STM32F407VE_FLASH.ld
 /syscalls.c
