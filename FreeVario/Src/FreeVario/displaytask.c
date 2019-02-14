@@ -90,16 +90,32 @@ void displayTaskSetup(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
 //	   */
 
 	//  Paint_DrawHorizontalLine(paint, 1, 74, epd->width-1, COLORED);
-	  Paint_DrawHorizontalLine(paint, 1, 148, epd->width-1, COLORED);
-	  Paint_DrawHorizontalLine(paint, 1, 222, epd->width-1, COLORED);
+	//  Paint_DrawHorizontalLine(paint, 1, 148, epd->width-1, COLORED);
+	//  Paint_DrawHorizontalLine(paint, 1, 222, epd->width-1, COLORED);
 
-
+	  uint8_t positop;
+	  uint8_t size=74;
 	  //draw boxes
-
+      //Vario
+	  positop = 0;
+	  Paint_DrawStringAt(paint, positop + 3, 4, "Vario", &Font8, COLORED);
 	  Paint_DrawRectangle(paint, 0, 0, epd->width-1, 74, COLORED);
+
+	  //Altitude
+	  positop = 74;
+	  Paint_DrawStringAt(paint, positop + 3, 4, "Altitude", &Font8, COLORED);
 	  Paint_DrawRectangle(paint, 0, 74, epd->width-1, 148, COLORED);
+
+	  //Ground Speed
+	  positop = 148;
+	  Paint_DrawStringAt(paint, positop + 3, 4, "Speed", &Font8, COLORED);
 	  Paint_DrawRectangle(paint, 0, 148, epd->width-1, 222, COLORED);
+
+	  //Infobox
+	  positop = 222;
+	//  Paint_DrawStringAt(paint, positop + 3, 4, "Altitude", &Font8, COLORED);
 	  Paint_DrawRectangle(paint, 0, 222, epd->width-1, epd->height-1, COLORED);
+
 
 	  EPD_SetFrameMemory(epd, frame_buffer, 0, 0, epd->width, epd->height);
 	  EPD_DisplayFrame(epd);
