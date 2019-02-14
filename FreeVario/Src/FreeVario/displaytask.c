@@ -93,6 +93,9 @@ void displayTaskSetup(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
 	  Paint_DrawHorizontalLine(paint, 1, 148, epd->width-1, COLORED);
 	  Paint_DrawHorizontalLine(paint, 1, 222, epd->width-1, COLORED);
 
+
+	  //draw boxes
+
 	  Paint_DrawRectangle(paint, 0, 0, epd->width-1, 74, COLORED);
 	  Paint_DrawRectangle(paint, 0, 74, epd->width-1, 148, COLORED);
 	  Paint_DrawRectangle(paint, 0, 148, epd->width-1, 222, COLORED);
