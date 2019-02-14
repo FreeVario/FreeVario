@@ -98,18 +98,21 @@ void displayTaskSetup(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
 	  //draw boxes
       //Vario
 	  positop = 0;
-	  Paint_DrawStringAt(paint, positop + 3, 4, "Vario", &Font8, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Vario", &Font16, COLORED);
 	  Paint_DrawRectangle(paint, 0, 0, epd->width-1, 74, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-45, positop + 55, "m/s", &Font20, COLORED);
 
 	  //Altitude
 	  positop = 74;
-	  Paint_DrawStringAt(paint, positop + 3, 4, "Altitude", &Font8, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Altitude", &Font16, COLORED);
 	  Paint_DrawRectangle(paint, 0, 74, epd->width-1, 148, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-20, positop + 55, "m", &Font20, COLORED);
 
 	  //Ground Speed
 	  positop = 148;
-	  Paint_DrawStringAt(paint, positop + 3, 4, "Speed", &Font8, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Speed", &Font16, COLORED);
 	  Paint_DrawRectangle(paint, 0, 148, epd->width-1, 222, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-60, positop + 55, "km/h", &Font20, COLORED);
 
 	  //Infobox
 	  positop = 222;
