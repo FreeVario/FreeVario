@@ -27,8 +27,8 @@
 #define CONFIGVERSION 3
 
 //Board LED
-#define FV_LED PC4_Pin
-#define FV_LED_GPIO	GPIOC
+#define FV_LED PB9_Pin
+#define FV_LED_GPIO	GPIOB
 
 //Audio baseline for buzzer
 #define FV_TONEBASE 600

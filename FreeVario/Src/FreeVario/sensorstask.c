@@ -49,7 +49,7 @@ void StartSensorsTask(void const * argument)
 		times = xTaskGetTickCount();
 		timetosend++;
 		readSensorsBMP280(&bmp280);
-		readSensorsMPU6050(&mpu1);
+	//	readSensorsMPU6050(&mpu1);
 
 		if ((timetosend >= 2)) { //every 100 ticks
 			calculateVario100ms();

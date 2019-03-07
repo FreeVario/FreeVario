@@ -214,15 +214,15 @@ void freeVario_RTOS_Init()  {
 	  osThreadDef(sensorsTask, StartSensorsTask, osPriorityNormal, 0, 1024);
 	  sensorsTaskHandle = osThreadCreate(osThread(sensorsTask), NULL);
 
-	  /* definition and creation of gpsTask */
+//	  /* definition and creation of gpsTask */
 	  osThreadDef(gpsTask, StartGPSTask, osPriorityNormal, 0, 2048);
 	  gpsTaskHandle = osThreadCreate(osThread(gpsTask), NULL);
-
-	  /* definition and creation of sendDataTask */
+//
+//	  /* definition and creation of sendDataTask */
 	  osThreadDef(sendDataTask, StartSendDataTask, osPriorityAboveNormal, 0, 2048);
 	  sendDataTaskHandle = osThreadCreate(osThread(sendDataTask), NULL);
 
-	  /* definition and creation of audioTask */
+//	  /* definition and creation of audioTask */
 	  osThreadDef(audioTask, StartAudioTask, osPriorityNormal, 0, 1024);
 	  audioTaskHandle = osThreadCreate(osThread(audioTask), NULL);
 
@@ -241,7 +241,6 @@ void StartDefaultTask(void const * argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
 
-  /* USER CODE BEGIN StartDefaultTask */
 
   xSemaphoreGive(confMutexHandle);
   xSemaphoreGive(sdCardMutexHandle);
@@ -253,11 +252,15 @@ void StartDefaultTask(void const * argument)
   memset(&activity, 0, sizeof(activity));
 
 
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,SET);
+
   if ( xSemaphoreTake( sdCardMutexHandle, ( TickType_t ) 500 ) == pdTRUE) {
 		if ( xSemaphoreTake( confMutexHandle, ( TickType_t ) 100 ) == pdTRUE) {
 			if (f_mount(&SDFatFS, SDPath, 0) == FR_OK) { //Mount SD card
 				SDcardMounted =1;
+				osDelay(1000); //give some time to load it up
 			}
+
 			loadConfigFromSD();
 			xSemaphoreGive(confMutexHandle);
 		}
@@ -345,8 +348,6 @@ void StartDefaultTask(void const * argument)
 					activity.landed = 1;
 				}
 
-
-
 		}
 
 		if (activity.landed) {
@@ -369,6 +370,6 @@ void StartDefaultTask(void const * argument)
 
 		osDelay(100);
 	}
-  /* USER CODE END StartDefaultTask */
+
 }
 
