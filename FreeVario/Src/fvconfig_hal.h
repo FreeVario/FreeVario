@@ -43,7 +43,7 @@
 
 
 //ACCL address
-#define FV_ACCL_ADR SD_MPU6050_Device_0
+#define FV_ACCL_ADR 0x02 //F4 board pin is high
 
 //GPS
 /*

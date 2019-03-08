@@ -22,7 +22,7 @@ static uint32_t vtime=0;
 void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280) {
 	bmp280_init_default_params(&bmp280->params);
 	bmp280->addr = BMP280_I2C_ADDRESS_0;
-	bmp280->i2c = &hi2c1;
+	bmp280->i2c = &FV_I2C;
 
 	bmp280->params.mode = BMP280_MODE_NORMAL;
 	bmp280->params.filter = BMP280_FILTER_16;
