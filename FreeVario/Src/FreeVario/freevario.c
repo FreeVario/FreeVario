@@ -38,6 +38,7 @@
 #include "sendatatask.h"
 #include "audiotask.h"
 #include "loggertask.h"
+#include "fanettask.h"
 #include "util.h"
 
 
@@ -68,6 +69,7 @@ osThreadId sensorsTaskHandle;
 osThreadId gpsTaskHandle;
 osThreadId sendDataTaskHandle;
 osThreadId audioTaskHandle;
+osThreadId fanetTaskHandle;
 osThreadId loggerTaskHandle;
 osMutexId confMutexHandle;
 osMutexId sdCardMutexHandle;
@@ -214,17 +216,23 @@ void freeVario_RTOS_Init()  {
 	  osThreadDef(sensorsTask, StartSensorsTask, osPriorityNormal, 0, 1024);
 	  sensorsTaskHandle = osThreadCreate(osThread(sensorsTask), NULL);
 
-//	  /* definition and creation of gpsTask */
+	  /* definition and creation of gpsTask */
 	  osThreadDef(gpsTask, StartGPSTask, osPriorityNormal, 0, 2048);
 	  gpsTaskHandle = osThreadCreate(osThread(gpsTask), NULL);
-//
-//	  /* definition and creation of sendDataTask */
+
+	  /* definition and creation of sendDataTask */
 	  osThreadDef(sendDataTask, StartSendDataTask, osPriorityAboveNormal, 0, 2048);
 	  sendDataTaskHandle = osThreadCreate(osThread(sendDataTask), NULL);
 
-//	  /* definition and creation of audioTask */
+	  /* definition and creation of audioTask */
 	  osThreadDef(audioTask, StartAudioTask, osPriorityNormal, 0, 1024);
 	  audioTaskHandle = osThreadCreate(osThread(audioTask), NULL);
+
+#ifdef FANET
+	  /* definition and creation of FanetTask */
+	  osThreadDef(fanetTask, StartFanetTask, osPriorityNormal, 0, 1024);
+	  fanetTaskHandle = osThreadCreate(osThread(fanetTask), NULL);
+#endif
 
 	  /* definition and creation of loggerTask */
 	  osThreadDef(loggerTask, StartLoggerTask, osPriorityNormal, 0, 2048);

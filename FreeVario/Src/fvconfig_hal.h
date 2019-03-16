@@ -68,11 +68,11 @@
 #define FV_TONECHN TIM_CHANNEL_1
 #define FV_TONEHALTMR TIM1
 
+//enable FANET
+#define FANET
 
-//Old gpio input format for DHT sensors, not implemented yet (might never be)
-//#define FV_DHTPIN GPIO_PIN_1
-//#define FV_DHTPORT GPIOB
-
+//LoRa modem spi
+ #define FV_LoRa_SPI  hspi2
 
 
 //Watchdog timer

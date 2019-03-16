@@ -36,7 +36,7 @@ void StartDisplayTask(void const * argument)
 		times = xTaskGetTickCount();
 		 displayTaskUpdate(&paint,&epd,frame_buffer);
 
-		 HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
 		 TickType_t waittime = abs( 500 - (xTaskGetTickCount() - times) ) ;
 		 if (waittime > 500) waittime = 500;
 		 xMaxBlockTime = pdMS_TO_TICKS(waittime);

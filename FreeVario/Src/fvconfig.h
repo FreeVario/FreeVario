@@ -25,7 +25,7 @@
 
 //#define SETUPBT
 
-#define NOOTGDELAY //Don't delay the OTG cable (this way some devices won't see it as a powerbank)
+
 #define ACCLSMOOTH 10 //Lowpass filter level
 #define UPDATELOGFILETIME 30000 //time in ms to update de Log summary file
 #define LANDEDSPEED 5 //Ground Speed in knots to detect landing
