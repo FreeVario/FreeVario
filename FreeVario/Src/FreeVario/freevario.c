@@ -207,36 +207,47 @@ void freeVario_RTOS_Init()  {
 	  /* add queues, ... */
 	  uartQueueHandle = xQueueCreate(2, SENDBUFFER);
 
-
+#ifdef FV_DISPLAY
 	  /* definition and creation of displayTask */
 	  osThreadDef(displayTask, StartDisplayTask, osPriorityBelowNormal, 0, 2048);
 	  displayTaskHandle = osThreadCreate(osThread(displayTask), NULL);
+#endif
 
+#ifdef FV_SENSORS
 	  /* definition and creation of sensorsTask */
 	  osThreadDef(sensorsTask, StartSensorsTask, osPriorityNormal, 0, 1024);
 	  sensorsTaskHandle = osThreadCreate(osThread(sensorsTask), NULL);
+#endif
 
+#ifdef FV_GPS
 	  /* definition and creation of gpsTask */
 	  osThreadDef(gpsTask, StartGPSTask, osPriorityNormal, 0, 2048);
 	  gpsTaskHandle = osThreadCreate(osThread(gpsTask), NULL);
+#endif
 
+#ifdef FV_SENDATA
 	  /* definition and creation of sendDataTask */
 	  osThreadDef(sendDataTask, StartSendDataTask, osPriorityAboveNormal, 0, 2048);
 	  sendDataTaskHandle = osThreadCreate(osThread(sendDataTask), NULL);
+#endif
 
+#ifdef FV_AUDIO
 	  /* definition and creation of audioTask */
 	  osThreadDef(audioTask, StartAudioTask, osPriorityNormal, 0, 1024);
 	  audioTaskHandle = osThreadCreate(osThread(audioTask), NULL);
+#endif
 
-#ifdef FANET
+#ifdef FV_FANET
 	  /* definition and creation of FanetTask */
 	  osThreadDef(fanetTask, StartFanetTask, osPriorityNormal, 0, 1024);
 	  fanetTaskHandle = osThreadCreate(osThread(fanetTask), NULL);
 #endif
 
+#ifdef FV_LOGGER
 	  /* definition and creation of loggerTask */
 	  osThreadDef(loggerTask, StartLoggerTask, osPriorityNormal, 0, 2048);
 	  loggerTaskHandle = osThreadCreate(osThread(loggerTask), NULL);
+#endif
 
 }
 

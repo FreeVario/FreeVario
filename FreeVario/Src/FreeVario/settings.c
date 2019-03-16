@@ -26,7 +26,7 @@ void saveConfigtoSD() {
 			if (SDcardMounted) {
 				FRESULT res;
 				uint32_t byteswritten;
-				if (f_open(&confFile, CONFIGFILENAME, FA_CREATE_ALWAYS | FA_WRITE)
+				if (f_open(&confFile, FV_CONFIGFILENAME, FA_CREATE_ALWAYS | FA_WRITE)
 						!= FR_OK) {
 					/* 'STM32.TXT' file Open for write Error */
 					//Error_Handler();
@@ -56,7 +56,7 @@ void loadConfigFromSD() {
 	FRESULT res;
 
 	if (SDcardMounted) {
-			if (f_open(&confFile, CONFIGFILENAME, FA_READ) != FR_OK) {
+			if (f_open(&confFile, FV_CONFIGFILENAME, FA_READ) != FR_OK) {
 
 				getDefaultConfig();
 				saveConfigtoSD();
@@ -68,7 +68,7 @@ void loadConfigFromSD() {
 				if ((bytesread == 0) || (res != FR_OK)) {
 					getDefaultConfig();
 					saveConfigtoSD();
-				}else if (conf.SaveVersion != CONFIGVERSION) {
+				}else if (conf.SaveVersion != FV_CONFIGVERSION) {
 					getDefaultConfig();
 					saveConfigtoSD();
 				}
@@ -89,7 +89,7 @@ void loadConfigFromSD() {
 
 void getDefaultConfig() {
  //version of the struct
-  conf.SaveVersion = CONFIGVERSION;
+  conf.SaveVersion = FV_CONFIGVERSION;
 
   //QNH value to calculate vario Altitude
   conf.qnePressure = 101325;

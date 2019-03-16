@@ -21,10 +21,19 @@
 #endif
 #include "stm32f4xx_hal.h"
 
+
+ //FreeRtos Tasks enable
+#define FV_DISPLAY
+#define FV_SENSORS
+#define FV_GPS
+#define FV_SENDATA
+#define FV_AUDIO
+//#define FV_FANET
+#define FV_LOGGER
+
 //Save config to SDCard
-#define SDCONFIGSAVE
-#define CONFIGFILENAME "settings.cfg"
-#define CONFIGVERSION 3
+#define FV_CONFIGFILENAME "settings.cfg"
+#define FV_CONFIGVERSION 3
 
 //Board LED
 #define FV_LED PB9_Pin
@@ -68,8 +77,7 @@
 #define FV_TONECHN TIM_CHANNEL_1
 #define FV_TONEHALTMR TIM1
 
-//enable FANET
-#define FANET
+
 
 //LoRa modem spi
  #define FV_LoRa_SPI  hspi2
