@@ -154,6 +154,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 	}
 
+
 }
 
 
@@ -187,8 +188,11 @@ void StandbyMode(void)
   /* Clear all related wakeup flags */
   __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
 
+
+
   /* Re-enable all used wakeup sources: Pin1(PA.0) */
   HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+
 
   /* Request to enter STANDBY mode  */
   HAL_PWR_EnterSTANDBYMode();
@@ -196,6 +200,9 @@ void StandbyMode(void)
 
 
 void freeVario_RTOS_Init()  {
+
+
+
 	  /* definition and creation of confMutex */
 	  osMutexDef(confMutex);
 	  confMutexHandle = osMutexCreate(osMutex(confMutex));
@@ -271,6 +278,7 @@ void StartDefaultTask(void const * argument)
   memset(&activity, 0, sizeof(activity));
 
 
+
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,SET);
 
   if ( xSemaphoreTake( sdCardMutexHandle, ( TickType_t ) 500 ) == pdTRUE) {
@@ -322,11 +330,17 @@ void StartDefaultTask(void const * argument)
 
 		}
 
-		//Baro takeoff detected
-		if(sensors.barotakeoff){
-			activity.takeOff = 1;
-		}
 
+		if (hgps.fix > 0) {
+			if (hgps.speed > TAKEOFFSPEED && sensors.barotakeoff) {
+				activity.takeOff = 1;
+			}
+		}else {
+			//Baro takeoff detected
+			if(sensors.barotakeoff){
+				activity.takeOff = 1;
+			}
+		}
 
 
 		//Flight Operations

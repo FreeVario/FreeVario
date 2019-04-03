@@ -29,6 +29,7 @@
 #define ACCLSMOOTH 10 //Lowpass filter level
 #define UPDATELOGFILETIME 30000 //time in ms to update de Log summary file
 #define LANDEDSPEED 5 //Ground Speed in knots to detect landing
+#define TAKEOFFSPEED 5 //Ground Speed in knots to detect takeoff
 #define LANDEDLOWSPEEDTIME 20000 //Time in ms groundspeed lower than LANDEDSPEED to trigger landed detection
 #define STARTDELAY 6000 //the time delay before the process starts
 #define TAKEOFFVARIO 800 //0.4 //abs vario level to detect takeoff
@@ -42,7 +43,8 @@
 #define SOARDETECTION 30000 // if climbrate is constant for set milliseconds at 0 m/s the buzzer is muted
 #define BUZZERCLIMBING 0.1 // vario level to start giving climbing signal
 #define AUDIOSMOOTH 10 //smooth out audio changes
-#define ADAPTIVEVARIO //Adapts the vario low pass filter
+//#define VARIOLOWPASSFILTER  // smmooth out the vario (disable the BMP280 sensor filter if used)
+//#define ADAPTIVEVARIO //Adapts the vario low pass filter
 
 //#define TESTBUZZER
 

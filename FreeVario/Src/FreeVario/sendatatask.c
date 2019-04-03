@@ -36,7 +36,7 @@ void StartSendDataTask(void const * argument)
 
 		HAL_UART_Transmit_DMA(&FV_UARTBT, (uint8_t *) &receiveqBuffer, buffsize); //Usart global interupt must be enabled for this to work
 		CDC_Transmit_FS((uint8_t *) &receiveqBuffer, buffsize);
-		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		ulTaskNotifyTake( pdTRUE, xMaxBlockTime);
 
 		osDelay(1);

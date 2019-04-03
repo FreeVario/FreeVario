@@ -83,12 +83,6 @@
  #define FV_LoRa_SPI  hspi2
 
 
-//Watchdog timer
-/*
- * Set prescaler to 32
- */
-#define FV_IWDG hiwdg
-
 /*
  * Power management
  *
@@ -111,6 +105,8 @@
 #define FV_BTNNEXT	GPIO_PIN_5 //B
 #define FV_BTNPREV  GPIO_PIN_4 //B
 #define FV_BRNPRT 	GPIOB
+
+
 
 
 

@@ -22,9 +22,10 @@ extern SensorData sensors;
 extern QueueHandle_t uartQueueHandle;
 
 
+
 void StartSensorsTask(void const * argument)
 {
-  /* USER CODE BEGIN StartSensorsTask */
+
 
 	TickType_t times;
 	TickType_t startTime = xTaskGetTickCount();
@@ -89,5 +90,5 @@ void StartSensorsTask(void const * argument)
 
 		vTaskDelayUntil(&times, xDelay);
 	}
-  /* USER CODE END StartSensorsTask */
+
 }

@@ -25,7 +25,7 @@ void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280) {
 	bmp280->i2c = &FV_I2C;
 
 	bmp280->params.mode = BMP280_MODE_NORMAL;
-	bmp280->params.filter = BMP280_FILTER_16;
+	bmp280->params.filter = BMP280_FILTER_8;
 	bmp280->params.oversampling_pressure = BMP280_ULTRA_HIGH_RES;
 	bmp280->params.oversampling_temperature = BMP280_STANDARD;
 	bmp280->params.oversampling_humidity = BMP280_STANDARD;
@@ -59,8 +59,11 @@ void readSensorsBMP280(BMP280_HandleTypedef *bmp280){
 	sensors.pressureraw = pressure;
 
 	//low pass filter
+#ifdef VARIOLOWPASSFILTER
 	sensors.pressure = (conf.variosmooth * sensors.pressure + pressure) / (conf.variosmooth + 1);
-
+#else
+	sensors.pressure = pressure;
+#endif
 }
 
 void readSensorsMPU6050(SD_MPU6050 *mpu1){
