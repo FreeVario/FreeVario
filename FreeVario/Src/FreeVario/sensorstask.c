@@ -20,7 +20,7 @@ uint8_t nmeasendbuffer[SENDBUFFER] __attribute__((section(".ccmram")));
 
 extern SensorData sensors;
 extern QueueHandle_t uartQueueHandle;
-extern ActivityData activity;
+
 
 
 void StartSensorsTask(void const * argument)

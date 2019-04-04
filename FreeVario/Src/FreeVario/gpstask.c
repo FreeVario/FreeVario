@@ -10,7 +10,6 @@
 
 
 #include "gpstask.h"
-#include "gps.h"
 #include <stdlib.h>
 #include <string.h>
 

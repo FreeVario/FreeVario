@@ -13,10 +13,12 @@
 #define FREEVARIO_UTIL_H_
 #include "../fvconfig.h"
 #include "gps.h"
+#include "gpstask.h"
 #include <globaldata.h>
 
-void setRTCFromHgps(gps_t * hgps, RTC_HandleTypeDef * hrtc, int gmtoffset);
-void setActivityTakeoffTime(RTC_HandleTypeDef * hrtc, ActivityData * activity);
-void setActivityLandTime(RTC_HandleTypeDef * hrtc, ActivityData * activity);
-
+void setRTCFromHgps();
+void setActivityTakeoffTime();
+void setActivityLandTime();
+uint32_t uint2bcd(uint16_t dec);
+inline int bcd_decimal(uint8_t hex);
 #endif /* FREEVARIO_UTIL_H_ */

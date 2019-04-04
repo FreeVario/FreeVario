@@ -51,6 +51,8 @@ settings_t conf __attribute__((section(".ccmram")));
 
 /*  Standard Vars---------------------------------------------------------------*/
 
+//TODO: Move all extern declerations to apropriate header files see:
+// https://sogilis.com/blog/wrong-usage-of-extern-keyword-in-c/
 extern char SDPath[4]; /* SD logical drive path */
 extern FATFS SDFatFS; /* File system object for SD logical drive */
 extern gps_t  hgps;
@@ -391,13 +393,14 @@ void StartDefaultTask(void const * argument)
 				UserPrevButton = 0;
 			}
 		}
-
+#ifndef USEGPSDATETIME
 		if (hgps.fix > 0 && !HasSetTime ) {
-			setRTCFromHgps(&hgps, &hrtc,conf.gmtoffset); //util.c
+
+			setRTCFromHgps(); //util.c
 			HasSetTime=1;
 
 		}
-
+#endif
 		if (activity.flightstatus == FLS_GROUND) { //Todo: if status 0
 			if (hgps.fix > 0) {
 				if (hgps.speed > TAKEOFFSPEED && sensors.barotakeoff) {
@@ -420,7 +423,7 @@ void StartDefaultTask(void const * argument)
 			activity.takeoffLocationLAT = (int32_t) (hgps.latitude * 1000000);
 			activity.takeoffLocationLON = (int32_t) (hgps.longitude * 1000000);
 			activity.takeoffTemp = sensors.temperature;
-			setActivityTakeoffTime(&hrtc, &activity); //util.c
+			setActivityTakeoffTime(); //util.c
 			activity.flightstatus = FLS_FLYING;
 			xTaskNotify(xLogDataNotify, 0x01, eSetValueWithOverwrite);
 			landedcheck = xTaskGetTickCount();
@@ -455,9 +458,10 @@ void StartDefaultTask(void const * argument)
 			activity.landingLocationLON = (int32_t) (hgps.longitude * 1000000);
 			activity.MaxAltitudeGainedMeters = activity.MaxAltitudeMeters
 					- activity.takeoffAltitude;
-			setActivityLandTime(&hrtc, &activity); //util.c
+			setActivityLandTime(); //util.c
 			activity.flightstatus = FLS_GROUND;
 			conf.lastLogNumber = activity.currentLogID;
+			saveConfigtoSD();
 			xTaskNotify(xLogDataNotify, 0x03, eSetValueWithOverwrite);
 			break;
 

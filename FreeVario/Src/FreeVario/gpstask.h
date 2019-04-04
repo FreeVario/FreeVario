@@ -13,9 +13,13 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
+#include "gps.h"
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
 #include "../fvconfig.h"
+
+
+ extern gps_t hgps;
 
  void StartGPSTask(void const * argument);
 

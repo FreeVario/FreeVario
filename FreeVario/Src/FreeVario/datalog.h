@@ -14,12 +14,10 @@
 #include "gps.h"
 #include <globaldata.h>
 
-extern ActivityData activity;
-extern gps_t  hgps;
-extern SensorData sensors;
+
 void writeFlightLogSummaryFile();
 int openDataLogFile(FIL * logFile);
 void writeDataLogFile(FIL  * logFile);
 void closeDataLogFile(FIL  * logFile);
-
+//FRESULT set_timestamp(char * obj);
 #endif /* DATALOG_H_ */

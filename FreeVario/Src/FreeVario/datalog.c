@@ -11,7 +11,11 @@
 
 
 #include "datalog.h"
+#include "fatfs.h"
 
+extern ActivityData activity;
+extern gps_t  hgps;
+extern SensorData sensors;
 
 /**
  * @brief Rewrites the Flight log summary file
@@ -27,7 +31,8 @@ void writeFlightLogSummaryFile(){
 	FRESULT res;
 	uint32_t byteswritten;
 	uint8_t wtext[128];
-	char filename[32];
+	char  filename[32];
+
 
 	sprintf(filename,"%06d.log",activity.currentLogID);
 	if (f_open(&logSumFile, filename,
@@ -72,6 +77,7 @@ void writeFlightLogSummaryFile(){
 					} else {
 						/* Close the open text file */
 						f_close(&logSumFile);
+
 
 					}
 
@@ -152,4 +158,18 @@ void closeDataLogFile(FIL *logFile) {
 }
 
 
-
+//FRESULT set_timestamp(char * obj) {
+//	FILINFO fno;
+//
+//	int hour = hgps.hours;
+//	int min = hgps.minutes;
+//	int sec = hgps.seconds;
+//	int month = hgps.month;
+//	int mday = hgps.date;
+//	int year = hgps.year;
+//	year += 2000;
+//	fno.fdate = (WORD) (((year - 1980) << 9) | month << 5 | mday);
+//	fno.ftime = (WORD) (hour << 11 | min << 5 | sec / 2);
+//
+//	return f_utime(obj, &fno);
+//}

@@ -147,10 +147,10 @@ void getDefaultConfig() {
   conf.advMaxSmooth = 35;
 
   //save the last logbook number
-  conf.lastLogNumber = 1;
+  conf.lastLogNumber = 0;
 
   //GMT hours from median
-  conf.gmtoffset = 1;
+  conf.gmtoffset = 2;
 }
 
 

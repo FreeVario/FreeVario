@@ -68,6 +68,8 @@ typedef struct {
 
 }ActivityData;
 
+extern ActivityData activity;
+
 typedef struct {
 	uint8_t isLogging;
 }DataLog;

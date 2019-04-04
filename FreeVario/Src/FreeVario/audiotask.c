@@ -19,7 +19,9 @@ extern ActivityData activity;
 
 void StartAudioTask(void const * argument)
 {
-  /* USER CODE BEGIN StartAudioTask */
+
+	uint8_t audioon=0;
+
 
 #ifdef TESTBUZZER
 
@@ -55,13 +57,18 @@ void StartAudioTask(void const * argument)
 #else
 
 		if (running) {
-		if (activity.flightstatus == FLS_FLYING) {
+			if (activity.flightstatus == FLS_FLYING) {
 				makeVarioAudio(&audiorun, sensors.VarioMs); //flying
+				audioon = 1;
 
+			}
+			if (activity.flightstatus == FLS_GROUND && audioon) {
+				audioon = 0;
+				noTone();
 			}
 		}
 #endif
 		osDelay(10);
 	}
-  /* USER CODE END StartAudioTask */
+
 }

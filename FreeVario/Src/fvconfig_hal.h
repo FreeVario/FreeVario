@@ -34,7 +34,9 @@
  //DisplayRefresh every n seconds
 #define FV_DISPLAYREFRESH 120
 
-
+//Use GPS time instead of RTC
+//Workaround for buggy RTC implementation
+#define USEGPSDATETIME
 
 //Save config to SDCard
 #define FV_CONFIGFILENAME "settings.cfg"
