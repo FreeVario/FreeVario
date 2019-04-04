@@ -107,11 +107,12 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+//After using generate code in cubeMX, add this after GPIO_INIT :   HAL_Delay(100);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  HAL_Delay(100);
   MX_DMA_Init();
   MX_USART3_UART_Init();
   MX_SPI1_Init();
@@ -122,8 +123,21 @@ int main(void)
   MX_TIM1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-//HAL_Delay(3000);
-//HAL_GPIO_WritePin(PWR_EN_GPIO_Port, PWR_EN_Pin, GPIO_PIN_RESET);
+
+
+ /*
+  * Bug fix for pwr button
+  * Button must be held in for 3 seconds to powerup
+  */
+
+
+#ifndef  DEBUG
+    HAL_Delay(PWRBUTTONDELAY);
+    if (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_RESET){
+    	StandbyMode();
+    }
+#endif
+
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -600,12 +614,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PWR_EN_Pin SX_NSS_Pin DC_Pin */
-  GPIO_InitStruct.Pin = PWR_EN_Pin|SX_NSS_Pin|DC_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  /*Configure GPIO pin : PWR_EN_Pin */
+  GPIO_InitStruct.Pin = PWR_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(PWR_EN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PWRBUTTON_Pin */
   GPIO_InitStruct.Pin = PWRBUTTON_Pin;
@@ -621,6 +635,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : SX_NSS_Pin DC_Pin */
+  GPIO_InitStruct.Pin = SX_NSS_Pin|DC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   /*Configure GPIO pins : SX_INT_Pin BUSY_Pin */
   GPIO_InitStruct.Pin = SX_INT_Pin|BUSY_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -634,8 +655,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : BTN_PREV_Pin BTN_OK_Pin BTN_CANCEL_Pin BTN_NEXT_Pin */
-  GPIO_InitStruct.Pin = BTN_PREV_Pin|BTN_OK_Pin|BTN_CANCEL_Pin|BTN_NEXT_Pin;
+  /*Configure GPIO pins : BTN_NEXT_Pin BTN_OK_Pin BTN_CANCEL_Pin BTN_PREV_Pin */
+  GPIO_InitStruct.Pin = BTN_NEXT_Pin|BTN_OK_Pin|BTN_CANCEL_Pin|BTN_PREV_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);

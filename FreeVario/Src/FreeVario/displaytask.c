@@ -26,6 +26,7 @@ void StartDisplayTask(void const * argument)
 	BaseType_t xResult;
 	TickType_t xMaxBlockTime;
 	TickType_t times;
+	uint16_t refreshcount=0;
 	xDisplayNotify = xTaskGetCurrentTaskHandle();
 	EPD epd;
 	displayTaskSetup(&paint,&epd, frame_buffer);
@@ -34,6 +35,11 @@ void StartDisplayTask(void const * argument)
 	/* Infinite loop */
 	for (;;) {
 		times = xTaskGetTickCount();
+
+		 if(refreshcount > (FV_DISPLAYREFRESH * 2)) {
+			 refreshcount = 0;
+			 displayRefreshMainScreen(&paint,&epd, frame_buffer);
+		 }
 		 displayTaskUpdate(&paint,&epd,frame_buffer);
 
 
@@ -59,6 +65,8 @@ void StartDisplayTask(void const * argument)
 
 		         }
 		      }
+		 refreshcount++;
+
 
 	}
 
@@ -89,14 +97,56 @@ void displayTaskSetup(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
 //	   *  therefore you have to set the frame memory and refresh the display twice.
 //	   */
 
-	//  Paint_DrawHorizontalLine(paint, 1, 74, epd->width-1, COLORED);
-	//  Paint_DrawHorizontalLine(paint, 1, 148, epd->width-1, COLORED);
-	//  Paint_DrawHorizontalLine(paint, 1, 222, epd->width-1, COLORED);
 
+	  displayDrawmainScreen (paint, epd,frame_buffer);
+
+
+	  EPD_SetFrameMemory(epd, frame_buffer, 0, 0, epd->width, epd->height);
+	  EPD_DisplayFrame(epd);
+
+	  EPD_SetFrameMemory(epd, frame_buffer, 0, 0, epd->width, epd->height);
+	  EPD_DisplayFrame(epd);
+
+
+
+
+		  /* EPD_or partial update */
+		  if (EPD_Init(epd, lut_partial_update) != 0) {
+		    return;
+		  }
+
+
+}
+
+void displayRefreshMainScreen(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
+
+
+	  if (EPD_Init(epd, lut_full_update) != 0) {
+	    return;
+	  }
+	  Paint_Init(paint, frame_buffer, epd->width, epd->height);
+	  Paint_Clear(paint, UNCOLORED);
+
+	  displayDrawmainScreen (paint, epd,frame_buffer);
+
+	  EPD_SetFrameMemory(epd, frame_buffer, 0, 0, epd->width, epd->height);
+	  EPD_DisplayFrame(epd);
+
+	  EPD_SetFrameMemory(epd, frame_buffer, 0, 0, epd->width, epd->height);
+	  EPD_DisplayFrame(epd);
+
+	  if (EPD_Init(epd, lut_partial_update) != 0) {
+	    return;
+	  }
+
+
+}
+
+void displayDrawmainScreen (Paint *paint, EPD *epd, unsigned char * frame_buffer) {
 	  uint8_t positop;
 	  uint8_t size=74;
 	  //draw boxes
-      //Vario
+    //Vario
 	  positop = 0;
 	  Paint_DrawStringAt(paint,  3, positop + 4, "Vario", &Font16, COLORED);
 	  Paint_DrawRectangle(paint, 0, 0, epd->width-1, 74, COLORED);
@@ -118,22 +168,6 @@ void displayTaskSetup(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
 	  positop = 222;
 	//  Paint_DrawStringAt(paint, positop + 3, 4, "Altitude", &Font8, COLORED);
 	  Paint_DrawRectangle(paint, 0, 222, epd->width-1, epd->height-1, COLORED);
-
-
-	  EPD_SetFrameMemory(epd, frame_buffer, 0, 0, epd->width, epd->height);
-	  EPD_DisplayFrame(epd);
-
-	  EPD_SetFrameMemory(epd, frame_buffer, 0, 0, epd->width, epd->height);
-	  EPD_DisplayFrame(epd);
-
-
-
-
-		  /* EPD_or partial update */
-		  if (EPD_Init(epd, lut_partial_update) != 0) {
-		    return;
-		  }
-
 
 }
 

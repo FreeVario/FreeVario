@@ -55,10 +55,21 @@ extern char SDPath[4]; /* SD logical drive path */
 extern FATFS SDFatFS; /* File system object for SD logical drive */
 extern gps_t  hgps;
 extern RTC_HandleTypeDef hrtc;
+
+
 __IO uint8_t UserPowerButton = 0;
-__IO uint8_t UserOptButton = 0;
+__IO uint8_t UserOkButton = 0;
+__IO uint8_t UserCancelButton = 0;
+__IO uint8_t UserNextButton = 0;
+__IO uint8_t UserPrevButton = 0;
 uint8_t SDcardMounted = 0;
 uint8_t HasSetTime = 0;
+TickType_t pwrBTtimePressed = 0;
+TickType_t OkButtonTimePressed = 0;
+TickType_t CancelButtonTimePressed = 0;
+TickType_t NextButtonTimePressed = 0;
+TickType_t PrevButtonTimePressed = 0;
+
 
 
 /*  FreeRtos-------------------------------------------------------------------*/
@@ -146,12 +157,25 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == PWRBUTTON_Pin) {
 		/* Set the variable: button pressed */
 		if (HAL_GetTick() > 5000) {
+			pwrBTtimePressed = xTaskGetTickCount();
 			UserPowerButton = 1;
 		}
 	}else if (GPIO_Pin == BTN_OK_Pin) {
 
-		UserOptButton = 1;
+		UserOkButton = 1;
+		OkButtonTimePressed = xTaskGetTickCount();
 
+	}else if (GPIO_Pin == BTN_CANCEL_Pin) {
+		UserCancelButton = 1;
+		CancelButtonTimePressed = xTaskGetTickCount();
+
+	}else if (GPIO_Pin == BTN_NEXT_Pin) {
+		UserNextButton = 1;
+		NextButtonTimePressed = xTaskGetTickCount();
+
+	}else if (GPIO_Pin == BTN_PREV_Pin) {
+		UserPrevButton =1 ;
+		PrevButtonTimePressed = xTaskGetTickCount();
 	}
 
 
@@ -261,6 +285,7 @@ void freeVario_RTOS_Init()  {
 
 void StartDefaultTask(void const * argument)
 {
+
   /* init code for FATFS */
   MX_FATFS_Init();
 
@@ -276,8 +301,6 @@ void StartDefaultTask(void const * argument)
   uint8_t switchs=0;
 
   memset(&activity, 0, sizeof(activity));
-
-
 
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,SET);
 
@@ -298,30 +321,76 @@ void StartDefaultTask(void const * argument)
 	for (;;) {
 
 		if  (UserPowerButton) {
-			UserPowerButton = 0;
-			xTaskNotify(xDisplayNotify,0x01,eSetValueWithOverwrite);
-			while(HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_SET) { //wait for button to be released
-			}
-			f_mount(0, "0:", 1); //unmount SDCARD
+			osDelay(20);
 
-			osDelay(4000);
-			StandbyMode();
+			if (((xTaskGetTickCount() - pwrBTtimePressed) > PWRBUTTONDELAY) & (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_SET)) {
+				UserPowerButton = 0;
+				xTaskNotify(xDisplayNotify,0x01,eSetValueWithOverwrite);
+
+
+				if (SDcardMounted) {
+					f_mount(0, "0:", 1); //unmount SDCARD
+				}
+				osDelay(4000);
+				while(HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_SET) { //wait for button to be released
+				}
+
+				StandbyMode();
+			}
+			if (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_RESET) {
+				UserPowerButton = 0;
+			}
+
 		}
-		if (UserOptButton) {
+		if (UserOkButton) {
 
-			osDelay(10); //debouncer
-
-
-			if (switchs) {
-				activity.landed = 1;
-				switchs=0;
-			} else {
-				switchs =1;
-				activity.takeOff = 1;
+			osDelay(20); //debouncer
+			if (((xTaskGetTickCount() - OkButtonTimePressed) > 2000) & (HAL_GPIO_ReadPin(BTN_OK_GPIO_Port,BTN_OK_Pin) == GPIO_PIN_SET)) {
+				UserOkButton = 0;
+				if (switchs) {
+					activity.landed = 1;
+					switchs=0;
+				} else {
+					switchs =1;
+					activity.takeOff = 1;
+				}
 			}
 
-			UserOptButton = 0;
+			if (HAL_GPIO_ReadPin(BTN_OK_GPIO_Port,BTN_OK_Pin) == GPIO_PIN_RESET) {
+				UserOkButton = 0;
+			}
 
+		}
+
+		if (UserCancelButton) {
+			osDelay(20);
+
+			if (((xTaskGetTickCount() - CancelButtonTimePressed) > 4000) & (HAL_GPIO_ReadPin(BTN_CANCEL_GPIO_Port,BTN_CANCEL_Pin) == GPIO_PIN_SET)) {
+				__disable_irq();
+				NVIC_SystemReset();
+				while( 1 ) {
+				        __nop();
+				    }
+			}
+
+			if (HAL_GPIO_ReadPin(BTN_CANCEL_GPIO_Port,BTN_CANCEL_Pin) == GPIO_PIN_RESET) {
+				UserCancelButton = 0;
+			}
+
+		}
+
+		if (UserNextButton) {
+			osDelay(20);
+			if (HAL_GPIO_ReadPin(BTN_NEXT_GPIO_Port,BTN_NEXT_Pin) == GPIO_PIN_RESET) {
+				UserNextButton = 0;
+			}
+		}
+
+		if (UserPrevButton) {
+			osDelay(20);
+			if (HAL_GPIO_ReadPin(BTN_PREV_GPIO_Port,BTN_PREV_Pin) == GPIO_PIN_RESET) {
+				UserPrevButton = 0;
+			}
 		}
 
 		if (hgps.fix > 0 && !HasSetTime ) {

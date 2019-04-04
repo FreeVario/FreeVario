@@ -15,7 +15,7 @@
 #include "nmea.h"
 #include <stdlib.h>
 #include <string.h>
-
+#include "stm32f4xx_hal.h"
 uint8_t nmeasendbuffer[SENDBUFFER] __attribute__((section(".ccmram")));
 
 extern SensorData sensors;
@@ -26,7 +26,6 @@ extern QueueHandle_t uartQueueHandle;
 void StartSensorsTask(void const * argument)
 {
 
-
 	TickType_t times;
 	TickType_t startTime = xTaskGetTickCount();
 	const TickType_t xDelay = 50; //20hz
@@ -34,7 +33,6 @@ void StartSensorsTask(void const * argument)
 	BMP280_HandleTypedef bmp280;
 	SD_MPU6050 mpu1;
 	memset(&sensors, 0, sizeof(sensors));
-
 
 	sensors.humidity = 0;
 	sensors.pressure = 0;
@@ -45,8 +43,12 @@ void StartSensorsTask(void const * argument)
 	setupReadSensorsMPU6050(&mpu1);
 	osDelay(100);
 
+
+
 	/* Infinite loop */
 	for (;;) {
+
+
 		times = xTaskGetTickCount();
 		timetosend++;
 		readSensorsBMP280(&bmp280);
@@ -89,6 +91,7 @@ void StartSensorsTask(void const * argument)
 #endif
 
 		vTaskDelayUntil(&times, xDelay);
+
 	}
 
 }

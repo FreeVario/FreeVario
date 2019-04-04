@@ -35,6 +35,8 @@ extern ActivityData activity;
 
 void StartDisplayTask(void const * argument);
 void displayTaskSetup(Paint *paint, EPD *epd, unsigned char * frame_buffer);
+void displayRefreshMainScreen(Paint *paint, EPD *epd, unsigned char * frame_buffer);
+void displayDrawmainScreen (Paint *paint, EPD *epd, unsigned char * frame_buffer);
 void displayTaskUpdate( Paint *paint,EPD *epd, unsigned char * frame_buffer);
 void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer);
 void intTocharFloat(char *buffer, int value, uint16_t div, uint16_t dif);

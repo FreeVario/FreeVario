@@ -31,6 +31,11 @@
 //#define FV_FANET
 #define FV_LOGGER
 
+ //DisplayRefresh every n seconds
+#define FV_DISPLAYREFRESH 120
+
+
+
 //Save config to SDCard
 #define FV_CONFIGFILENAME "settings.cfg"
 #define FV_CONFIGVERSION 3

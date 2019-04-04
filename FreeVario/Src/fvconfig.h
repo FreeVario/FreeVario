@@ -24,7 +24,7 @@
 
 
 //#define SETUPBT
-
+#define DEBUG //for develepment mode
 
 #define ACCLSMOOTH 10 //Lowpass filter level
 #define UPDATELOGFILETIME 30000 //time in ms to update de Log summary file
@@ -50,5 +50,7 @@
 
 #define SENDBUFFER 256 //global size of the send buffer
 #define CONFIGFILENAME "settings.cfg"
+
+#define PWRBUTTONDELAY 3000//Time powerbutton must be pressed
 
 #endif /* FVCONFIG_H_ */
