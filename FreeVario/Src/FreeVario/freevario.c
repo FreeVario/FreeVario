@@ -298,7 +298,8 @@ void StartDefaultTask(void const * argument)
 
   TickType_t landedcheck=0;
 
-  uint8_t switchs=0;
+
+  activity.flightstatus = FLS_GROUND;
 
   memset(&activity, 0, sizeof(activity));
 
@@ -308,7 +309,7 @@ void StartDefaultTask(void const * argument)
 		if ( xSemaphoreTake( confMutexHandle, ( TickType_t ) 100 ) == pdTRUE) {
 			if (f_mount(&SDFatFS, SDPath, 0) == FR_OK) { //Mount SD card
 				SDcardMounted =1;
-				osDelay(1000); //give some time to load it up
+				osDelay(2000); //give some time to load it up
 			}
 
 			loadConfigFromSD();
@@ -347,12 +348,10 @@ void StartDefaultTask(void const * argument)
 			osDelay(20); //debouncer
 			if (((xTaskGetTickCount() - OkButtonTimePressed) > 2000) & (HAL_GPIO_ReadPin(BTN_OK_GPIO_Port,BTN_OK_Pin) == GPIO_PIN_SET)) {
 				UserOkButton = 0;
-				if (switchs) {
-					activity.landed = 1;
-					switchs=0;
+				if (activity.flightstatus == FLS_FLYING) {
+					activity.flightstatus = FLS_LANDED;
 				} else {
-					switchs =1;
-					activity.takeOff = 1;
+					activity.flightstatus = FLS_TAKEOFF;
 				}
 			}
 
@@ -399,74 +398,68 @@ void StartDefaultTask(void const * argument)
 
 		}
 
-
-		if (hgps.fix > 0) {
-			if (hgps.speed > TAKEOFFSPEED && sensors.barotakeoff) {
-				activity.takeOff = 1;
-			}
-		}else {
-			//Baro takeoff detected
-			if(sensors.barotakeoff){
-				activity.takeOff = 1;
+		if (activity.flightstatus == FLS_GROUND) { //Todo: if status 0
+			if (hgps.fix > 0) {
+				if (hgps.speed > TAKEOFFSPEED && sensors.barotakeoff) {
+					activity.flightstatus = FLS_TAKEOFF;
+				}
+			}else {
+				//Baro takeoff detected
+				if(sensors.barotakeoff){
+					activity.flightstatus = FLS_TAKEOFF;
+				}
 			}
 		}
 
 
 		//Flight Operations
 
-		if (activity.takeOff && !activity.isFlying) { //took off
-
-				activity.currentLogID = conf.lastLogNumber + 1;
-				activity.takeoffLocationLAT = (int32_t)(hgps.latitude*1000000);
-				activity.takeoffLocationLON = (int32_t)(hgps.longitude*1000000);
-				activity.takeoffTemp = sensors.temperature;
-				setActivityTakeoffTime(&hrtc, &activity); //util.c
-				activity.isFlying = 1;
-
+		switch (activity.flightstatus) {
+		case FLS_TAKEOFF:
+			activity.currentLogID = conf.lastLogNumber + 1;
+			activity.takeoffLocationLAT = (int32_t) (hgps.latitude * 1000000);
+			activity.takeoffLocationLON = (int32_t) (hgps.longitude * 1000000);
+			activity.takeoffTemp = sensors.temperature;
+			setActivityTakeoffTime(&hrtc, &activity); //util.c
+			activity.flightstatus = FLS_FLYING;
 			xTaskNotify(xLogDataNotify, 0x01, eSetValueWithOverwrite);
 			landedcheck = xTaskGetTickCount();
-		}
+			break;
 
-		if (activity.isFlying) { //flying
+		case FLS_FLYING:
+			if (sensors.AltitudeMeters > activity.MaxAltitudeMeters)
+				activity.MaxAltitudeMeters = sensors.AltitudeMeters;
+			if (sensors.VarioMs > activity.MaxVarioMs)
+				activity.MaxVarioMs = sensors.VarioMs;
+			if (sensors.VarioMs < activity.MaxVarioSinkMs)
+				activity.MaxVarioSinkMs = sensors.VarioMs;
 
-				if (sensors.AltitudeMeters > activity.MaxAltitudeMeters)
-					activity.MaxAltitudeMeters = sensors.AltitudeMeters;
-				if (sensors.VarioMs > activity.MaxVarioMs)
-					activity.MaxVarioMs = sensors.VarioMs;
-				if (sensors.VarioMs < activity.MaxVarioSinkMs)
-					activity.MaxVarioSinkMs = sensors.VarioMs;
-
-				//Landed detection
-				if (hgps.fix > 0) {
-					if (hgps.speed > LANDEDSPEED) {
-						landedcheck = xTaskGetTickCount();
-					}
-				} else {
+			//Landed detection
+			if (hgps.fix > 0) {
+				if (hgps.speed > LANDEDSPEED) {
 					landedcheck = xTaskGetTickCount();
 				}
+			} else {
+				landedcheck = xTaskGetTickCount();
+			}
 
-				if (xTaskGetTickCount() - landedcheck > LANDEDLOWSPEEDTIME){
-					activity.isFlying =0;
-					activity.landed = 1;
-				}
+			if (xTaskGetTickCount() - landedcheck > LANDEDLOWSPEEDTIME) {
+				activity.flightstatus = FLS_LANDED;
+			}
 
-		}
+			break;
 
-		if (activity.landed) {
-
-				activity.landingAltitude = sensors.AltitudeMeters;
-				activity.landingLocationLAT = (int32_t)(hgps.latitude*1000000);
-				activity.landingLocationLON = (int32_t)(hgps.longitude*1000000);
-				activity.MaxAltitudeGainedMeters = activity.MaxAltitudeMeters - activity.takeoffAltitude;
-				setActivityLandTime(&hrtc, &activity); //util.c
-
-
-				activity.landed = 0;
-				activity.isFlying = 0;
-				activity.takeOff = 0;
-				conf.lastLogNumber = activity.currentLogID;
-
+		case FLS_LANDED:
+			activity.landingAltitude = sensors.AltitudeMeters;
+			activity.landingLocationLAT = (int32_t) (hgps.latitude * 1000000);
+			activity.landingLocationLON = (int32_t) (hgps.longitude * 1000000);
+			activity.MaxAltitudeGainedMeters = activity.MaxAltitudeMeters
+					- activity.takeoffAltitude;
+			setActivityLandTime(&hrtc, &activity); //util.c
+			activity.flightstatus = FLS_GROUND;
+			conf.lastLogNumber = activity.currentLogID;
 			xTaskNotify(xLogDataNotify, 0x03, eSetValueWithOverwrite);
+			break;
 
 		}
 

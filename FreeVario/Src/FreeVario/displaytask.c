@@ -208,7 +208,7 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
     intTocharFloat(BmpTemp, sensors.temperature,100,1);
     Paint_Clear(paint, UNCOLORED);
 
-    if (activity.isFlying) {
+    if (activity.flightstatus == FLS_FLYING) {
     	Paint_DrawStringAt(paint, 0, 4,"Flying", &Font16, COLORED);
     }else{
     	Paint_DrawStringAt(paint, 0, 4,"Not Flying", &Font16, COLORED);

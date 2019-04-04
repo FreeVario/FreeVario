@@ -15,6 +15,10 @@
 #endif
 #include "../fvconfig.h"
 
+#define FLS_GROUND 		0
+#define FLS_TAKEOFF 	1
+#define FLS_FLYING 		2
+#define FLS_LANDED 		3
 
  typedef struct {
 	int16_t temperature;  // C x100
@@ -55,9 +59,7 @@ typedef struct {
 	uint32_t landingLocationLAT;
 	uint32_t landingLocationLON;
 	uint32_t landingAltitude;
-	uint8_t takeOff;
-	uint8_t isFlying;
-	uint8_t landed;
+	uint8_t flightstatus;
 	int32_t MaxAltitudeMeters;
 	int32_t MaxAltitudeGainedMeters;
 	int32_t MaxVarioMs;

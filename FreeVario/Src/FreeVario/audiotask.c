@@ -15,6 +15,7 @@
 #include "audio.h"
 
 extern SensorData sensors;
+extern ActivityData activity;
 
 void StartAudioTask(void const * argument)
 {
@@ -47,14 +48,14 @@ void StartAudioTask(void const * argument)
 		//if(t_vario >= 9000) step = -100;
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		t_vario += step;
-		sensors.barotakeoff = 1;
+
 	  }
 	  //toneconstant(&audiorun, 1000);
 	  makeVarioAudio(&audiorun, t_vario);
 #else
 
 		if (running) {
-		if (sensors.barotakeoff) {
+		if (activity.flightstatus == FLS_FLYING) {
 				makeVarioAudio(&audiorun, sensors.VarioMs); //flying
 
 			}

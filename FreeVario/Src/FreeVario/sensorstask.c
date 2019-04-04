@@ -20,7 +20,7 @@ uint8_t nmeasendbuffer[SENDBUFFER] __attribute__((section(".ccmram")));
 
 extern SensorData sensors;
 extern QueueHandle_t uartQueueHandle;
-
+extern ActivityData activity;
 
 
 void StartSensorsTask(void const * argument)
@@ -56,7 +56,7 @@ void StartSensorsTask(void const * argument)
 
 		if ((timetosend >= 2)) { //every 100 ticks
 			calculateVario100ms();
-			checkAdaptiveVario(sensors.VarioMs, sensors.barotakeoff); //TODO: change to activity.isflying
+			checkAdaptiveVario(sensors.VarioMs, activity.flightstatus);
 		}
 
 		if ((timetosend >= 4)
@@ -77,18 +77,17 @@ void StartSensorsTask(void const * argument)
 
 		}
 
-#if defined(TAKEOFFVARIO) && !defined(TESTBUZZER)
-		if ((int) xTaskGetTickCount() > (STARTDELAY + 4000)
-				&& !sensors.barotakeoff) {
+		if ((int) xTaskGetTickCount() > (STARTDELAY + 4000)	&& activity.flightstatus == FLS_GROUND) {
 			if (abs(sensors.VarioMs) > TAKEOFFVARIO) {
 				sensors.barotakeoff = true;
-
 			}
 
 		}
-#else
-		sensors.barotakeoff = true;
-#endif
+
+		if (sensors.barotakeoff && activity.flightstatus > FLS_GROUND) {
+			sensors.barotakeoff = 0;
+		}
+
 
 		vTaskDelayUntil(&times, xDelay);
 

@@ -64,3 +64,4 @@
 
 /.code_review_properties
 /STM32F405RG_FLASH.ld
+/Release/
