@@ -15,7 +15,9 @@ Freevario is an opensource device to provides telemetry data to any vario based 
 
 The firmware runs on FreeRtos and STM32 HAL drivers. 
 
-
+<br>
+<br>
+<center>
   <p > 
   <img src="Doc/fv4.jpg" width="300"/> <img src="Doc/fv1.jpg" width="300"/>  
   </p>
@@ -26,3 +28,4 @@ The firmware runs on FreeRtos and STM32 HAL drivers.
     <p > 
   <img src="Doc/Fv_Internal.jpg" width="300"/>  
   </p>
+</center>
