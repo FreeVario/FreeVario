@@ -148,21 +148,21 @@ void displayDrawmainScreen (Paint *paint, EPD *epd, unsigned char * frame_buffer
 	  //draw boxes
     //Vario
 	  positop = 0;
-	  Paint_DrawStringAt(paint,  3, positop + 4, "Vario", &Font16, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Vario", &Font12, COLORED);
 	  Paint_DrawRectangle(paint, 0, 0, epd->width-1, 74, COLORED);
-	  Paint_DrawStringAt(paint,  epd->width-45, positop + 55, "m/s", &Font20, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-24, positop + 4, "m/s", &Font12, COLORED);
 
 	  //Altitude
 	  positop = 74;
-	  Paint_DrawStringAt(paint,  3, positop + 4, "Altitude", &Font16, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Alt", &Font12, COLORED);
 	  Paint_DrawRectangle(paint, 0, 74, epd->width-1, 148, COLORED);
-	  Paint_DrawStringAt(paint,  epd->width-20, positop + 55, "m", &Font20, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-10, positop + 4, "m", &Font12, COLORED);
 
 	  //Ground Speed
 	  positop = 148;
-	  Paint_DrawStringAt(paint,  3, positop + 4, "Speed", &Font16, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Speed", &Font12, COLORED);
 	  Paint_DrawRectangle(paint, 0, 148, epd->width-1, 222, COLORED);
-	  Paint_DrawStringAt(paint,  epd->width-60, positop + 55, "km/h", &Font20, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-31, positop + 4, "km/h", &Font12, COLORED);
 
 	  //Infobox
 	  positop = 222;
@@ -178,32 +178,32 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
 	char GPSSpeed[9];
 
 	    Paint_SetWidth(paint, 112);
-	    Paint_SetHeight(paint, 24);
+	    Paint_SetHeight(paint, 41);
 
 
 //    fpart = sensors.temperature/100;
 //    bpart = sensors.temperature % 100;
 //    sprintf(BmpTemp,"%d.%02d",fpart,bpart);
 
-	intTocharFloat(BmpVario, sensors.VarioMs,1000,10);
+	intTocharFloat(BmpVario, sensors.VarioMs,1000,100);
 
     Paint_Clear(paint, UNCOLORED);
-    Paint_DrawStringAt(paint, 3, 4, BmpVario, &Font24, COLORED);
-    EPD_SetFrameMemory(epd, frame_buffer, 8, 25, Paint_GetWidth(paint), Paint_GetHeight(paint));
+    Paint_DrawStringAt(paint, 3, 4, BmpVario, &Font32, COLORED);
+    EPD_SetFrameMemory(epd, frame_buffer, 8, 20, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 
-
-    intTocharFloat(BmpAltitude, sensors.AltitudeMeters,1000,100);
+    sprintf(BmpAltitude," %d",sensors.AltitudeMeters/1000);
+    //intTocharFloat(BmpAltitude, sensors.AltitudeMeters,1000,1000);
     Paint_Clear(paint, UNCOLORED);
-    Paint_DrawStringAt(paint, 0, 4, BmpAltitude, &Font24, COLORED);
-    EPD_SetFrameMemory(epd, frame_buffer, 8, 100, Paint_GetWidth(paint), Paint_GetHeight(paint));
+    Paint_DrawStringAt(paint, 0, 4, BmpAltitude, &Font28, COLORED);
+    EPD_SetFrameMemory(epd, frame_buffer, 8, 98, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 
-    //sprintf(GPSSpeed," %d",hgps.minutes);
+
     intTocharFloat(GPSSpeed, hgps.speed*1.85,1,10);
     Paint_Clear(paint, UNCOLORED);
-    Paint_DrawStringAt(paint, 0, 4, GPSSpeed, &Font24, COLORED);
-    EPD_SetFrameMemory(epd, frame_buffer, 8, 175, Paint_GetWidth(paint), Paint_GetHeight(paint));
+    Paint_DrawStringAt(paint, 0, 4, GPSSpeed, &Font28, COLORED);
+    EPD_SetFrameMemory(epd, frame_buffer, 8, 173, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
     intTocharFloat(BmpTemp, sensors.temperature,100,1);
     Paint_Clear(paint, UNCOLORED);

@@ -32,7 +32,7 @@
 #define FV_LOGGER
 
  //DisplayRefresh every n seconds
-#define FV_DISPLAYREFRESH 120
+#define FV_DISPLAYREFRESH 240
 
 //Use GPS time instead of RTC
 //Workaround for buggy RTC implementation
