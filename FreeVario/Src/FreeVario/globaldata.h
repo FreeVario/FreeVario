@@ -25,9 +25,10 @@
 	uint32_t pressure;    //Pa x100
 	uint32_t pressureraw;    //Pa x100
 	int16_t humidity;     //% x100
-	int16_t accel_x;   //x1000
-	int16_t accel_y;   //x1000
-	int16_t accel_z;   //x1000
+	int16_t accel_x;   //x100
+	int16_t accel_y;   //x100
+	int16_t accel_z;   //x100
+	int16_t gforce;   //x100
 	int16_t gyro_x;
 	int16_t gyro_y;
 	int16_t gyro_z;
@@ -35,6 +36,8 @@
 	int32_t VarioMs; //x1000
 	Queue_t  QAltitudeMeters;
 	uint8_t barotakeoff;
+	uint16_t vbat; //bat voltage x10
+	uint8_t pbat; //bat %charge
 }SensorData;
 
 extern settings_t conf; //declared at fvconf.h. So yes, you must include both files
@@ -73,7 +76,7 @@ extern ActivityData activity;
 typedef struct {
 	uint8_t isLogging;
 }DataLog;
-
+extern DataLog datalog;
 
 
 #endif /* GLOBALDATA_H_ */

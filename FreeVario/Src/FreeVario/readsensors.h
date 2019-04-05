@@ -25,7 +25,8 @@
 #include <sd_hal_mpu6050.h>
 
 
-
+ void setupVbatSensor();
+ void readVbatSensor();
 void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280);
 void setupReadSensorsMPU6050(SD_MPU6050 *mpu1);
 void readSensorsBMP280(BMP280_HandleTypedef *bmp280);

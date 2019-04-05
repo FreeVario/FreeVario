@@ -148,21 +148,21 @@ void displayDrawmainScreen (Paint *paint, EPD *epd, unsigned char * frame_buffer
 	  //draw boxes
     //Vario
 	  positop = 0;
-	  Paint_DrawStringAt(paint,  3, positop + 4, "Vario", &Font12, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Vario", &Font10, COLORED);
 	  Paint_DrawRectangle(paint, 0, 0, epd->width-1, 74, COLORED);
-	  Paint_DrawStringAt(paint,  epd->width-24, positop + 4, "m/s", &Font12, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-32, positop + 4, "m/s", &Font12, COLORED);
 
 	  //Altitude
 	  positop = 74;
-	  Paint_DrawStringAt(paint,  3, positop + 4, "Alt", &Font12, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Alt", &Font10, COLORED);
 	  Paint_DrawRectangle(paint, 0, 74, epd->width-1, 148, COLORED);
-	  Paint_DrawStringAt(paint,  epd->width-10, positop + 4, "m", &Font12, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-12, positop + 4, "m", &Font12, COLORED);
 
 	  //Ground Speed
 	  positop = 148;
-	  Paint_DrawStringAt(paint,  3, positop + 4, "Speed", &Font12, COLORED);
+	  Paint_DrawStringAt(paint,  3, positop + 4, "Speed", &Font10, COLORED);
 	  Paint_DrawRectangle(paint, 0, 148, epd->width-1, 222, COLORED);
-	  Paint_DrawStringAt(paint,  epd->width-31, positop + 4, "km/h", &Font12, COLORED);
+	  Paint_DrawStringAt(paint,  epd->width-42, positop + 4, "km/h", &Font12, COLORED);
 
 	  //Infobox
 	  positop = 222;
@@ -175,52 +175,98 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
 	char BmpAltitude[9];
 	char BmpVario[9];
 	char BmpTemp[6];
+	char BmpHumid[6];
+	char BmpBat[6];
+	char BmpGforce[6];
 	char GPSSpeed[9];
 
 	    Paint_SetWidth(paint, 112);
 	    Paint_SetHeight(paint, 41);
 
 
-//    fpart = sensors.temperature/100;
-//    bpart = sensors.temperature % 100;
-//    sprintf(BmpTemp,"%d.%02d",fpart,bpart);
+    /* -------------------------------------------------*/
 
-	intTocharFloat(BmpVario, sensors.VarioMs,1000,100);
+	intTocharFloat(BmpVario, sensors.VarioMs,1000,100,1);
 
     Paint_Clear(paint, UNCOLORED);
-    Paint_DrawStringAt(paint, 3, 4, BmpVario, &Font32, COLORED);
+    Paint_DrawStringAt(paint, 0, 4, BmpVario, &Font32, COLORED);
     EPD_SetFrameMemory(epd, frame_buffer, 8, 20, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
-
+    /* -------------------------------------------------*/
     sprintf(BmpAltitude," %d",sensors.AltitudeMeters/1000);
     //intTocharFloat(BmpAltitude, sensors.AltitudeMeters,1000,1000);
     Paint_Clear(paint, UNCOLORED);
     Paint_DrawStringAt(paint, 0, 4, BmpAltitude, &Font28, COLORED);
     EPD_SetFrameMemory(epd, frame_buffer, 8, 98, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
+    /* -------------------------------------------------*/
 
-
-    intTocharFloat(GPSSpeed, hgps.speed*1.85,1,10);
+    intTocharFloat(GPSSpeed, hgps.speed*1.85,1,10,1);
     Paint_Clear(paint, UNCOLORED);
     Paint_DrawStringAt(paint, 0, 4, GPSSpeed, &Font28, COLORED);
     EPD_SetFrameMemory(epd, frame_buffer, 8, 173, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
-    intTocharFloat(BmpTemp, sensors.temperature,100,1);
+
+    /* -------------------------------------------------*/
+    //status displays
+    Paint_SetWidth(paint, 45);
+   	Paint_SetHeight(paint, 20);
+
+    //flying
     Paint_Clear(paint, UNCOLORED);
-
     if (activity.flightstatus == FLS_FLYING) {
-    	Paint_DrawStringAt(paint, 0, 4,"Flying", &Font16, COLORED);
+    	Paint_DrawStringAt(paint, 0, 0,"PF", &Font14, COLORED);
     }else{
-    	Paint_DrawStringAt(paint, 0, 4,"Not Flying", &Font16, COLORED);
+    	Paint_DrawStringAt(paint, 0, 0,"PNF", &Font14, COLORED);
     }
+    EPD_SetFrameMemory(epd, frame_buffer, 8, 230, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 
-    EPD_SetFrameMemory(epd, frame_buffer, 8, 250, Paint_GetWidth(paint), Paint_GetHeight(paint));
+    //datalogger
+    Paint_SetWidth(paint, 50);
+    Paint_Clear(paint, UNCOLORED);
+    if (datalog.isLogging) {
+       	Paint_DrawStringAt(paint, 0, 0," LOG", &Font14, COLORED);
+    }else{
+    	Paint_DrawStringAt(paint, 0, 0," ---", &Font14, COLORED);
+    }
+    EPD_SetFrameMemory(epd, frame_buffer, epd->width-58, 230, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 
-   EPD_DisplayFrame(epd);
+    //temp
+    Paint_SetWidth(paint, 45);
+    Paint_Clear(paint, UNCOLORED);
+    //intTocharFloat(BmpTemp, sensors.temperature,100,1);
+    sprintf(BmpTemp,"%dC",(int)sensors.temperature/100);
+    Paint_DrawStringAt(paint, 0, 0,BmpTemp, &Font14, COLORED);
+    EPD_SetFrameMemory(epd, frame_buffer, 8, 252, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 
+    //humid
+    Paint_SetWidth(paint, 50);
+    Paint_Clear(paint, UNCOLORED);   -
+    sprintf(BmpHumid," %d%%",sensors.humidity/100);
+    Paint_DrawStringAt(paint, 0, 0,BmpHumid, &Font14, COLORED);
+    EPD_SetFrameMemory(epd, frame_buffer, epd->width-58, 252, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+
+    //battery
+    Paint_SetWidth(paint, 50);
+   Paint_Clear(paint, UNCOLORED);
+   intTocharFloat(BmpBat, sensors.vbat,10,1,0);
+   strncat(BmpBat, "V",1);
+   Paint_DrawStringAt(paint, 0, 0,BmpBat, &Font14, COLORED);
+   EPD_SetFrameMemory(epd, frame_buffer, 8, 275, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+   //gforce
+   Paint_SetWidth(paint, 50);
+   Paint_Clear(paint, UNCOLORED);
+   intTocharFloat(BmpGforce, sensors.gforce,100,10,1);
+   strncat(BmpGforce, "G",1);
+   Paint_DrawStringAt(paint, 0, 0,BmpGforce, &Font14, COLORED);
+   EPD_SetFrameMemory(epd, frame_buffer, epd->width-58, 275, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+    EPD_DisplayFrame(epd);
 
 }
 
@@ -255,25 +301,29 @@ void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer)
 }
 
 
-//char array, the value, divide by amount (1000), reduce after 0
-void intTocharFloat(char *buffer, int value, uint16_t div, uint16_t dif){
+//char array, the value, divide by amount (1000), reduce by x after 0 (100 removes 2 0's), add -sign
+void intTocharFloat(char *buffer, int value, uint16_t div, uint16_t dif, uint8_t sign){
 
 	int fpart;
 	int16_t bpart;
-
-
 
     char *tmpSign = (value < 0) ? "-" : " ";
     fpart = abs(value)/div;
     bpart = abs(value) % div;
     if (dif >0) bpart = bpart / dif;
-
+if (sign) {
     if ((div/dif) >= 100) {
     	sprintf(buffer,"%s%d.%02d",tmpSign,fpart,bpart);
     }else{
     	sprintf(buffer,"%s%d.%1d",tmpSign,fpart,bpart);
     }
-
+}else{
+    if ((div/dif) >= 100) {
+    	sprintf(buffer,"%d.%02d",fpart,bpart);
+    }else{
+    	sprintf(buffer,"%d.%1d",fpart,bpart);
+    }
+}
 
 }
 

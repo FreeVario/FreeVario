@@ -15,9 +15,38 @@
 
 extern I2C_HandleTypeDef hi2c1;
 extern SensorData sensors;
-
+extern ADC_HandleTypeDef FV_HALADC;
 static uint8_t vTriggerd;
 static uint32_t vtime=0;
+
+
+
+void setupVbatSensor() {
+	HAL_ADC_Start(&FV_HALADC);
+	sensors.vbat=35;
+	sensors.pbat=100;
+
+}
+
+void readVbatSensor() {
+
+	if (HAL_ADC_PollForConversion(&FV_HALADC,100) == HAL_OK) {
+
+			uint32_t cnv = HAL_ADC_GetValue(&FV_HALADC);
+			//double vbat = (double)( (cnv * 2 * 3300) / 0xfff)/1000;
+			//TODO: figure out the conversion, check for power draining due to measurement
+
+
+
+			sensors.vbat = (double)( (cnv * 2 * 4800) / 0xfff)/100;
+					//(double) (sensors.vbat * 10 + (double)cnv/23)/11;
+
+		  //calculate %charge
+			sensors.pbat = (uint8_t)((sensors.vbat - 36) * 16.6);
+
+	}
+
+}
 
 void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280) {
 	bmp280_init_default_params(&bmp280->params);
@@ -71,13 +100,17 @@ void readSensorsMPU6050(SD_MPU6050 *mpu1){
 	SD_MPU6050_ReadAll(&FV_I2C,mpu1);
 	//we use the full scale so the devider is 2048
 
-	sensors.accel_x = (ACCLSMOOTH * sensors.accel_x +  mpu1->Accelerometer_X*1000/8192) / (ACCLSMOOTH + 1);
-	sensors.accel_y = (ACCLSMOOTH * sensors.accel_y +  mpu1->Accelerometer_Y*1000/8192) / (ACCLSMOOTH + 1);
-	sensors.accel_z = (ACCLSMOOTH * sensors.accel_z +  mpu1->Accelerometer_Z*1000/8192) / (ACCLSMOOTH + 1);
+	sensors.accel_x = (ACCLSMOOTH * sensors.accel_x +  mpu1->Accelerometer_X*100/8192) / (ACCLSMOOTH + 1);
+	sensors.accel_y = (ACCLSMOOTH * sensors.accel_y +  mpu1->Accelerometer_Y*100/8192) / (ACCLSMOOTH + 1);
+	sensors.accel_z = (ACCLSMOOTH * sensors.accel_z +  mpu1->Accelerometer_Z*100/8192) / (ACCLSMOOTH + 1);
+
+	sensors.gforce = (sqrt(pow(sensors.accel_x, 2) + pow(sensors.accel_y, 2) + pow(sensors.accel_z, 2))) - 100;
+
 
 	sensors.gyro_x = (ACCLSMOOTH * sensors.gyro_x +  mpu1->Gyroscope_X) / (ACCLSMOOTH + 1);
 	sensors.gyro_y = (ACCLSMOOTH * sensors.gyro_y +  mpu1->Gyroscope_Y) / (ACCLSMOOTH + 1);
 	sensors.gyro_z = (ACCLSMOOTH * sensors.gyro_z +  mpu1->Gyroscope_Z) / (ACCLSMOOTH + 1);
+
 
 }
 

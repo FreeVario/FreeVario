@@ -25,7 +25,7 @@ extern QueueHandle_t uartQueueHandle;
 
 void StartSensorsTask(void const * argument)
 {
-
+    uint16_t readbattimer=0;
 	TickType_t times;
 	TickType_t startTime = xTaskGetTickCount();
 	const TickType_t xDelay = 50; //20hz
@@ -38,7 +38,7 @@ void StartSensorsTask(void const * argument)
 	sensors.pressure = 0;
 	sensors.temperature = 0;
 	sensors.barotakeoff = 0;
-
+	setupVbatSensor();
 	setupReadSensorsBMP280(&bmp280);
 	setupReadSensorsMPU6050(&mpu1);
 	osDelay(100);
@@ -48,7 +48,7 @@ void StartSensorsTask(void const * argument)
 	/* Infinite loop */
 	for (;;) {
 
-
+		readbattimer++;
 		times = xTaskGetTickCount();
 		timetosend++;
 		readSensorsBMP280(&bmp280);
@@ -57,6 +57,7 @@ void StartSensorsTask(void const * argument)
 		if ((timetosend >= 2)) { //every 100 ticks
 			calculateVario100ms();
 			checkAdaptiveVario(sensors.VarioMs, activity.flightstatus);
+
 		}
 
 		if ((timetosend >= 4)
@@ -88,6 +89,11 @@ void StartSensorsTask(void const * argument)
 			sensors.barotakeoff = 0;
 		}
 
+		if (readbattimer >= 40) { //every 2000 ticks
+			readbattimer = 0;
+			readVbatSensor();
+
+		}
 
 		vTaskDelayUntil(&times, xDelay);
 
