@@ -23,4 +23,6 @@ The firmware runs on FreeRtos and STM32 HAL drivers.
   <p > 
   <img src="Doc/fv2.jpg" width="300"/> <img src="Doc/fv3.jpg" width="300"/>  
   </p>
-  
+    <p > 
+  <img src="Doc/Fv_Internal.jpg" width="300"/>  
+  </p>
