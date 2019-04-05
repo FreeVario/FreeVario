@@ -1,16 +1,18 @@
 # FreeVario
 Freevario is an opensource device to provides telemetry data to any vario based program such as XCSoar or XCTrack via bluetooth or USB. It's a custom build board featuring:
-
-  STM32F405 processor
-  E-Ink display
-  GNSS module
-  BMP280 presure sensor
-  mpu6050 motion sensor
-  HM13 bluetooth module
-  SX1276 Lora Modem (for FANET)
-  SDcard reader
-  Piezo output
-  USB-C connector for OTG and charging
+ <br>
+  STM32F405 processor  <br>
+  E-Ink display  <br>
+  GNSS module <br>
+  BMP280 presure sensor <br>
+  mpu6050 motion sensor <br>
+  HM13 bluetooth module <br>
+  SX1276 Lora Modem (for FANET) <br>
+  SDcard reader <br>
+  Piezo output <br>
+  USB-C connector for OTG and charging <br>
+  
+  <br>
   
 
 The firmware runs on FreeRtos and STM32 HAL drivers. 
