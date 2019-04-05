@@ -13,7 +13,7 @@ Build Steps:
   5) Manually add the sub directories in FreeVario directory to the include paths (Right click on the folder)<br> 
   6) Go to project->build settings and add DEBUG_MODE to the C Compiler symbols. This will enable/disable features required during debugging or release. <brr>
  
- Compile and debug it <br>
+ Compile and have fun!<br>
   <br>
   
   
