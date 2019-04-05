@@ -29,7 +29,7 @@
 #define ACCLSMOOTH 10 //Lowpass filter level
 #define UPDATELOGFILETIME 30000 //time in ms to update de Log summary file
 #define LANDEDSPEED 5 //Ground Speed in knots to detect landing
-#define TAKEOFFSPEED 5 //Ground Speed in knots to detect takeoff
+#define TAKEOFFSPEED 10 //Ground Speed in knots to detect takeoff
 #define LANDEDLOWSPEEDTIME 20000 //Time in ms groundspeed lower than LANDEDSPEED to trigger landed detection
 #define STARTDELAY 6000 //the time delay before the process starts
 #define TAKEOFFVARIO 800 //0.4 //abs vario level to detect takeoff
@@ -48,7 +48,7 @@
 
 //#define TESTBUZZER
 
-#define SENDBUFFER 256 //global size of the send buffer
+#define SENDBUFFER 512 //global size of the send buffer
 #define CONFIGFILENAME "settings.cfg"
 
 #define PWRBUTTONDELAY 3000//Time powerbutton must be pressed

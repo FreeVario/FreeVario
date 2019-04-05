@@ -114,16 +114,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle) {
 
 }
 
-//TODO: Check if this is still needed
-void HAL_UART_RxIdleCallback(UART_HandleTypeDef *UartHandle) {
-	__HAL_UART_DISABLE_IT(UartHandle, UART_IT_IDLE);
-//
-//		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-//		vTaskNotifyGiveFromISR( xTaskToNotify, &xHigherPriorityTaskWoken );
-//		xTaskToNotify = NULL;
-//	    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-
-}
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle) {
 
@@ -146,8 +136,9 @@ void uart_Idle_Handler_Callback(UART_HandleTypeDef *UartHandle){
 	    __HAL_UART_DISABLE_IT(UartHandle, UART_IT_IDLE);
 
 	    //check for correct DMA
-	    DMA2_Stream2->CR &= ~DMA_SxCR_EN; //trigger tx complete
+	    DMA2_Stream2->CR &= ~DMA_SxCR_EN; //trigger tx completecallback
 	  }
+
 }
 
 /**
@@ -226,8 +217,6 @@ void StandbyMode(void)
 
 
 void freeVario_RTOS_Init()  {
-
-
 
 	  /* definition and creation of confMutex */
 	  osMutexDef(confMutex);

@@ -221,6 +221,16 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
     }
     EPD_SetFrameMemory(epd, frame_buffer, 8, 230, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
+    //GPS Fix
+    Paint_SetWidth(paint, 12);
+    Paint_Clear(paint, UNCOLORED);
+    if (hgps.fix > 0) {
+       	Paint_DrawStringAt(paint, 0, 0,"*", &Font14, COLORED);
+    }else{
+    	Paint_DrawStringAt(paint, 0, 0,"!", &Font14, COLORED);
+    }
+    EPD_SetFrameMemory(epd, frame_buffer, epd->width-74, 230, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
 
     //datalogger
     Paint_SetWidth(paint, 50);
@@ -272,6 +282,11 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
 
 void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
 
+    Paint_SetWidth(paint, epd->width);
+   	Paint_SetHeight(paint, epd->height);
+    Paint_Clear(paint, UNCOLORED);
+
+
 	      EPD_ClearFrameMemory(epd, 0xFF);
 		  EPD_DisplayFrame(epd);
 		  EPD_ClearFrameMemory(epd, 0xFF);
@@ -284,15 +299,15 @@ void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer)
 
           Paint_Clear(paint, UNCOLORED);
           Paint_DrawStringAt(paint, 8, 4, "FreeVario", &Font16, COLORED);
-          EPD_SetFrameMemory(epd, frame_buffer, 2, 25, Paint_GetWidth(paint), Paint_GetHeight(paint));
+          EPD_SetFrameMemory(epd, frame_buffer, 2, 85, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 	      Paint_Clear(paint, UNCOLORED);
 	      Paint_DrawStringAt(paint, 50, 4, "is", &Font16, COLORED);
-	      EPD_SetFrameMemory(epd, frame_buffer, 2, 100, Paint_GetWidth(paint), Paint_GetHeight(paint));
+	      EPD_SetFrameMemory(epd, frame_buffer, 2, 110, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 	      Paint_Clear(paint, UNCOLORED);
 	      Paint_DrawStringAt(paint, 8, 4, "sleeping", &Font16, COLORED);
-	      EPD_SetFrameMemory(epd, frame_buffer, 2, 175, Paint_GetWidth(paint), Paint_GetHeight(paint));
+	      EPD_SetFrameMemory(epd, frame_buffer, 9, 135, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 	      EPD_DisplayFrame(epd);
 

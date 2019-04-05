@@ -23,18 +23,18 @@ void StartGPSTask(void const * argument)
 {
   /* USER CODE BEGIN StartGPSTask */
 	gps_init(&hgps);
-	uint8_t buffer[SENDBUFFER]; //DMA buffer can't use ccm
+	uint8_t buffer[SENDBUFFER]; //DMA buffer can't use ccmram
 	//uint8_t rcvdCount;
 	configASSERT(xReceiveNotify == NULL);
 	__HAL_UART_ENABLE_IT(&FV_UARTGPS, UART_IT_IDLE);
 
 	/* Infinite loop */
 	for (;;) {
-		memset(buffer, 0, sizeof(buffer));
+		memset(buffer, 0,SENDBUFFER);
 		__HAL_UART_CLEAR_IDLEFLAG(&FV_UARTGPS);
 		__HAL_UART_ENABLE_IT(&FV_UARTGPS, UART_IT_IDLE);
 
-		if (HAL_UART_Receive_DMA(&FV_UARTGPS, buffer, sizeof(buffer)) != HAL_OK) {
+		if (HAL_UART_Receive_DMA(&FV_UARTGPS, buffer, SENDBUFFER) != HAL_OK) {
 			// error
 		}
 		xReceiveNotify = xTaskGetCurrentTaskHandle();
@@ -42,9 +42,9 @@ void StartGPSTask(void const * argument)
 
 		//rcvdCount = sizeof(buffer) - huart1.hdmarx->Instance->NDTR;
 		HAL_UART_DMAStop(&FV_UARTGPS);
+		xQueueSendToBack(uartQueueHandle, buffer, 100);
+		gps_process(&hgps, &buffer, SENDBUFFER);
 
-		gps_process(&hgps, &buffer, sizeof(buffer));
-		xQueueSendToBack(uartQueueHandle, buffer, 10);
 
 	}
   /* USER CODE END StartGPSTask */

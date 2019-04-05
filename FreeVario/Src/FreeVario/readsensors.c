@@ -38,7 +38,7 @@ void readVbatSensor() {
 
 
 
-			sensors.vbat = (double)( (cnv * 2 * 4800) / 0xfff)/100;
+			sensors.vbat = (double)( (cnv * 2 * 4600) / 0xfff)/100;
 					//(double) (sensors.vbat * 10 + (double)cnv/23)/11;
 
 		  //calculate %charge
