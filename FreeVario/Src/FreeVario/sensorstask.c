@@ -51,7 +51,7 @@ void StartSensorsTask(void const * argument)
 		readbattimer++;
 		times = xTaskGetTickCount();
 		timetosend++;
-		readSensorsBMP280(&bmp280);
+		readSensorsBMP280(&bmp280); //TODO: Test moving to 100ms tick since the sensor is doing the filtering
 		readSensorsMPU6050(&mpu1);
 
 		if ((timetosend >= 2)) { //every 100 ticks

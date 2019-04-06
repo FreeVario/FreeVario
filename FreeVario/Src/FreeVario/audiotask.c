@@ -16,11 +16,14 @@
 
 extern SensorData sensors;
 extern ActivityData activity;
+extern WWDG_HandleTypeDef hwwdg;
 
 void StartAudioTask(void const * argument)
 {
 
 	uint8_t audioon=0;
+
+
 
 
 #ifdef TESTBUZZER
@@ -68,7 +71,11 @@ void StartAudioTask(void const * argument)
 			}
 		}
 #endif
-		osDelay(10);
+		osDelay(10); //do not change, need to be precise for the wdt
+		HAL_WWDG_Refresh(&hwwdg);
 	}
 
 }
+
+
+

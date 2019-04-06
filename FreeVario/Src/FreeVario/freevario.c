@@ -390,7 +390,7 @@ void StartDefaultTask(void const * argument)
 
 		}
 #endif
-		if (activity.flightstatus == FLS_GROUND) { //Todo: if status 0
+		if (activity.flightstatus == FLS_GROUND) {
 			if (hgps.fix > 0) {
 				if (hgps.speed > TAKEOFFSPEED && sensors.barotakeoff) {
 					activity.flightstatus = FLS_TAKEOFF;

@@ -53,6 +53,8 @@ UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_usart1_rx;
 DMA_HandleTypeDef hdma_usart3_tx;
 
+WWDG_HandleTypeDef hwwdg;
+
 osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -73,6 +75,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_RTC_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_WWDG_Init(void);
 void StartDefaultTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
@@ -111,9 +114,7 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 //After using generate code in cubeMX, add this after GPIO_INIT :   HAL_Delay(100);
-  /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   HAL_Delay(100);
   MX_DMA_Init();
@@ -126,6 +127,13 @@ int main(void)
   MX_TIM1_Init();
   MX_RTC_Init();
   MX_ADC1_Init();
+
+#ifndef  DEBUG_MODE
+  MX_WWDG_Init();
+#endif
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
 
 
@@ -640,6 +648,36 @@ static void MX_USART3_UART_Init(void)
 
 }
 
+/**
+  * @brief WWDG Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_WWDG_Init(void)
+{
+
+  /* USER CODE BEGIN WWDG_Init 0 */
+
+  /* USER CODE END WWDG_Init 0 */
+
+  /* USER CODE BEGIN WWDG_Init 1 */
+
+  /* USER CODE END WWDG_Init 1 */
+  hwwdg.Instance = WWDG;
+  hwwdg.Init.Prescaler = WWDG_PRESCALER_8;
+  hwwdg.Init.Window = 127;
+  hwwdg.Init.Counter = 127;
+  hwwdg.Init.EWIMode = WWDG_EWI_DISABLE;
+  if (HAL_WWDG_Init(&hwwdg) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN WWDG_Init 2 */
+
+  /* USER CODE END WWDG_Init 2 */
+
+}
+
 /** 
   * Enable DMA controller clock
   */
@@ -786,11 +824,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 __weak void StartDefaultTask(void const * argument)
 {
-  /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
-
-  /* init code for FATFS */
-  MX_FATFS_Init();
 
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
