@@ -307,18 +307,58 @@ void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer)
 	    return;
 	  }
 
-
+	  	  uint8_t sp = 10;
           Paint_Clear(paint, UNCOLORED);
-          Paint_DrawStringAt(paint, 8, 4, "FreeVario", &Font16, COLORED);
-          EPD_SetFrameMemory(epd, frame_buffer, 2, 85, Paint_GetWidth(paint), Paint_GetHeight(paint));
+          Paint_DrawStringAt(paint, 2, 0, "Flyable?", &Font16, COLORED);
+          EPD_SetFrameMemory(epd, frame_buffer, 2, sp, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 	      Paint_Clear(paint, UNCOLORED);
-	      Paint_DrawStringAt(paint, 50, 4, "is", &Font16, COLORED);
-	      EPD_SetFrameMemory(epd, frame_buffer, 2, 110, Paint_GetWidth(paint), Paint_GetHeight(paint));
+	      Paint_DrawStringAt(paint, 2, 0, "NOTAM", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer, 4, sp+=25, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 	      Paint_Clear(paint, UNCOLORED);
-	      Paint_DrawStringAt(paint, 8, 4, "sleeping", &Font16, COLORED);
-	      EPD_SetFrameMemory(epd, frame_buffer, 9, 135, Paint_GetWidth(paint), Paint_GetHeight(paint));
+	      Paint_DrawStringAt(paint, 2, 0, "Wind <500", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer, 4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Wind >500", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Rain/Front", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Thermal m/s", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Condition", &Font16, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=25, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Cloud cover", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=25, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Temperature", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Cloud Base", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Air Pressure", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Over develop", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+	      Paint_Clear(paint, UNCOLORED);
+	      Paint_DrawStringAt(paint, 2, 0, "Inversion", &Font12, COLORED);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 	      EPD_DisplayFrame(epd);
 
