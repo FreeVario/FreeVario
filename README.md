@@ -8,12 +8,17 @@ Freevario is an opensource vario that provides telemetry data to any vario based
   mpu6050 motion sensor <br>
   HM13 bluetooth module <br>
   SX1276 Lora Modem (for FANET) <br>
-  SDcard reader <br>
-  Piezo output <br>
+  Micro SDcard reader <br>
+  Piezo buzzer output <br>
   USB-C connector for OTG and charging <br>  
+  SWDIO port
+  Signal LED
+  CN3055 LiPo charger  
 <br>
 
 The firmware runs on FreeRtos and STM32 HAL drivers. 
+
+A lot of firmware features still have to be added and developed, but the milestone releases are practically usable
 
 <br>
 <br>
