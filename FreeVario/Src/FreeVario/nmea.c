@@ -70,8 +70,8 @@ void NMEA_getnmeaShortLXWP0(uint8_t * buffer, int32_t varioAlt,
 
 
 	sprintf(nmeaVario, "$LXWP0,N,,");
-	appendCharNum(nmeaVario, varioAlt, 1000,0);
-	appendCharNum(nmeaVario, varioMts, 1000,0);
+	appendCharNum(nmeaVario, varioAlt, 1000,10,2);
+	appendCharNum(nmeaVario, varioMts, 1000,10,2);
 
 
 	strcat(nmeaVario, ",,,,,,,,,*");
@@ -110,11 +110,11 @@ void NMEA_getNmeaLK8EX1(uint8_t * buffer, int32_t rawPressure, int32_t varioAlt,
 
 	sprintf(nmeaVario, "$LK8EX1,");
 
-	appendCharNum(nmeaVario, rawPressure, 100,1);
-	appendCharNum(nmeaVario, varioAlt, 1000,1);
-	appendCharNum(nmeaVario, climbRate, 1000,0);
-	appendCharNum(nmeaVario, temperature, 100,1);
-	appendCharNum(nmeaVario, pbat, 100,1);
+	appendCharNum(nmeaVario, rawPressure, 100,1,0);
+	appendCharNum(nmeaVario, varioAlt, 1000,10,2);
+	appendCharNum(nmeaVario, climbRate, 10,1,0);
+	appendCharNum(nmeaVario, temperature, 100,10,1);
+	appendCharNum(nmeaVario, pbat, 100,1,0);
 
 	strcat(nmeaVario, "*");
 	getCRC(nmeaVario);
@@ -201,7 +201,7 @@ void getCRC(char *buff) {
 	//based on code by Elimeléc López - July-19th-2013
 }
 
-void appendCharNum(char * buff, int32_t value, uint16_t div, uint8_t type) {
+void appendCharNum(char * buff, int32_t value, uint16_t div,uint16_t dif, uint8_t type) {
 
 	int fpart;
 	uint16_t bpart;
@@ -210,14 +210,19 @@ void appendCharNum(char * buff, int32_t value, uint16_t div, uint8_t type) {
 	char *tmpSign = (value < 0) ? "-" : "";
 	fpart = abs(value) / div;
 	bpart = abs(value) % div;
+	 if (dif >0) bpart = bpart / dif;
 
-	switch(type) {
+	switch (type) {
 	case 0:
-		sprintf(nubmerc, "%s%d.%02u", tmpSign, fpart, bpart);
+		sprintf(nubmerc, "%s%d", tmpSign, fpart);
 		break;
 
 	case 1:
-		sprintf(nubmerc, "%s%d", tmpSign, fpart);
+		sprintf(nubmerc, "%s%d.%1u", tmpSign, fpart, bpart);
+		break;
+
+	case 2:
+		sprintf(nubmerc, "%s%d.%02u", tmpSign, fpart, bpart);
 		break;
 	}
 

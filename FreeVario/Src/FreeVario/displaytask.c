@@ -9,6 +9,7 @@
  */
 
 #include <displaytask.h>
+#include "util.h"
 extern TaskHandle_t xDisplayNotify;
 
 unsigned char * frame_buffer[EPD_WIDTH * EPD_HEIGHT / 8] __attribute__((section(".ccmram")));
@@ -326,31 +327,7 @@ void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer)
 }
 
 
-//char array, the value, divide by amount (1000), reduce by x after 0 (100 removes 2 0's), add -sign
-void intTocharFloat(char *buffer, int value, uint16_t div, uint16_t dif, uint8_t sign){
 
-	int fpart;
-	int16_t bpart;
-
-    char *tmpSign = (value < 0) ? "-" : " ";
-    fpart = abs(value)/div;
-    bpart = abs(value) % div;
-    if (dif >0) bpart = bpart / dif;
-if (sign) {
-    if ((div/dif) >= 100) {
-    	sprintf(buffer,"%s%d.%02d",tmpSign,fpart,bpart);
-    }else{
-    	sprintf(buffer,"%s%d.%1d",tmpSign,fpart,bpart);
-    }
-}else{
-    if ((div/dif) >= 100) {
-    	sprintf(buffer,"%d.%02d",fpart,bpart);
-    }else{
-    	sprintf(buffer,"%d.%1d",fpart,bpart);
-    }
-}
-
-}
 
 
 

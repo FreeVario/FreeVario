@@ -39,6 +39,6 @@ void displayRefreshMainScreen(Paint *paint, EPD *epd, unsigned char * frame_buff
 void displayDrawmainScreen (Paint *paint, EPD *epd, unsigned char * frame_buffer);
 void displayTaskUpdate( Paint *paint,EPD *epd, unsigned char * frame_buffer);
 void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer);
-void intTocharFloat(char *buffer, int value, uint16_t div, uint16_t dif, uint8_t sign);
+
 
 #endif /* DISPLAYTASK_H_ */
