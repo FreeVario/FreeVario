@@ -38,7 +38,7 @@
 	uint8_t barotakeoff;
 	uint16_t vbat; //bat voltage x10
 	uint8_t pbat; //bat %charge
-}SensorData;
+}SensorData; //owner: sensortask.c
 
 extern settings_t conf; //declared at fvconf.h. So yes, you must include both files
 
@@ -68,8 +68,9 @@ typedef struct {
 	int32_t MaxVarioMs;
 	int32_t MaxVarioSinkMs;
 	int32_t currentLogID;
+	uint8_t muted;
 
-}ActivityData;
+}ActivityData; //owner: freevario.c
 
 extern ActivityData activity;
 

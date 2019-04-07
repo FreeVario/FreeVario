@@ -48,7 +48,8 @@
 
 //#define TESTBUZZER
 
-#define SENDBUFFER 512 //global size of the send buffer
+#define SENDBUFFER 164 //global size of the send buffer
+#define GPSRXBUFFER 1024
 #define CONFIGFILENAME "settings.cfg"
 
 #define PWRBUTTONDELAY 3000//Time powerbutton must be pressed

@@ -105,23 +105,24 @@ QueueHandle_t uartQueueHandle;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle) {
 
+	  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	  	vTaskNotifyGiveFromISR(xReceiveNotify, &xHigherPriorityTaskWoken);
+	  	xReceiveNotify = NULL;
+	  	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	vTaskNotifyGiveFromISR(xReceiveNotify, &xHigherPriorityTaskWoken);
-
-	xReceiveNotify = NULL;
-	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
 }
 
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle) {
 
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	vTaskNotifyGiveFromISR(xSendDataNotify, &xHigherPriorityTaskWoken);
-	xSendDataNotify = NULL;
-	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	if (UartHandle->Instance == FV_USARTBT) {
 
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		vTaskNotifyGiveFromISR(xSendDataNotify, &xHigherPriorityTaskWoken);
+		xSendDataNotify = NULL;
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
 
 }
 
@@ -129,6 +130,7 @@ void uart_Idle_Handler_Callback(UART_HandleTypeDef *UartHandle){
 	  uint32_t tmp_flag = 0, tmp_it_source = 0;
 	  tmp_flag = __HAL_UART_GET_FLAG(UartHandle, UART_FLAG_IDLE);
 	  tmp_it_source = __HAL_UART_GET_IT_SOURCE(UartHandle, UART_IT_IDLE);
+
 
 	  if((tmp_flag != RESET) && (tmp_it_source != RESET))
 	  {
@@ -138,6 +140,8 @@ void uart_Idle_Handler_Callback(UART_HandleTypeDef *UartHandle){
 	    //check for correct DMA
 	    DMA2_Stream2->CR &= ~DMA_SxCR_EN; //trigger tx completecallback
 	  }
+
+
 
 }
 
@@ -227,7 +231,7 @@ void freeVario_RTOS_Init()  {
 	  sdCardMutexHandle = osMutexCreate(osMutex(sdCardMutex));
 
 	  /* add queues, ... */
-	  uartQueueHandle = xQueueCreate(2, SENDBUFFER);
+	  uartQueueHandle = xQueueCreate(8, SENDBUFFER);
 
 #ifdef FV_DISPLAY
 	  /* definition and creation of displayTask */
@@ -289,7 +293,7 @@ void StartDefaultTask(void const * argument)
 
   TickType_t landedcheck=0;
 
-
+  activity.muted = 0;
   activity.flightstatus = FLS_GROUND;
 
   memset(&activity, 0, sizeof(activity));
@@ -371,6 +375,12 @@ void StartDefaultTask(void const * argument)
 
 		if (UserNextButton) {
 			osDelay(20);
+
+			if (((xTaskGetTickCount() - NextButtonTimePressed) > 2000) & (HAL_GPIO_ReadPin(BTN_NEXT_GPIO_Port,BTN_NEXT_Pin) == GPIO_PIN_SET)) {
+				UserNextButton = 0;
+				activity.muted = (activity.muted == 0) ? 1 : 0;
+			}
+
 			if (HAL_GPIO_ReadPin(BTN_NEXT_GPIO_Port,BTN_NEXT_Pin) == GPIO_PIN_RESET) {
 				UserNextButton = 0;
 			}
@@ -378,6 +388,10 @@ void StartDefaultTask(void const * argument)
 
 		if (UserPrevButton) {
 			osDelay(20);
+			if (((xTaskGetTickCount() - CancelButtonTimePressed) > 300) & (HAL_GPIO_ReadPin(BTN_PREV_GPIO_Port,BTN_PREV_Pin) == GPIO_PIN_SET)) {
+				UserPrevButton = 0;
+			}
+
 			if (HAL_GPIO_ReadPin(BTN_PREV_GPIO_Port,BTN_PREV_Pin) == GPIO_PIN_RESET) {
 				UserPrevButton = 0;
 			}

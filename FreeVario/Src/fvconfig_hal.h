@@ -77,6 +77,7 @@
  * DMA not needed
  */
 #define FV_UARTBT huart3
+#define FV_USARTBT USART3
 
 
 //HW output for the speaker

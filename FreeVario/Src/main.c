@@ -117,7 +117,7 @@ int main(void)
 
 
   MX_GPIO_Init();
-  HAL_Delay(50);
+  HAL_Delay(100);
   MX_DMA_Init();
   MX_USART3_UART_Init();
   MX_SPI1_Init();
@@ -129,9 +129,7 @@ int main(void)
   MX_RTC_Init();
   MX_ADC1_Init();
 
-#ifndef  DEBUG_MODE
-  MX_WWDG_Init();
-#endif
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -149,6 +147,10 @@ int main(void)
     if (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_RESET){
     	StandbyMode();
     }
+#endif
+
+#ifndef  DEBUG_MODE
+  MX_WWDG_Init();
 #endif
 
   /* USER CODE END 2 */

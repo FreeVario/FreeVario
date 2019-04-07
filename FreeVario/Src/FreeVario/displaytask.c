@@ -251,6 +251,16 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
     Paint_DrawStringAt(paint, 0, 0,BmpTemp, &Font14, COLORED);
     EPD_SetFrameMemory(epd, frame_buffer, 8, 252, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
+    //Muted
+    Paint_SetWidth(paint, 12);
+    Paint_Clear(paint, UNCOLORED);
+    if (activity.muted > 0) {
+       	Paint_DrawStringAt(paint, 0, 0,"m", &Font14, COLORED);
+    }else{
+    	Paint_DrawStringAt(paint, 0, 0,".", &Font14, COLORED);
+    }
+    EPD_SetFrameMemory(epd, frame_buffer, epd->width-74, 252, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
 
     //humid
     Paint_SetWidth(paint, 50);
