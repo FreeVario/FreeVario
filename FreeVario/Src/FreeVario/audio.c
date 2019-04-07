@@ -37,7 +37,7 @@ void noTone() {
 
 
 }
-#define BASEPULSE 200
+
 #define TOPPULSE  1000
 
  void tone(audio_t * audio, float freq, int period) {
@@ -217,7 +217,7 @@ void makeVarioAudio(audio_t * audio, float vario) {
 
 
   if (vario > BUZZERCLIMBING) {
-	  pulse = TOPPULSE / (vario * 10) + 100;
+	  pulse = TOPPULSE / (vario * 12) + 150;
 
     if (!audio->muted) {
       dynaTone(audio, audio->variof);
