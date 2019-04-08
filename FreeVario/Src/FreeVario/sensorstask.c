@@ -53,12 +53,11 @@ void StartSensorsTask(void const * argument)
 		timetosend++;
 		readSensorsMPU6050(&mpu1);
 
-		if ((timetosend >= 2)) { //every 100 ticks
-			readSensorsBMP280(&bmp280); //using built in filtering
-			calculateVario100ms();
-			checkAdaptiveVario(sensors.VarioMs, activity.flightstatus);
+		readSensorsBMP280(&bmp280); //using built in filtering
+		calculateVario50ms();
+		checkAdaptiveVario(sensors.VarioMs, activity.flightstatus);
 
-		}
+
 
 		if ((timetosend >= 4)
 				& ((xTaskGetTickCount() - startTime) > STARTDELAY)) { //every 200 ticks

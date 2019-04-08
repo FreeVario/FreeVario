@@ -54,7 +54,7 @@ void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280) {
 	bmp280->i2c = &FV_I2C;
 
 	bmp280->params.mode = BMP280_MODE_NORMAL;
-	bmp280->params.filter = BMP280_FILTER_8;
+	bmp280->params.filter = BMP280_FILTER_16;
 	bmp280->params.oversampling_pressure = BMP280_ULTRA_HIGH_RES;
 	bmp280->params.oversampling_temperature = BMP280_STANDARD;
 	bmp280->params.oversampling_humidity = BMP280_STANDARD;
@@ -126,21 +126,26 @@ float getAltitudeMeters() {
 
 }
 
-//This must be called at 100ms
-void calculateVario100ms() {
+//This must be called every 50ms (value x2)
+void calculateVario50ms() {
 
     float alt = getAltitudeMeters();
     sensors.AltitudeMeters = (int32_t)( alt * 1000);
     SO_enqueue(&sensors.QAltitudeMeters, alt);
 
     if (SO_qisFull(&sensors.QAltitudeMeters)) {
-        sensors.VarioMs = (int32_t)(( SO_rear(&sensors.QAltitudeMeters) -  SO_front(&sensors.QAltitudeMeters)) * 1000);
+    	//called per 50ms, so value *2
+       sensors.VarioMs = (int32_t)(( SO_rear(&sensors.QAltitudeMeters) -  SO_front(&sensors.QAltitudeMeters)) * 1000) * 2;
+
     }else{
     	sensors.VarioMs = 0;
     }
 
 
 }
+
+
+
 
 void checkAdaptiveVario(int32_t vario, int8_t takeoff) { //sensors.VarioMs as parameter
 #if defined(ADAPTIVEVARIO)

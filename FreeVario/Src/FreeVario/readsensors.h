@@ -33,7 +33,7 @@ void readSensorsBMP280(BMP280_HandleTypedef *bmp280);
 void readSensorsMPU6050(SD_MPU6050 *mpu1);
 float getAltitudeFeet();
 float getAltitudeMeters();
-void calculateVario100ms();
+void calculateVario50ms();
 void checkAdaptiveVario(int32_t vario, int8_t takeoff);
 
 
