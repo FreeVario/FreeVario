@@ -66,7 +66,7 @@ void StartAudioTask(void const * argument)
 				audioon = 1;
 
 			}
-			if (activity.flightstatus == FLS_GROUND && audioon && !activity.muted) {
+			if ((activity.flightstatus == FLS_GROUND && audioon) || (activity.muted && audioon)) {
 				audioon = 0;
 				noTone();
 			}

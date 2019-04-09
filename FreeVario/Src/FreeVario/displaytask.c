@@ -194,7 +194,26 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
     EPD_SetFrameMemory(epd, frame_buffer, 8, 20, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
     /* -------------------------------------------------*/
-    sprintf(BmpAltitude," %d",sensors.AltitudeMeters/1000);
+
+    Paint_SetWidth(paint, 26);
+    Paint_SetHeight(paint, 14);
+    Paint_Clear(paint, UNCOLORED);
+
+    if (activity.barognssavalid) {
+
+        sprintf(BmpAltitude," %d",(sensors.AltitudeMeters + activity.barognssdeveation)/1000);
+        Paint_DrawStringAt(paint, 0, 0, "   ", &Font10, COLORED);
+
+    }else{
+        sprintf(BmpAltitude," %d",sensors.AltitudeMeters/1000);
+        Paint_DrawStringAt(paint, 0, 0, "QNE", &Font10, COLORED);
+    }
+    EPD_SetFrameMemory(epd, frame_buffer,  epd->width-74, 78, Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+
+    Paint_SetWidth(paint, 112);
+    Paint_SetHeight(paint, 41);
+
     //intTocharFloat(BmpAltitude, sensors.AltitudeMeters,1000,1000);
     Paint_Clear(paint, UNCOLORED);
     Paint_DrawStringAt(paint, 0, 4, BmpAltitude, &Font28, COLORED);

@@ -143,10 +143,24 @@ int main(void)
 
 
 #ifndef  DEBUG_MODE
+
+  HAL_PWR_EnableBkUpAccess();
+  uint32_t extRequest = HAL_RTCEx_BKUPRead(&hrtc, 0);
+
+
+  /*check if the shutdown was proper */
+  /*if not, continue startup in case of a wwdg reset*/
+ // if(extRequest ==  0x00000002) {
     HAL_Delay(PWRBUTTONDELAY);
     if (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_RESET){
     	StandbyMode();
-    }
+  //  }
+
+    /*Clear the proper shutdown flag */
+    HAL_RTCEx_BKUPWrite(&hrtc, 0, 0x00000001);
+
+
+  }
 #endif
 
 #ifndef  DEBUG_MODE

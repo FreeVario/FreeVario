@@ -16,8 +16,7 @@
 extern I2C_HandleTypeDef hi2c1;
 extern SensorData sensors;
 extern ADC_HandleTypeDef FV_HALADC;
-static uint8_t vTriggerd;
-static uint32_t vtime=0;
+
 
 
 
@@ -33,16 +32,14 @@ void readVbatSensor() {
 	if (HAL_ADC_PollForConversion(&FV_HALADC,100) == HAL_OK) {
 
 			uint32_t cnv = HAL_ADC_GetValue(&FV_HALADC);
-			//double vbat = (double)( (cnv * 2 * 3300) / 0xfff)/1000;
-			//TODO: figure out the conversion, check for power draining due to measurement
 
+			/*TODO: in dire need of calibration, use your scope man*/
+			sensors.vbat = (sensors.vbat * 100 + (((cnv * 2 * 4600) / 0xfff)/100))/101; //lowpassfilter
 
+		  //calculate %charge, sort of
+			sensors.pbat = (uint8_t)((37 - sensors.vbat) * 16.6);
 
-			sensors.vbat = (double)( (cnv * 2 * 4600) / 0xfff)/100;
-					//(double) (sensors.vbat * 10 + (double)cnv/23)/11;
-
-		  //calculate %charge
-			sensors.pbat = (uint8_t)((sensors.vbat - 36) * 16.6);
+			if (sensors.pbat > 100) { sensors.pbat = 100;}
 
 	}
 
@@ -126,6 +123,7 @@ float getAltitudeMeters() {
 
 }
 
+
 //This must be called every 50ms (value x2)
 void calculateVario50ms() {
 
@@ -141,10 +139,7 @@ void calculateVario50ms() {
     	sensors.VarioMs = 0;
     }
 
-
 }
-
-
 
 
 void checkAdaptiveVario(int32_t vario, int8_t takeoff) { //sensors.VarioMs as parameter

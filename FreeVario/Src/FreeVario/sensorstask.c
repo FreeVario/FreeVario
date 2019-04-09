@@ -25,7 +25,8 @@ extern QueueHandle_t uartQueueHandle;
 
 void StartSensorsTask(void const * argument)
 {
-    uint16_t readbattimer=0;
+	TickType_t readbattimer=0;
+
 	TickType_t times;
 	TickType_t startTime = xTaskGetTickCount();
 	const TickType_t xDelay = 50; //20hz

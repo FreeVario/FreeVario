@@ -197,7 +197,12 @@ void StandbyMode(void)
   __HAL_RCC_PWR_CLK_ENABLE();
 
   /* Allow access to Backup */
-  HAL_PWR_EnableBkUpAccess();
+
+  HAL_PWR_EnableBkUpAccess(); //still not working
+
+
+  /* Write data to backup register to indicate valid shutdown */
+  HAL_RTCEx_BKUPWrite(&hrtc, 0, 0x00000002);
 
   /* Reset RTC Domain */
   __HAL_RCC_BACKUPRESET_FORCE();
@@ -292,6 +297,7 @@ void StartDefaultTask(void const * argument)
   xSemaphoreGive(sdCardMutexHandle);
 
   TickType_t landedcheck=0;
+  TickType_t maintenanceloop=0; //loop every 1 minute
 
   activity.muted = 0;
   activity.flightstatus = FLS_GROUND;
@@ -315,6 +321,8 @@ void StartDefaultTask(void const * argument)
 
 	/* Infinite loop */
 	for (;;) {
+
+		maintenanceloop++;
 
 		if  (UserPowerButton) {
 			osDelay(20);
@@ -405,7 +413,7 @@ void StartDefaultTask(void const * argument)
 		}
 #endif
 		if (activity.flightstatus == FLS_GROUND) {
-			if (hgps.fix > 0) {
+			if (hgps.fix > 0 && hgps.is_valid) {
 				if (hgps.speed > TAKEOFFSPEED && sensors.barotakeoff) {
 					activity.flightstatus = FLS_TAKEOFF;
 				}
@@ -467,6 +475,20 @@ void StartDefaultTask(void const * argument)
 			saveConfigtoSD();
 			xTaskNotify(xLogDataNotify, 0x03, eSetValueWithOverwrite);
 			break;
+
+		}
+
+		if (maintenanceloop > 600) { // = 1 minute
+			maintenanceloop = 0;
+
+			if (hgps.fix > 0 && hgps.is_valid && hgps.sats_in_use > 8) { //have accurate fix
+			    uint8_t barognssavalid = 1;
+			    activity.barognssdeveation = sensors.AltitudeMeters - (hgps.altitude *1000) ;
+			    activity.barognssavalid = 1;
+
+			}else{
+			     activity.barognssavalid = 0;
+			}
 
 		}
 
