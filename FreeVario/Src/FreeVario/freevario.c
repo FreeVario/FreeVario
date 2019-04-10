@@ -196,17 +196,9 @@ void StandbyMode(void)
   /* Enable Power Clock*/
   __HAL_RCC_PWR_CLK_ENABLE();
 
-  /* Allow access to Backup */
-
-  HAL_PWR_EnableBkUpAccess(); //still not working
-
 
   /* Write data to backup register to indicate valid shutdown */
-  HAL_RTCEx_BKUPWrite(&hrtc, 0, 0x00000002);
-
-  /* Reset RTC Domain */
-  __HAL_RCC_BACKUPRESET_FORCE();
-  __HAL_RCC_BACKUPRESET_RELEASE();
+  HAL_RTCEx_BKUPWrite(&hrtc, 0, 3);
 
   /* Disable all used wakeup sources: Pin1(PA.0) */
   HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
@@ -404,12 +396,14 @@ void StartDefaultTask(void const * argument)
 				UserPrevButton = 0;
 			}
 		}
-#ifndef USEGPSDATETIME
+
+#ifdef SETRTCBYGPS
 		if (hgps.fix > 0 && !HasSetTime ) {
+		    if ( !HasSetTime ) {
 
-			setRTCFromHgps(); //util.c
+			setRTCFromHgps(&hgps); //util.c
 			HasSetTime=1;
-
+		    }
 		}
 #endif
 		if (activity.flightstatus == FLS_GROUND) {
@@ -434,7 +428,7 @@ void StartDefaultTask(void const * argument)
 			activity.takeoffLocationLAT = (int32_t) (hgps.latitude * 1000000);
 			activity.takeoffLocationLON = (int32_t) (hgps.longitude * 1000000);
 			activity.takeoffTemp = sensors.temperature;
-			setActivityTakeoffTime(); //util.c
+			setActivityTakeoffTime(&activity); //util.c
 			activity.flightstatus = FLS_FLYING;
 			xTaskNotify(xLogDataNotify, 0x01, eSetValueWithOverwrite);
 			landedcheck = xTaskGetTickCount();
@@ -469,7 +463,7 @@ void StartDefaultTask(void const * argument)
 			activity.landingLocationLON = (int32_t) (hgps.longitude * 1000000);
 			activity.MaxAltitudeGainedMeters = activity.MaxAltitudeMeters
 					- activity.takeoffAltitude;
-			setActivityLandTime(); //util.c
+			setActivityLandTime(&activity); //util.c
 			activity.flightstatus = FLS_GROUND;
 			conf.lastLogNumber = activity.currentLogID;
 			saveConfigtoSD();

@@ -18,17 +18,18 @@
 	extern RTC_HandleTypeDef  hrtc;
 #endif
 
-void setRTCFromHgps() {
+void setRTCFromHgps(gps_t * hgps) {
 #ifndef USEGPSDATETIME
 	RTC_DateTypeDef  sdate;
 	RTC_TimeTypeDef  stime;
-    uint16_t dd;
 
 
-	sdate.Year = uint2bcd(hgps->year); //might have to convert to hex
+
+	sdate.Year = uint2bcd(hgps->year);
 	sdate.Month = uint2bcd(hgps->month);
 	sdate.Date = uint2bcd(hgps->date);
-    sdate.WeekDay = RTC_WEEKDAY_THURSDAY;
+	RTC_CalcDOW(&sdate);
+
 
 
 
@@ -40,25 +41,25 @@ void setRTCFromHgps() {
 	stime.StoreOperation = RTC_STOREOPERATION_RESET;
 
 
-	HAL_RTC_SetTime(hrtc,&stime,FORMAT_BCD);
-	HAL_RTC_SetDate(hrtc,&sdate,FORMAT_BCD);
+	HAL_RTC_SetTime(&hrtc,&stime,FORMAT_BCD);
+	HAL_RTC_SetDate(&hrtc,&sdate,FORMAT_BCD);
 
-	HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR1, 0x32F2);
+
 
 #endif
 }
 
 
 
-void setActivityTakeoffTime() {
+void setActivityTakeoffTime(ActivityData * activity) {
 
 #ifdef USEGPSDATETIME
-	activity.takeoffYear = hgps.year + 2000; //year 2100 problem anyone?
-	activity.takeoffMonth = hgps.month;
-	activity.takeoffDate = hgps.date;
-	activity.takeoffHour = hgps.hours;
-	activity.takeoffMinute = hgps.minutes;
-	activity.takeoffSeconds = hgps.seconds;
+	activity->takeoffYear = hgps.year + 2000; //year 2100 problem anyone?
+	activity->takeoffMonth = hgps.month;
+	activity->takeoffDate = hgps.date;
+	activity->takeoffHour = hgps.hours;
+	activity->takeoffMinute = hgps.minutes;
+	activity->takeoffSeconds = hgps.seconds;
 
 
 #else
@@ -78,14 +79,14 @@ void setActivityTakeoffTime() {
 
 }
 
-void setActivityLandTime() {
+void setActivityLandTime(ActivityData * activity) {
 #ifdef USEGPSDATETIME
-	activity.landingYear = hgps.year + 2000; //year 2100 problem anyone?
-	activity.landingMonth = hgps.month;
-	activity.landingDate = hgps.date;
-	activity.landingHour = hgps.hours;
-	activity.landingMinute = hgps.minutes;
-	activity.landingSeconds = hgps.seconds;
+	activity->landingYear = hgps.year + 2000; //year 2100 problem anyone?
+	activity->landingMonth = hgps.month;
+	activity->landingDate = hgps.date;
+	activity->landingHour = hgps.hours;
+	activity->landingMinute = hgps.minutes;
+	activity->landingSeconds = hgps.seconds;
 
 #else
 	RTC_DateTypeDef  sdate;
@@ -120,7 +121,9 @@ uint32_t uint2bcd(uint16_t dec)
 
 inline int bcd_decimal(uint8_t hex )
 {
-    return hex - 6 * (hex >> 4);
+
+    return ((hex & 0xF0) >> 4) * 10 + (hex & 0x0F);
+
 }
 
 //char array, the value, divide by amount (1000), reduce by x after 0 (100 removes 2 0's), add -sign
@@ -149,3 +152,17 @@ if (sign) {
 
 }
 
+void RTC_CalcDOW(RTC_DateTypeDef *date) {
+    int16_t adjustment,mm,yy;
+
+    // Calculate intermediate values
+    adjustment = (14 - date->Month) / 12;
+    mm = date->Month + (12 * adjustment) - 2;
+    yy = date->Year - adjustment;
+
+    // Calculate day of week (0 = Sunday ... 6 = Saturday)
+    date->WeekDay = (date->Date + ((13 * mm - 1) / 5) + yy + (yy / 4) - (yy / 100) + (yy / 400)) % 7;
+
+    // Sunday?
+    if (!date->WeekDay) date->WeekDay = 7;
+}

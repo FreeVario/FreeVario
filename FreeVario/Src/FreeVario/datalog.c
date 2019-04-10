@@ -96,8 +96,8 @@ int openDataLogFile(FIL* logFile) {
 		return 0;
 	}
 
-	uint8_t header[] = "Date,Log,GPS Fix, GPS Valid,Latitude,Logitude, GPS Altitude,Coarse,Speed,Variation,Sats in use, Baro Altitude, Vario,"
-			"Accel X,Accel Y, Accel Z, Gyro X, Gyro Y, Gyro Z, Temperature, Humidity, Pressure, Pressure Raw, Vario Smooth \r\n";
+	uint8_t header[] = "Date,GPS Fix, GPS Valid,Latitude,Logitude, GPS Altitude,Coarse,Speed,Variation,Sats in use, Baro Altitude, Vario,"
+			"Accel X,Accel Y, Accel Z, Gyro X, Gyro Y, Gyro Z, G-Force ,Temperature, Humidity, Pressure, Pressure Raw, Baro GNSS Valid, Baro GNSS dif \r\n";
 	f_write(logFile, header, strlen(header),(void *) &byteswritten);
 		f_sync(logFile);
 	return 1;
@@ -116,14 +116,13 @@ void writeDataLogFile(FIL *logFile) {
 //		return;
 //	}
 
-    sprintf(mtext,"%u-%02u-%02u %02u:%02u:%02u,%ld,%u,%u,%ld,%ld,%ld,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%d\r\n",
+    sprintf(mtext,"%u-%02u-%02u %02u:%02u:%02u,%u,%u,%ld,%ld,%ld,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%u,%d\r\n",
 			hgps.date,
 			hgps.month,
 			hgps.year,
 			hgps.hours,
 			hgps.minutes,
 			hgps.seconds,
-			activity.currentLogID,
 			hgps.fix,
 			hgps.is_valid,
 			(int32_t)(hgps.latitude*1000000),
@@ -141,11 +140,14 @@ void writeDataLogFile(FIL *logFile) {
 			sensors.gyro_x,
 			sensors.gyro_y,
 			sensors.gyro_z,
+			sensors.gforce,
 			sensors.temperature,
 			sensors.humidity,
 			sensors.pressure,
 			sensors.pressureraw,
-			conf.variosmooth);
+			activity.barognssavalid,
+			activity.barognssdeveation
+			);
 
 	f_write(logFile, mtext, strlen(mtext),(void *) &byteswritten);
 	f_sync(logFile);

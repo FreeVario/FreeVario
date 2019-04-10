@@ -16,10 +16,11 @@
 #include "gpstask.h"
 #include <globaldata.h>
 
-void setRTCFromHgps();
-void setActivityTakeoffTime();
-void setActivityLandTime();
+void setRTCFromHgps(gps_t * hgps);
+void setActivityTakeoffTime(ActivityData * activity);
+void setActivityLandTime(ActivityData * activity);
 uint32_t uint2bcd(uint16_t dec);
 inline int bcd_decimal(uint8_t hex);
 void intTocharFloat(char *buffer, int value, uint16_t div, uint16_t dif, uint8_t sign);
+void RTC_CalcDOW(RTC_DateTypeDef *date);
 #endif /* FREEVARIO_UTIL_H_ */

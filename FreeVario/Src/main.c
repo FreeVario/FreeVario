@@ -135,33 +135,37 @@ int main(void)
   /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
 
+  /*Disable RTC tamper*/
+
+  HAL_RTCEx_DeactivateTamper(&hrtc, RTC_TAMPER_1);
+  __HAL_RTC_TAMPER_CLEAR_FLAG(&hrtc, RTC_FLAG_TAMP1F);
+  __HAL_RTC_WRITEPROTECTION_DISABLE(&hrtc);
+  HAL_PWR_EnableBkUpAccess();
 
  /*
   * Bug fix for pwr button
   * Button must be held in for 3 seconds to powerup
   */
 
+    uint32_t extRequest = HAL_RTCEx_BKUPRead(&hrtc, 0);
 
-#ifndef  DEBUG_MODE
+    /*check if the shutdown was proper */
+    /*if not, continue startup in case of a wwdg reset*/
+    if (extRequest == 3) { //had normal shutdown
+        HAL_Delay(PWRBUTTONDELAY);
+        if (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
+                == GPIO_PIN_RESET) {
+            StandbyMode();
+        }
 
-  HAL_PWR_EnableBkUpAccess();
-  uint32_t extRequest = HAL_RTCEx_BKUPRead(&hrtc, 0);
+        /*Clear the proper shutdown flag */
+        HAL_RTCEx_BKUPWrite(&hrtc, 0, 1); //do normal startup
+
+    } else {
+        HAL_RTCEx_BKUPWrite(&hrtc, 0, 2); //unexpected restart
+    }
 
 
-  /*check if the shutdown was proper */
-  /*if not, continue startup in case of a wwdg reset*/
- // if(extRequest ==  0x00000002) {
-    HAL_Delay(PWRBUTTONDELAY);
-    if (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_RESET){
-    	StandbyMode();
-  //  }
-
-    /*Clear the proper shutdown flag */
-    HAL_RTCEx_BKUPWrite(&hrtc, 0, 0x00000001);
-
-
-  }
-#endif
 
 #ifndef  DEBUG_MODE
   MX_WWDG_Init();

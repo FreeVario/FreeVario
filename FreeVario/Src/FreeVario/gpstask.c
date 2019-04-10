@@ -21,15 +21,12 @@ extern QueueHandle_t uartQueueHandle;
 void StartGPSTask(void const * argument)
 {
 
-
     uint8_t sendBuffer[SENDBUFFER];
     uint8_t flag = 0;
     uint16_t y = 0;
     size_t len;
 
 	gps_init(&hgps);
-	 //DMA buffer can't use ccmram
-	//uint8_t rcvdCount;
 	configASSERT(xReceiveNotify == NULL);
 	__HAL_UART_ENABLE_IT(&FV_UARTGPS, UART_IT_IDLE);
 	uint8_t buffer[GPSRXBUFFER];
@@ -44,14 +41,12 @@ void StartGPSTask(void const * argument)
 		}
 		xReceiveNotify = xTaskGetCurrentTaskHandle();
 		ulTaskNotifyTake( pdTRUE, portMAX_DELAY);
-
-		//rcvdCount = sizeof(buffer) - huart1.hdmarx->Instance->NDTR;
 		HAL_UART_DMAStop(&FV_UARTGPS);
 
 		/*
 		 * The sendbuffer was getting to big with the new GNSS modules
 		 * Something more than 700 Bytes was needed.If you send it all at that
-		 * size to the BT module, you start getting racing conditions and
+		 * size to the BT module, you start getting race conditions and
 		 * the data gets chopped off.
 		 * Below parses the NMEA in seperate lines and send it off line by line
 		 * TODO: merge it with the gps parser
@@ -82,9 +77,6 @@ void StartGPSTask(void const * argument)
 	    	  q++;
 	    }
 
-
-
-		//xQueueSendToBack(uartQueueHandle, buffer, 100);
 		gps_process(&hgps, &buffer, GPSRXBUFFER);
 
 
