@@ -216,6 +216,13 @@ void StandbyMode(void)
   HAL_PWR_EnterSTANDBYMode();
 }
 
+void toggleDebugLED() {
+#ifdef DEBUG_MODE
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+#endif
+}
+
+
 
 void freeVario_RTOS_Init()  {
 
@@ -476,7 +483,6 @@ void StartDefaultTask(void const * argument)
 			maintenanceloop = 0;
 
 			if (hgps.fix > 0 && hgps.is_valid && hgps.sats_in_use > 8) { //have accurate fix
-			    uint8_t barognssavalid = 1;
 			    activity.barognssdeveation = sensors.AltitudeMeters - (hgps.altitude *1000) ;
 			    activity.barognssavalid = 1;
 

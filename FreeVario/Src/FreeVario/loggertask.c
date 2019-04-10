@@ -101,7 +101,6 @@ void StartLoggerTask(void const * argument)
 
 			if ( xSemaphoreTake(sdCardMutexHandle,
 					(TickType_t ) 600) == pdTRUE) {
-				HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 				writeDataLogFile(&dataLogFile);
 				if (xTaskGetTickCount() - updateLogBooktime > UPDATELOGFILETIME){ //update Summary log in case of program crash
 					writeFlightLogSummaryFile();

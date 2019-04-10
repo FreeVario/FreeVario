@@ -166,3 +166,11 @@ void RTC_CalcDOW(RTC_DateTypeDef *date) {
     // Sunday?
     if (!date->WeekDay) date->WeekDay = 7;
 }
+
+
+void toggleaDebugLED() {
+#ifndef DEBUG_MODE
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+#endif
+}
+

@@ -70,7 +70,7 @@ void writeFlightLogSummaryFile(){
 
 					res = f_write(&logSumFile, wtext, strlen(wtext),
 							(void *) &byteswritten);
-					//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
 					if ((byteswritten == 0) || (res != FR_OK)) {
 						/* 'STM32.TXT' file Write or EOF Error */
 						//Error_Handler();

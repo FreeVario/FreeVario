@@ -145,7 +145,6 @@ void displayRefreshMainScreen(Paint *paint, EPD *epd, unsigned char * frame_buff
 
 void displayDrawmainScreen (Paint *paint, EPD *epd, unsigned char * frame_buffer) {
 	  uint8_t positop;
-	  uint8_t size=74;
 	  //draw boxes
     //Vario
 	  positop = 0;
@@ -201,7 +200,7 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
 
     if (activity.barognssavalid) {
 
-        sprintf(BmpAltitude," %d",(sensors.AltitudeMeters + activity.barognssdeveation)/1000);
+        sprintf(BmpAltitude," %d",(sensors.AltitudeMeters - activity.barognssdeveation)/1000);
         Paint_DrawStringAt(paint, 0, 0, "   ", &Font10, COLORED);
 
     }else{
@@ -379,6 +378,7 @@ void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer)
 	      Paint_DrawStringAt(paint, 2, 0, "Inversion", &Font12, COLORED);
 	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
+	      EPD_DisplayFrame(epd);
 	      EPD_DisplayFrame(epd);
 
 

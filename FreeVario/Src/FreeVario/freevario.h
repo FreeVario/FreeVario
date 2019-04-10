@@ -17,6 +17,7 @@
 #include "../fvconfig.h"
  void uart_Idle_Handler_Callback(UART_HandleTypeDef *UartHandle);
  void StandbyMode(void);
+ void toggleDebugLED();
  void freeVario_RTOS_Init();
  void StartDefaultTask(void const * argument);
 
