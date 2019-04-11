@@ -34,6 +34,7 @@
 	int16_t gyro_z;
 	int32_t AltitudeMeters; //x1000
 	int32_t VarioMs; //x1000
+	int32_t zVariomms; //x1000
 	Queue_t  QAltitudeMeters;
 	uint8_t barotakeoff;
 	uint16_t vbat; //bat voltage x10

@@ -10,8 +10,8 @@
 
 
 #include "readsensors.h"
-
-
+#include "kalman.h"
+#include "MadgwickAHRS.h"
 
 extern I2C_HandleTypeDef hi2c1;
 extern SensorData sensors;
@@ -71,11 +71,61 @@ void setupReadSensorsMPU6050(SD_MPU6050 *mpu1) {
 	 SD_MPU6050_Init(&FV_I2C,mpu1,FV_ACCL_ADR,SD_MPU6050_Accelerometer_4G,SD_MPU6050_Gyroscope_250s );
 }
 
+#define Z_VARIANCE          300.0f
+#define ZACCEL_VARIANCE     200.0f
+#define ZACCELBIAS_VARIANCE 1.0f
+
+
+void setupKalmanSensors(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1){
+
+    KalmanFilter_Configure(Z_VARIANCE, ZACCEL_VARIANCE, ZACCELBIAS_VARIANCE, 0,0.0f,0.0f);
+
+}
+//not yet used, needs work
+void readSensorsKalman(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1){
+
+
+    uint32_t pressure;
+    int16_t temperature, humidity;
+    SD_MPU6050_ReadAll(&FV_I2C,mpu1);
+    float fax, fay,faz;
+
+    float zTrack, vTrack;
+
+    while (!bmp280_read_int(bmp280, &temperature, &pressure, &humidity)) {
+
+        }
+
+    sensors.humidity = humidity;
+    sensors.temperature = temperature;
+    sensors.pressureraw = pressure;
+    sensors.pressure = pressure;
+
+
+    calculateVario50ms();
+
+    fax=mpu1->Accelerometer_X/819200; //x100
+    fay=mpu1->Accelerometer_Y/819200;
+    faz=mpu1->Accelerometer_Z/819200;
+
+    MadgwickAHRSupdateIMU(mpu1->Gyroscope_X, mpu1->Gyroscope_Y, mpu1->Gyroscope_Z,fax , fay, faz);
+
+    float accel = 980.0f*imu_GravityCompensatedAccel(fax,fay,faz);
+    //float accel = 0 ;
+
+    KalmanFilter_Update((float)sensors.VarioMs/10, accel, 0.05f, &zTrack, &vTrack); //time based on 50ms
+
+    sensors.zVariomms = vTrack * 100; //from cm/s to mm/s
+
+
+
+}
 
 void readSensorsBMP280(BMP280_HandleTypedef *bmp280){
 
 	uint32_t pressure;
 	int16_t temperature, humidity;
+
 	while (!bmp280_read_int(bmp280, &temperature, &pressure, &humidity)) {
 
 		}

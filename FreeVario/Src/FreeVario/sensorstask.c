@@ -42,6 +42,9 @@ void StartSensorsTask(void const * argument)
 	setupVbatSensor();
 	setupReadSensorsBMP280(&bmp280);
 	setupReadSensorsMPU6050(&mpu1);
+#ifdef USEKALMANFILTER
+	setupKalmanSensors(&bmp280,&mpu1);
+#endif
 	osDelay(100);
 
 
@@ -52,12 +55,18 @@ void StartSensorsTask(void const * argument)
 		readbattimer++;
 		times = xTaskGetTickCount();
 		timetosend++;
-		readSensorsMPU6050(&mpu1);
 
+
+#ifdef USEKALMANFILTER
+
+		readSensorsKalman(&bmp280,&mpu1);
+
+#else
+		readSensorsMPU6050(&mpu1);
 		readSensorsBMP280(&bmp280); //using built in filtering
 		calculateVario50ms();
 		checkAdaptiveVario(sensors.VarioMs, activity.flightstatus);
-
+#endif
 
 
 		if ((timetosend >= 4)

@@ -45,7 +45,7 @@
 #define AUDIOSMOOTH 10 //smooth out audio changes
 //#define VARIOLOWPASSFILTER  // smmooth out the vario (disable the BMP280 sensor filter if used)
 //#define ADAPTIVEVARIO //Adapts the vario low pass filter
-
+//#define USEKALMANFILTER  //still under development
 //#define TESTBUZZER
 
 #define SENDBUFFER 164 //global size of the send buffer

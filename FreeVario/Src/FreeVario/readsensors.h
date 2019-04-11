@@ -29,6 +29,8 @@
  void readVbatSensor();
 void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280);
 void setupReadSensorsMPU6050(SD_MPU6050 *mpu1);
+void setupKalmanSensors(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1);
+void readSensorsKalman(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1);
 void readSensorsBMP280(BMP280_HandleTypedef *bmp280);
 void readSensorsMPU6050(SD_MPU6050 *mpu1);
 float getAltitudeFeet();

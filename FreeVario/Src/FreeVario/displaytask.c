@@ -185,8 +185,11 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
 
 
     /* -------------------------------------------------*/
-
+#ifdef USEKALMANFILTER
+	intTocharFloat(BmpVario, sensors.zVariomms,1000,100,1);
+#else
 	intTocharFloat(BmpVario, sensors.VarioMs,1000,100,1);
+#endif
 
     Paint_Clear(paint, UNCOLORED);
     Paint_DrawStringAt(paint, 0, 4, BmpVario, &Font32, COLORED);
