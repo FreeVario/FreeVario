@@ -34,7 +34,14 @@ void writeFlightLogSummaryFile(){
 	char  filename[32];
 
 
-	sprintf(filename,"%06d.log",activity.currentLogID);
+	sprintf(filename,"20%02u-%02u-%u-%02u%02u-Log-%06ld.log",
+	        activity.takeoffYear,
+	        activity.takeoffMonth,
+	        activity.takeoffDate,
+	        activity.takeoffHour,
+	        activity.takeoffMinute,
+	        activity.currentLogID);
+
 	if (f_open(&logSumFile, filename,
 				FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) {
 					/* 'STM32.TXT' file Open for write Error */
@@ -90,7 +97,15 @@ int openDataLogFile(FIL* logFile) {
 	char filename[32];
 	uint32_t byteswritten=0;
 
-	sprintf(filename,"%06d.csv",activity.currentLogID);
+	sprintf(filename,"20%02u-%02u-%u-%02u%02u-Log-%06ld.csv",
+            activity.takeoffYear,
+            activity.takeoffMonth,
+            activity.takeoffDate,
+            activity.takeoffHour,
+            activity.takeoffMinute,
+	        activity.currentLogID);
+
+
 	if (f_open(logFile, filename,
 			FA_OPEN_APPEND | FA_WRITE) != FR_OK) {
 		return 0;

@@ -70,10 +70,9 @@ void StartSensorsTask(void const * argument)
 			NMEA_getnmeaShortLXWP0(nmeasendbuffer, sensors.AltitudeMeters,
 					sensors.VarioMs);
 			NMEA_getNmeaLK8EX1(nmeasendbuffer, sensors.pressure, sensors.AltitudeMeters,
-					sensors.VarioMs, sensors.temperature, 8000);
+					sensors.VarioMs, sensors.temperature, 999);
 			NMEA_getNmeaPcProbe(nmeasendbuffer, sensors.accel_x, sensors.accel_y,
-					sensors.accel_z, sensors.temperature, sensors.humidity, 100,
-					0);
+					sensors.accel_z, sensors.temperature, sensors.humidity);
 			xQueueSendToBack(uartQueueHandle, nmeasendbuffer, 10);
 
 		}
