@@ -4,6 +4,7 @@
  *  Created on: Apr 11, 2019
  *      Author: har-in-air
  *      https://github.com/har-in-air/Kalmanfilter_altimeter_vario
+ *      Converted it to C
  */
 
 

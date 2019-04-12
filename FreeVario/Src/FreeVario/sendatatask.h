@@ -18,7 +18,7 @@
 #include "cmsis_os.h"
 #include "../fvconfig.h"
 
-
+ void setupBTData();
  void StartSendDataTask(void const * argument);
 
 #endif /* FREEVARIO_SENDATATASK_H_ */

@@ -95,8 +95,6 @@ void StartDefaultTask(void const * argument);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	//FreeVario - set PWR_EN pin high. The pin seems to jitter if set low from start
-
 
   /* USER CODE END 1 */
 

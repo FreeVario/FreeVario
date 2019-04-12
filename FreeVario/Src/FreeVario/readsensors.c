@@ -71,9 +71,7 @@ void setupReadSensorsMPU6050(SD_MPU6050 *mpu1) {
 	 SD_MPU6050_Init(&FV_I2C,mpu1,FV_ACCL_ADR,SD_MPU6050_Accelerometer_4G,SD_MPU6050_Gyroscope_250s );
 }
 
-#define Z_VARIANCE          300.0f
-#define ZACCEL_VARIANCE     200.0f
-#define ZACCELBIAS_VARIANCE 1.0f
+
 
 
 void setupKalmanSensors(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1){
@@ -89,6 +87,7 @@ void readSensorsKalman(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1){
     int16_t temperature, humidity;
     SD_MPU6050_ReadAll(&FV_I2C,mpu1);
     float fax, fay,faz;
+    int8_t mx,my,mz;
 
     float zTrack, vTrack;
 
@@ -104,18 +103,29 @@ void readSensorsKalman(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1){
 
     calculateVario50ms();
 
-    fax=mpu1->Accelerometer_X/819200; //x100
-    fay=mpu1->Accelerometer_Y/819200;
-    faz=mpu1->Accelerometer_Z/819200;
+    fax=(mpu1->Accelerometer_X/4096); //cm/s
+    fay=(mpu1->Accelerometer_Y/4096);
+    faz=(-mpu1->Accelerometer_Z/4096); //sensor is upside down
 
-    MadgwickAHRSupdateIMU(mpu1->Gyroscope_X, mpu1->Gyroscope_Y, mpu1->Gyroscope_Z,fax , fay, faz);
+    sensors.accel_x = (ACCLSMOOTH * sensors.accel_x +  fax*100) / (ACCLSMOOTH + 1);
+    sensors.accel_y = (ACCLSMOOTH * sensors.accel_y +  fay*100) / (ACCLSMOOTH + 1);
+    sensors.accel_z = (ACCLSMOOTH * sensors.accel_z +  faz*100) / (ACCLSMOOTH + 1);
 
-    float accel = 980.0f*imu_GravityCompensatedAccel(fax,fay,faz);
+    my= (mpu1->Gyroscope_X * 180.0 / M_PI);
+    mx= (mpu1->Gyroscope_Y * 180.0 / M_PI);
+    mz= (mpu1->Gyroscope_Z * 180.0 / M_PI);
+
+
+    MadgwickAHRSupdateIMU(mx, my, mz, fax,fay, faz);
+
+    float accel = 98.0f*imu_GravityCompensatedAccel(fax,fay,faz);
     //float accel = 0 ;
 
-    KalmanFilter_Update((float)sensors.VarioMs/10, accel, 0.05f, &zTrack, &vTrack); //time based on 50ms
+    sensors.gforce = (sqrt(pow(sensors.accel_x, 2) + pow(sensors.accel_y, 2) + pow(sensors.accel_z, 2)));
 
-    sensors.zVariomms = vTrack * 100; //from cm/s to mm/s
+    KalmanFilter_Update((float)sensors.VarioMs/10, accel,(float) SENSORREADMS/1000 , &zTrack, &vTrack); //time based on 50ms
+    //KalmanFilter_Update((float)0, accel,(float) SENSORREADMS/1000 , &zTrack, &vTrack);
+    sensors.zVariomms = vTrack * 10; //from cm/s to mm/s
 
 
 
@@ -145,13 +155,13 @@ void readSensorsBMP280(BMP280_HandleTypedef *bmp280){
 void readSensorsMPU6050(SD_MPU6050 *mpu1){
 
 	SD_MPU6050_ReadAll(&FV_I2C,mpu1);
-	//we use the full scale so the devider is 2048
+
 
 	sensors.accel_x = (ACCLSMOOTH * sensors.accel_x +  mpu1->Accelerometer_X*100/8192) / (ACCLSMOOTH + 1);
 	sensors.accel_y = (ACCLSMOOTH * sensors.accel_y +  mpu1->Accelerometer_Y*100/8192) / (ACCLSMOOTH + 1);
-	sensors.accel_z = (ACCLSMOOTH * sensors.accel_z +  mpu1->Accelerometer_Z*100/8192) / (ACCLSMOOTH + 1);
+	sensors.accel_z = -(ACCLSMOOTH * sensors.accel_z +  mpu1->Accelerometer_Z*100/8192) / (ACCLSMOOTH + 1);
 
-	sensors.gforce = (sqrt(pow(sensors.accel_x, 2) + pow(sensors.accel_y, 2) + pow(sensors.accel_z, 2))) - 100;
+	sensors.gforce = (sqrt(pow(sensors.accel_x, 2) + pow(sensors.accel_y, 2) + pow(sensors.accel_z, 2)));
 
 
 	sensors.gyro_x = (ACCLSMOOTH * sensors.gyro_x +  mpu1->Gyroscope_X) / (ACCLSMOOTH + 1);

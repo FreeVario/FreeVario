@@ -19,9 +19,45 @@ extern TaskHandle_t xSendDataNotify;
 extern UART_HandleTypeDef FV_UARTBT;
 extern QueueHandle_t uartQueueHandle;
 
+void setupBTData() {
+
+    char buff[30];
+    sprintf(buff, "AT");
+    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+    osDelay(200);
+    sprintf(buff, "AT+NAMEFreeVarioF4");
+    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+    osDelay(200);
+    sprintf(buff, "AT+NAMBFreeVarioF4LE");
+    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+    osDelay(200);
+    sprintf(buff, "AT+DUAL0");
+    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+    osDelay(200);
+//    sprintf(buff, "AT+ROLB0");
+//    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+//    HAL_Delay(500);
+//    sprintf(buff, "AT+PIN1234");
+//    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+//    HAL_Delay(500);
+//    sprintf(buff, "AT+PINB120730");
+//    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+//    HAL_Delay(500);
+//    sprintf(buff, "AT+BAUD4");
+//    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+
+
+}
+
+
+
+
 void StartSendDataTask(void const * argument)
 {
-  /* USER CODE BEGIN StartSendDataTask */
+
+#ifdef SETUPBT
+    setupBTData();
+#endif
 
 	//configASSERT(xSendDataNotify == NULL);
 	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(500);
@@ -35,11 +71,14 @@ void StartSendDataTask(void const * argument)
 		xSendDataNotify = xTaskGetCurrentTaskHandle();
 
 		HAL_UART_Transmit_DMA(&FV_UARTBT, (uint8_t *) &receiveqBuffer, buffsize); //Usart global interupt must be enabled for this to work
+#if !defined(DEBUGUSBOUT) && !defined(DEBUG_MODE)
 		CDC_Transmit_FS((uint8_t *) &receiveqBuffer, buffsize);
+#endif
 		toggleDebugLED();
 		ulTaskNotifyTake( pdTRUE, xMaxBlockTime);
 
 		osDelay(1);
 	}
-  /* USER CODE END StartSendDataTask */
+
+
 }

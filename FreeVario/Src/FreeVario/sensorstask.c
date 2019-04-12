@@ -29,7 +29,7 @@ void StartSensorsTask(void const * argument)
 
 	TickType_t times;
 	TickType_t startTime = xTaskGetTickCount();
-	const TickType_t xDelay = 50; //20hz
+	const TickType_t xDelay = SENSORREADMS; //20hz
 	uint8_t timetosend = 1;
 	BMP280_HandleTypedef bmp280;
 	SD_MPU6050 mpu1;
