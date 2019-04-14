@@ -153,7 +153,7 @@ int main(void)
         HAL_Delay(PWRBUTTONDELAY);
         if (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
                 == GPIO_PIN_RESET) {
-           // StandbyMode();
+            StandbyMode();
         }
 
         /*Clear the proper shutdown flag */
