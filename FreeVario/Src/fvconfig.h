@@ -44,9 +44,9 @@
 #define SOARDETECTION 30000 // if climbrate is constant for set milliseconds at 0 m/s the buzzer is muted
 #define BUZZERCLIMBING 0.1 // vario level to start giving climbing signal
 #define AUDIOSMOOTH 10 //smooth out audio changes
-//#define VARIOLOWPASSFILTER  // smmooth out the vario (disable the BMP280 sensor filter if used)
-//#define ADAPTIVEVARIO //Adapts the vario low pass filter
-//#define USEKALMANFILTER  //still under development
+
+#define ADAPTIVEVARIO //Adapts the vario low pass filter
+
 #define SENSORREADMS    50  //ms sensors are read
 //#define TESTBUZZER
 

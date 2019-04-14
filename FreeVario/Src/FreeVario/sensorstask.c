@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stm32f4xx_hal.h"
+
+
 uint8_t nmeasendbuffer[SENDBUFFER] __attribute__((section(".ccmram")));
 
 extern SensorData sensors;
@@ -41,10 +43,11 @@ void StartSensorsTask(void const * argument)
 	sensors.barotakeoff = 0;
 	setupVbatSensor();
 	setupReadSensorsBMP280(&bmp280);
+
 	setupReadSensorsMPU6050(&mpu1);
-#ifdef USEKALMANFILTER
-	setupKalmanSensors(&bmp280,&mpu1);
-#endif
+
+	setupKalman();
+
 	osDelay(100);
 
 
@@ -56,17 +59,11 @@ void StartSensorsTask(void const * argument)
 		times = xTaskGetTickCount();
 		timetosend++;
 
+        readSensorsBMP280(&bmp280); //using built in filtering
+        readSensorsMPU6050(&mpu1);
+        calculateVario50ms();
+		calcSensorsKalman(&bmp280, &mpu1);
 
-#ifdef USEKALMANFILTER
-
-		readSensorsKalman(&bmp280,&mpu1);
-
-#else
-		readSensorsMPU6050(&mpu1);
-		readSensorsBMP280(&bmp280); //using built in filtering
-		calculateVario50ms();
-		checkAdaptiveVario(sensors.VarioMs, activity.flightstatus);
-#endif
 
 
 		if ((timetosend >= 4)

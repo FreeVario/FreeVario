@@ -58,7 +58,8 @@ void StartDisplayTask(void const * argument)
 		         if(  ulNotifiedValue == 1 )
 		         {
 		        	 displayMessageShutdown(&paint,&epd,frame_buffer);
-		        	 osDelay(4000); //just sleep till shutdown
+		        	 displayMessageShutdown(&paint,&epd,frame_buffer); //also the second buffer
+		        	 osDelay(8000); //just sleep till shutdown
 		         }
 
 		         if(  ulNotifiedValue == 2 )
@@ -174,28 +175,44 @@ void displayDrawmainScreen (Paint *paint, EPD *epd, unsigned char * frame_buffer
 void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
 	char BmpAltitude[9];
 	char BmpVario[9];
-	char BmpTemp[6];
-	char BmpHumid[6];
-	char BmpBat[6];
-	char BmpGforce[6];
-	char GPSSpeed[9];
+    char BmpTemp[6];
+    char BmpHumid[6];
+    char BmpBat[6];
+    char BmpGforce[6];
+    char GPSSpeed[9];
 
-	    Paint_SetWidth(paint, 112);
-	    Paint_SetHeight(paint, 41);
+    Paint_SetWidth(paint, 112);
+    Paint_SetHeight(paint, 41);
+
+    /* --------------------Vario-----------------------------*/
 
 
-    /* -------------------------------------------------*/
-#ifdef USEKALMANFILTER
-	intTocharFloat(BmpVario, sensors.zVariomms,1000,100,1);
-#else
-	intTocharFloat(BmpVario, sensors.VarioMs,1000,100,1);
-#endif
+    Paint_SetWidth(paint, 26);
+    Paint_SetHeight(paint, 14);
+    Paint_Clear(paint, UNCOLORED);
 
+    if (activity.useKalman) {
+
+        Paint_DrawStringAt(paint, 0, 0, "K", &Font10, COLORED);
+
+    } else {
+
+        Paint_DrawStringAt(paint, 0, 0, " ", &Font10, COLORED);
+    }
+
+    EPD_SetFrameMemory(epd, frame_buffer, epd->width - 65, 4,
+    Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+    Paint_SetWidth(paint, 112);
+    Paint_SetHeight(paint, 41);
+
+    intTocharFloat(BmpVario, sensors.VarioMs, 1000, 100, 1);
     Paint_Clear(paint, UNCOLORED);
     Paint_DrawStringAt(paint, 0, 4, BmpVario, &Font32, COLORED);
-    EPD_SetFrameMemory(epd, frame_buffer, 8, 20, Paint_GetWidth(paint), Paint_GetHeight(paint));
+    EPD_SetFrameMemory(epd, frame_buffer, 8, 20, Paint_GetWidth(paint),
+     Paint_GetHeight(paint));
 
-    /* -------------------------------------------------*/
+    /* ---------------------Alt----------------------------*/
 
     Paint_SetWidth(paint, 26);
     Paint_SetHeight(paint, 14);
@@ -221,7 +238,7 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
     Paint_DrawStringAt(paint, 0, 4, BmpAltitude, &Font28, COLORED);
     EPD_SetFrameMemory(epd, frame_buffer, 8, 98, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
-    /* -------------------------------------------------*/
+    /* --------------------Speed-----------------------------*/
 
     intTocharFloat(GPSSpeed, hgps.speed*1.85,1,10,1);
     Paint_Clear(paint, UNCOLORED);
@@ -229,7 +246,7 @@ void displayTaskUpdate(Paint *paint,EPD *epd, unsigned char * frame_buffer) {
     EPD_SetFrameMemory(epd, frame_buffer, 8, 173, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
 
-    /* -------------------------------------------------*/
+    /* --------------------Status-----------------------------*/
     //status displays
     Paint_SetWidth(paint, 45);
    	Paint_SetHeight(paint, 20);
@@ -319,14 +336,17 @@ void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer)
     Paint_Clear(paint, UNCOLORED);
 
 
+
 	      EPD_ClearFrameMemory(epd, 0xFF);
 		  EPD_DisplayFrame(epd);
 		  EPD_ClearFrameMemory(epd, 0xFF);
 		  EPD_DisplayFrame(epd);
 
-	  if (EPD_Init(epd, lut_full_update) != 0) {
-	    return;
-	  }
+
+		    if (EPD_Init(epd, lut_full_update) != 0) {
+		      return;
+		    }
+
 
 	  	  uint8_t sp = 10;
           Paint_Clear(paint, UNCOLORED);
@@ -379,9 +399,8 @@ void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer)
 
 	      Paint_Clear(paint, UNCOLORED);
 	      Paint_DrawStringAt(paint, 2, 0, "Inversion", &Font12, COLORED);
-	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
 
-	      EPD_DisplayFrame(epd);
+	      EPD_SetFrameMemory(epd, frame_buffer,4, sp+=18, Paint_GetWidth(paint), Paint_GetHeight(paint));
 	      EPD_DisplayFrame(epd);
 
 

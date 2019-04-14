@@ -62,11 +62,9 @@ void StartAudioTask(void const * argument)
 		if (running) {
 
 			if (activity.flightstatus == FLS_FLYING && !activity.muted) {
-#ifdef USEKALMANFILTER
-			    makeVarioAudio(&audiorun, sensors.zVariomms);
-#else
+
 				makeVarioAudio(&audiorun, sensors.VarioMs); //flying
-#endif
+
 				audioon = 1;
 
 			}

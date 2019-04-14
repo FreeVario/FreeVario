@@ -141,10 +141,10 @@ void getDefaultConfig() {
   conf.advRelaxTime = 20000;
 
   // lowest level for conf.variosmooth
-  conf.advMinSmooth = 8;
+  conf.advMinSmooth = 10;
 
   // highest level for conf.variosmooth
-  conf.advMaxSmooth = 35;
+  conf.advMaxSmooth = 20;
 
   //save the last logbook number
   conf.lastLogNumber = 0;

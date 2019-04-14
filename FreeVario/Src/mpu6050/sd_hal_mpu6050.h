@@ -50,6 +50,12 @@ extern "C" {
  * @}
  */
 
+#define FCFG_3                  (1088)
+#define FCFG_2                  (1066)
+#define FCFG_1                  (1062)
+#define FCFG_7                  (1073)
+
+
 /**
  * @}
  */
@@ -248,7 +254,8 @@ SD_MPU6050_Result SD_MPU6050_ReadAll(I2C_HandleTypeDef* I2Cx,SD_MPU6050* DataStr
 /**
  * @}
  */
-
+SD_MPU6050_Result SD_MPU6050_SetOrientation(I2C_HandleTypeDef* I2Cx ,SD_MPU6050* DataStruct, unsigned short orient);
+SD_MPU6050_Result mpu_write_mem(I2C_HandleTypeDef* I2Cx ,SD_MPU6050* DataStruct, unsigned short mem_addr, unsigned char *data);
 /**
  * @}
  */

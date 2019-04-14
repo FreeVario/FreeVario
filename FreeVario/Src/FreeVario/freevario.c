@@ -245,7 +245,7 @@ void freeVario_RTOS_Init()  {
 
 #ifdef FV_SENSORS
 	  /* definition and creation of sensorsTask */
-	  osThreadDef(sensorsTask, StartSensorsTask, osPriorityNormal, 0, 1024);
+	  osThreadDef(sensorsTask, StartSensorsTask, osPriorityNormal, 0, 2048);
 	  sensorsTaskHandle = osThreadCreate(osThread(sensorsTask), NULL);
 #endif
 
@@ -300,6 +300,7 @@ void StartDefaultTask(void const * argument)
 
   activity.muted = 0;
   activity.flightstatus = FLS_GROUND;
+  activity.useKalman = 0;
 
   memset(&activity, 0, sizeof(activity));
 
@@ -334,7 +335,7 @@ void StartDefaultTask(void const * argument)
 				if (SDcardMounted) {
 					f_mount(0, "0:", 1); //unmount SDCARD
 				}
-				osDelay(4000);
+				osDelay(5000);
 				while(HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port,PWRBUTTON_Pin) == GPIO_PIN_SET) { //wait for button to be released
 				}
 
@@ -395,8 +396,9 @@ void StartDefaultTask(void const * argument)
 
 		if (UserPrevButton) {
 			osDelay(20);
-			if (((xTaskGetTickCount() - CancelButtonTimePressed) > 300) & (HAL_GPIO_ReadPin(BTN_PREV_GPIO_Port,BTN_PREV_Pin) == GPIO_PIN_SET)) {
+			if (((xTaskGetTickCount() - PrevButtonTimePressed) > 2000) & (HAL_GPIO_ReadPin(BTN_PREV_GPIO_Port,BTN_PREV_Pin) == GPIO_PIN_SET)) {
 				UserPrevButton = 0;
+				activity.useKalman = (activity.useKalman == 0) ? 1 : 0;
 			}
 
 			if (HAL_GPIO_ReadPin(BTN_PREV_GPIO_Port,BTN_PREV_Pin) == GPIO_PIN_RESET) {

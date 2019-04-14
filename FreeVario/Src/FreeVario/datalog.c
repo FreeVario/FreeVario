@@ -34,7 +34,7 @@ void writeFlightLogSummaryFile(){
 	char  filename[32];
 
 
-	sprintf(filename,"20%02u-%02u-%u-%02u%02u-Log-%06ld.log",
+	sprintf(filename,"%02u-%02u-%u-%02u%02u-Log-%06ld.log",
 	        activity.takeoffYear,
 	        activity.takeoffMonth,
 	        activity.takeoffDate,
@@ -97,7 +97,7 @@ int openDataLogFile(FIL* logFile) {
 	char filename[32];
 	uint32_t byteswritten=0;
 
-	sprintf(filename,"20%02u-%02u-%u-%02u%02u-Log-%06ld.csv",
+	sprintf(filename,"%02u-%02u-%u-%02u%02u-Log-%06ld.csv",
             activity.takeoffYear,
             activity.takeoffMonth,
             activity.takeoffDate,
@@ -112,7 +112,7 @@ int openDataLogFile(FIL* logFile) {
 	}
 
 	uint8_t header[] = "Date,GPS Fix, GPS Valid,Latitude,Logitude, GPS Altitude,Coarse,Speed,Variation,Sats in use, Baro Altitude, Vario,"
-			"Accel X,Accel Y, Accel Z, Gyro X, Gyro Y, Gyro Z, G-Force ,Temperature, Humidity, Pressure, Pressure Raw, Baro GNSS Valid, Baro GNSS dif \r\n";
+			"Accel X,Accel Y, Accel Z, Gyro X, Gyro Y, Gyro Z, G-Force ,Temperature, Humidity, Pressure, Pressure Raw, Baro GNSS Valid, Baro GNSS dif, Vario Smooth, Kelman \r\n";
 	f_write(logFile, header, strlen(header),(void *) &byteswritten);
 		f_sync(logFile);
 	return 1;
@@ -131,7 +131,7 @@ void writeDataLogFile(FIL *logFile) {
 //		return;
 //	}
 
-    sprintf(mtext,"%u-%02u-%02u %02u:%02u:%02u,%u,%u,%ld,%ld,%ld,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%u,%d\r\n",
+    sprintf(mtext,"%u-%02u-%02u %02u:%02u:%02u,%u,%u,%ld,%ld,%ld,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%u,%ld,%ld,%d\r\n",
 			hgps.date,
 			hgps.month,
 			hgps.year,
@@ -161,7 +161,9 @@ void writeDataLogFile(FIL *logFile) {
 			sensors.pressure,
 			sensors.pressureraw,
 			activity.barognssavalid,
-			activity.barognssdeveation
+			activity.barognssdeveation,
+			(int32_t)conf.variosmooth,
+			activity.useKalman
 			);
 
 	f_write(logFile, mtext, strlen(mtext),(void *) &byteswritten);

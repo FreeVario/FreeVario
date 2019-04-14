@@ -386,3 +386,89 @@ SD_MPU6050_Result SD_MPU6050_ReadInterrupts(I2C_HandleTypeDef* I2Cx,SD_MPU6050* 
 	/* Return OK */
 	return SD_MPU6050_Result_Ok;
 }
+
+SD_MPU6050_Result SD_MPU6050_SetOrientation(I2C_HandleTypeDef* I2Cx ,SD_MPU6050* DataStruct, unsigned short orient)
+{
+
+    I2C_HandleTypeDef* Handle = I2Cx;
+    uint8_t address = DataStruct->Address;
+
+    unsigned char gyro_regs[3], accel_regs[3];
+    const unsigned char gyro_axes[3] = {0x4C, 0xCD, 0x6C};
+    const unsigned char accel_axes[3] = {0x0C, 0xC9, 0x2C};
+    const unsigned char gyro_sign[3] = {0x36, 0x56, 0x76};
+    const unsigned char accel_sign[3] = {0x26, 0x46, 0x66};
+
+    gyro_regs[0] = gyro_axes[orient & 3];
+    gyro_regs[1] = gyro_axes[(orient >> 3) & 3];
+    gyro_regs[2] = gyro_axes[(orient >> 6) & 3];
+    accel_regs[0] = accel_axes[orient & 3];
+    accel_regs[1] = accel_axes[(orient >> 3) & 3];
+    accel_regs[2] = accel_axes[(orient >> 6) & 3];
+
+    /* Chip-to-body, axes only. */
+    if (mpu_write_mem(I2Cx,DataStruct,FCFG_1, gyro_regs))
+        return -1;
+    if (mpu_write_mem(I2Cx,DataStruct,FCFG_2, accel_regs))
+        return -1;
+
+    memcpy(gyro_regs, gyro_sign, 3);
+    memcpy(accel_regs, accel_sign, 3);
+    if (orient & 4) {
+        gyro_regs[0] |= 1;
+        accel_regs[0] |= 1;
+    }
+    if (orient & 0x20) {
+        gyro_regs[1] |= 1;
+        accel_regs[1] |= 1;
+    }
+    if (orient & 0x100) {
+        gyro_regs[2] |= 1;
+        accel_regs[2] |= 1;
+    }
+
+    /* Chip-to-body, sign only. */
+    if (mpu_write_mem(I2Cx,DataStruct, FCFG_3, gyro_regs))
+        return -1;
+    if (mpu_write_mem(I2Cx,DataStruct, FCFG_7, accel_regs))
+        return -1;
+
+
+
+
+    return SD_MPU6050_Result_Ok;
+}
+
+
+//only to write to memory reg
+SD_MPU6050_Result mpu_write_mem(I2C_HandleTypeDef* I2Cx ,SD_MPU6050* DataStruct, unsigned short mem_addr,  unsigned char *data)
+{
+
+
+
+       I2C_HandleTypeDef* Handle = I2Cx;
+      uint8_t address = DataStruct->Address;
+
+
+        unsigned char tmp[3];
+        tmp[0] = 0x6D;
+        tmp[1] = (unsigned char)(mem_addr >> 8);
+        tmp[2] = (unsigned char)(mem_addr & 0xFF);
+
+
+        while(HAL_I2C_Master_Transmit(Handle, (uint16_t)address, tmp, 3, 1000) != HAL_OK);
+
+        unsigned char d[4];
+        d[0] = 0x6F;
+        d[1] = data[0];
+        d[2] = data[0];
+        d[3] = data[2];
+
+        while(HAL_I2C_Master_Transmit(Handle, (uint16_t)address,  data, 4, 1000) != HAL_OK);
+
+
+        return SD_MPU6050_Result_Ok;
+}
+
+
+

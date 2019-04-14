@@ -13,12 +13,34 @@
 #include "kalman.h"
 #include "MadgwickAHRS.h"
 
-extern I2C_HandleTypeDef hi2c1;
+
+extern I2C_HandleTypeDef FV_I2C;
 extern SensorData sensors;
 extern ADC_HandleTypeDef FV_HALADC;
 
+#define MPU6050_ACCE_SENS_2         ((float) 16384)
+#define MPU6050_ACCE_SENS_4         ((float) 8192)
+#define MPU6050_ACCE_SENS_8         ((float) 4096)
+#define MPU6050_ACCE_SENS_16        ((float) 2048)
 
 
+#define QUAT_W 0
+#define QUAT_X 1
+#define QUAT_Y 2
+#define QUAT_Z 3
+
+#define VEC_X 0
+#define VEC_Y 1
+#define VEC_Z 2
+
+
+
+char _orientation[9] = { 0, -1, 0,
+                         1, 0, 0,
+                         0, 0, -1 };
+
+static uint8_t vTriggerd;
+static uint32_t vtime=0;
 
 void setupVbatSensor() {
 	HAL_ADC_Start(&FV_HALADC);
@@ -51,7 +73,7 @@ void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280) {
 	bmp280->i2c = &FV_I2C;
 
 	bmp280->params.mode = BMP280_MODE_NORMAL;
-	bmp280->params.filter = BMP280_FILTER_16;
+	bmp280->params.filter = BMP280_FILTER_2;
 	bmp280->params.oversampling_pressure = BMP280_ULTRA_HIGH_RES;
 	bmp280->params.oversampling_temperature = BMP280_STANDARD;
 	bmp280->params.oversampling_humidity = BMP280_STANDARD;
@@ -66,90 +88,73 @@ void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280) {
 }
 
 
-
 void setupReadSensorsMPU6050(SD_MPU6050 *mpu1) {
 	 SD_MPU6050_Init(&FV_I2C,mpu1,FV_ACCL_ADR,SD_MPU6050_Accelerometer_4G,SD_MPU6050_Gyroscope_250s );
+
+
+	 SD_MPU6050_SetOrientation(&FV_I2C,mpu1,Matrix2Scalar(_orientation));
 }
 
 
-
-
-void setupKalmanSensors(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1){
+void setupKalman(){
 
     KalmanFilter_Configure(Z_VARIANCE, ZACCEL_VARIANCE, ZACCELBIAS_VARIANCE, 0,0.0f,0.0f);
 
 }
+
+
 //not yet used, needs work
-void readSensorsKalman(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1){
-
-
-    uint32_t pressure;
-    int16_t temperature, humidity;
-    SD_MPU6050_ReadAll(&FV_I2C,mpu1);
-    float fax, fay,faz;
-    int8_t mx,my,mz;
-
+void calcSensorsKalman(BMP280_HandleTypedef *bmp280, SD_MPU6050 *mpu1){
     float zTrack, vTrack;
 
-    while (!bmp280_read_int(bmp280, &temperature, &pressure, &humidity)) {
 
-        }
+    sensors.accel_x = mpu1->Accelerometer_X*100/MPU6050_ACCE_SENS_4;
+    sensors.accel_y = mpu1->Accelerometer_Y*100/MPU6050_ACCE_SENS_4;
+    sensors.accel_z = ( mpu1->Accelerometer_Z*100/MPU6050_ACCE_SENS_4) - 98; //upside down
 
-    sensors.humidity = humidity;
-    sensors.temperature = temperature;
-    sensors.pressureraw = pressure;
-    sensors.pressure = pressure;
+    sensors.gyro_x = (ACCLSMOOTH * sensors.gyro_x +  mpu1->Gyroscope_X) / (ACCLSMOOTH + 1);
+    sensors.gyro_y = (ACCLSMOOTH * sensors.gyro_y +  mpu1->Gyroscope_Y) / (ACCLSMOOTH + 1);
+    sensors.gyro_z = (ACCLSMOOTH * sensors.gyro_z +  mpu1->Gyroscope_Z) / (ACCLSMOOTH + 1);
 
+    MadgwickAHRSupdateIMU(sensors.gyro_x,sensors.gyro_y, sensors.gyro_z,sensors.accel_x,sensors.accel_y, sensors.accel_z);
 
-    calculateVario50ms();
+    float accelv = (9.8f*imu_GravityCompensatedAccel(sensors.accel_x,sensors.accel_y, sensors.accel_z));
 
-    fax=(mpu1->Accelerometer_X/4096); //cm/s
-    fay=(mpu1->Accelerometer_Y/4096);
-    faz=(-mpu1->Accelerometer_Z/4096); //sensor is upside down
+    sensors.gforce = accelv/100;
 
-    sensors.accel_x = (ACCLSMOOTH * sensors.accel_x +  fax*100) / (ACCLSMOOTH + 1);
-    sensors.accel_y = (ACCLSMOOTH * sensors.accel_y +  fay*100) / (ACCLSMOOTH + 1);
-    sensors.accel_z = (ACCLSMOOTH * sensors.accel_z +  faz*100) / (ACCLSMOOTH + 1);
-
-    my= (mpu1->Gyroscope_X * 180.0 / M_PI);
-    mx= (mpu1->Gyroscope_Y * 180.0 / M_PI);
-    mz= (mpu1->Gyroscope_Z * 180.0 / M_PI);
-
-
-    MadgwickAHRSupdateIMU(mx, my, mz, fax,fay, faz);
-
-    float accel = 98.0f*imu_GravityCompensatedAccel(fax,fay,faz);
-    //float accel = 0 ;
-
-    sensors.gforce = (sqrt(pow(sensors.accel_x, 2) + pow(sensors.accel_y, 2) + pow(sensors.accel_z, 2)));
-
-    KalmanFilter_Update((float)sensors.VarioMs/10, accel,(float) SENSORREADMS/1000 , &zTrack, &vTrack); //time based on 50ms
-    //KalmanFilter_Update((float)0, accel,(float) SENSORREADMS/1000 , &zTrack, &vTrack);
-    sensors.zVariomms = vTrack * 10; //from cm/s to mm/s
-
+    if (activity.useKalman) {
+        KalmanFilter_Update((float) sensors.VarioMsRaw/10, accelv / 10, (float) SENSORREADMS / 1000,
+                &zTrack, &vTrack); // values must be cm/s
+        sensors.VarioMs = vTrack * 10; //from cm/s to mm/s
+    } else {
+        sensors.VarioMs = sensors.VarioMsRaw;
+    }
 
 
 }
 
-void readSensorsBMP280(BMP280_HandleTypedef *bmp280){
+void readSensorsBMP280(BMP280_HandleTypedef *bmp280) {
 
-	uint32_t pressure;
-	int16_t temperature, humidity;
+    uint32_t pressure;
+    int16_t temperature, humidity;
 
-	while (!bmp280_read_int(bmp280, &temperature, &pressure, &humidity)) {
+    while (!bmp280_read_int(bmp280, &temperature, &pressure, &humidity)) {
 
-		}
+    }
 
-	sensors.humidity = humidity;
-	sensors.temperature = temperature;
-	sensors.pressureraw = pressure;
+    sensors.humidity = humidity;
+    sensors.temperature = temperature;
+    sensors.pressureraw = pressure;
 
-	//low pass filter
-#ifdef VARIOLOWPASSFILTER
-	sensors.pressure = (conf.variosmooth * sensors.pressure + pressure) / (conf.variosmooth + 1);
-#else
-	sensors.pressure = pressure;
-#endif
+
+    if (activity.useKalman) {
+        sensors.pressure = pressure;
+    } else {
+        sensors.pressure = (conf.variosmooth * sensors.pressure + pressure)
+                / (conf.variosmooth + 1);
+        checkAdaptiveVario(sensors.VarioMs, activity.flightstatus);
+    }
+
 }
 
 void readSensorsMPU6050(SD_MPU6050 *mpu1){
@@ -157,16 +162,6 @@ void readSensorsMPU6050(SD_MPU6050 *mpu1){
 	SD_MPU6050_ReadAll(&FV_I2C,mpu1);
 
 
-	sensors.accel_x = (ACCLSMOOTH * sensors.accel_x +  mpu1->Accelerometer_X*100/8192) / (ACCLSMOOTH + 1);
-	sensors.accel_y = (ACCLSMOOTH * sensors.accel_y +  mpu1->Accelerometer_Y*100/8192) / (ACCLSMOOTH + 1);
-	sensors.accel_z = -(ACCLSMOOTH * sensors.accel_z +  mpu1->Accelerometer_Z*100/8192) / (ACCLSMOOTH + 1);
-
-	sensors.gforce = (sqrt(pow(sensors.accel_x, 2) + pow(sensors.accel_y, 2) + pow(sensors.accel_z, 2)));
-
-
-	sensors.gyro_x = (ACCLSMOOTH * sensors.gyro_x +  mpu1->Gyroscope_X) / (ACCLSMOOTH + 1);
-	sensors.gyro_y = (ACCLSMOOTH * sensors.gyro_y +  mpu1->Gyroscope_Y) / (ACCLSMOOTH + 1);
-	sensors.gyro_z = (ACCLSMOOTH * sensors.gyro_z +  mpu1->Gyroscope_Z) / (ACCLSMOOTH + 1);
 
 
 }
@@ -193,13 +188,50 @@ void calculateVario50ms() {
 
     if (SO_qisFull(&sensors.QAltitudeMeters)) {
     	//called per 50ms, so value *2
-       sensors.VarioMs = (int32_t)(( SO_rear(&sensors.QAltitudeMeters) -  SO_front(&sensors.QAltitudeMeters)) * 1000) * 2;
+       sensors.VarioMsRaw = (int32_t)(( SO_rear(&sensors.QAltitudeMeters) -  SO_front(&sensors.QAltitudeMeters)) * 1000) * 2;
 
     }else{
-    	sensors.VarioMs = 0;
+    	sensors.VarioMsRaw = 0;
     }
 
 }
+
+unsigned short Row2Scale(const char *row)
+{
+    unsigned short b;
+
+    if (row[0] > 0)
+        b = 0;
+    else if (row[0] < 0)
+        b = 4;
+    else if (row[1] > 0)
+        b = 1;
+    else if (row[1] < 0)
+        b = 5;
+    else if (row[2] > 0)
+        b = 2;
+    else if (row[2] < 0)
+        b = 6;
+    else
+        b = 7;
+
+    return b;
+}
+
+unsigned short Matrix2Scalar(const char *mtx)
+{
+    unsigned short scalar;
+
+    scalar = Row2Scale(mtx);
+    scalar |= Row2Scale(mtx + 3) << 3;
+    scalar |= Row2Scale(mtx + 6) << 6;
+
+    return scalar;
+}
+
+
+
+
 
 
 void checkAdaptiveVario(int32_t vario, int8_t takeoff) { //sensors.VarioMs as parameter
@@ -207,7 +239,7 @@ void checkAdaptiveVario(int32_t vario, int8_t takeoff) { //sensors.VarioMs as pa
 
   int16_t triggerLevel = (conf.advTriggerLevel);
 
-  if(takeoff) { //compensate for glider sink
+  if(takeoff==FLS_FLYING) { //compensate for glider sink
     vario += -(conf.gliderSinkRate);
   }
 

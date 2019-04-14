@@ -33,8 +33,8 @@
 	int16_t gyro_y;
 	int16_t gyro_z;
 	int32_t AltitudeMeters; //x1000
-	int32_t VarioMs; //x1000
-	int32_t zVariomms; //x1000
+	int32_t VarioMs; //x1000 Raw vario value from Baro
+	int32_t VarioMsRaw; //x1000 Raw vario value from Baro
 	Queue_t  QAltitudeMeters;
 	uint8_t barotakeoff;
 	uint16_t vbat; //bat voltage x10
@@ -72,6 +72,7 @@ typedef struct {
     uint8_t muted;
     int32_t barognssdeveation;  //difference between baro and gnss (baro - gnss)
     uint8_t barognssavalid;    //flag if the adjusted value is usable
+    uint8_t useKalman; //use kalman with accelerometer insead of a lowpass filter
 }ActivityData; //owner: freevario.c
 
 extern ActivityData activity;
@@ -79,6 +80,7 @@ extern ActivityData activity;
 typedef struct {
 	uint8_t isLogging;
 }DataLog;
+
 extern DataLog datalog;
 
 

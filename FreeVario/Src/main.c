@@ -132,7 +132,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
-
+#ifndef  DEBUG_MODE
   /*Disable RTC tamper*/
 
   HAL_RTCEx_DeactivateTamper(&hrtc, RTC_TAMPER_1);
@@ -153,7 +153,7 @@ int main(void)
         HAL_Delay(PWRBUTTONDELAY);
         if (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
                 == GPIO_PIN_RESET) {
-            StandbyMode();
+           // StandbyMode();
         }
 
         /*Clear the proper shutdown flag */
@@ -163,7 +163,7 @@ int main(void)
         HAL_RTCEx_BKUPWrite(&hrtc, 0, 2); //unexpected restart
     }
 
-
+#endif
 
 #ifndef  DEBUG_MODE
   MX_WWDG_Init();

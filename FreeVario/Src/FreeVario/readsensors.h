@@ -27,16 +27,24 @@
 
  void setupVbatSensor();
  void readVbatSensor();
+ void readInvMpuSensor();
 void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280);
 void setupReadSensorsMPU6050(SD_MPU6050 *mpu1);
-void setupKalmanSensors(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1);
-void readSensorsKalman(BMP280_HandleTypedef *bmp280,SD_MPU6050 *mpu1);
+void setupKalman();
+void calcSensorsKalman(BMP280_HandleTypedef *bmp280, SD_MPU6050 *mpu1);
 void readSensorsBMP280(BMP280_HandleTypedef *bmp280);
 void readSensorsMPU6050(SD_MPU6050 *mpu1);
 float getAltitudeFeet();
 float getAltitudeMeters();
 void calculateVario50ms();
+
+static void DataReadyCallback();
+unsigned short Row2Scale(const char *row);
+unsigned short Matrix2Scalar(const char *mtx);
+void NormalizeQuaternion(float *quat);
+
 void checkAdaptiveVario(int32_t vario, int8_t takeoff);
+
 
 
 #endif /* READSENSORS_H_ */
