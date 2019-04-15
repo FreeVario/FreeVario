@@ -17,6 +17,9 @@ extern SensorData sensors;
 extern ActivityData activity;
 extern WWDG_HandleTypeDef hwwdg;
 
+    TickType_t times;
+    const TickType_t xDelay = 10; //do not change, need to be precise for the wwdt
+
 void StartAudioTask(void const * argument) {
 
     uint8_t audioon = 0;
@@ -35,6 +38,7 @@ void StartAudioTask(void const * argument) {
     setupAudio(&audiorun);
     /* Infinite loop */
     for (;;) {
+        times = xTaskGetTickCount();
 
         if (xTaskGetTickCount() > STARTDELAY) {
             running = 1;
@@ -70,8 +74,11 @@ void StartAudioTask(void const * argument) {
             }
         }
 #endif
-        osDelay(10); //do not change, need to be precise for the wdt
+
+        vTaskDelayUntil(&times, xDelay);
         HAL_WWDG_Refresh(&hwwdg);
+
+
     }
 
 }

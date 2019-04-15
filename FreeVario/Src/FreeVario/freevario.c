@@ -272,6 +272,9 @@ void StartDefaultTask(void const * argument) {
     TickType_t landedcheck = 0;
     TickType_t maintenanceloop = 0; //loop every 1 minute
 
+    TickType_t times;
+    const TickType_t xDelay = 100;
+
     activity.muted = 0;
     activity.flightstatus = FLS_GROUND;
     activity.useKalman = 0;
@@ -295,7 +298,7 @@ void StartDefaultTask(void const * argument) {
 
     /* Infinite loop */
     for (;;) {
-
+        times = xTaskGetTickCount();
         maintenanceloop++;
 
         if (UserPowerButton) {
@@ -483,7 +486,7 @@ void StartDefaultTask(void const * argument) {
 
         }
 
-        osDelay(100);
+        vTaskDelayUntil(&times, xDelay);
     }
 
 }
