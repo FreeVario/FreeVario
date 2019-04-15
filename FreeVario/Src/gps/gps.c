@@ -418,7 +418,7 @@ gps_distance_bearing(gps_float_t las, gps_float_t los, gps_float_t lae, gps_floa
          * *d = RADIUS * 2 * atan(a / (1 - a)) * 1000 (for meters)
          */
         a = (gps_float_t)(sin(df * 0.5f) * sin(df * 0.5f) + sin(dfi * 0.5f) * sin(dfi * 0.5f) * cos(las) * cos(lae));
-        *d = (gps_float_t)(EARTH_RADIUS * 2.0f * atan2(sqrt(a), sqrt(1.0f - a)) * 1000.0f);
+        *d = (gps_float_t)(EARTH_RADIUS * 2.0f * atan2(sqrtf(a), sqrtf(1.0f - a)) * 1000.0f);
     }
 
     /*

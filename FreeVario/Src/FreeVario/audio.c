@@ -25,6 +25,7 @@ void setupAudio(audio_t * audio) {
 	 toneconstant(audio, 1000);
 	 osDelay(10);
 	 noTone();
+	 audio->transition =0;
 }
 
 #define PWMTMRMULTIPLIER 10000000
@@ -38,7 +39,7 @@ void noTone() {
 
 }
 
-#define TOPPULSE  1000
+#define TOPPULSE  1200
 
  void tone(audio_t * audio, float freq, int period) {
 
@@ -70,7 +71,12 @@ void toneconstant(audio_t * audio, float freq) {
 	return xTaskGetTickCount();
 }
 
-
+void switchTone(audio_t * audio){
+    audio->muted=0;
+    audio->pause=0;
+    audio->toneOn=0;
+    audio->notonetimer = 0;
+}
 
  void noToneTimer(audio_t * audio) {
    if(millis() >= audio->notonetimer && audio->notonetimer > 0) {
@@ -194,7 +200,10 @@ void makeVarioAudio(audio_t * audio, float vario) {
   audio->variof = (AUDIOSMOOTH * audio->variof + variofr )/(AUDIOSMOOTH + 1);
 
     if (vario <= BUZZERCLIMBING && vario >= BUZZERZEROCLIMB) { // prethermal audio bip bip bip
-
+        if ( audio->transition !=AUDIOZEROCLIMB) {
+            switchTone(audio);
+        }
+        audio->transition =AUDIOZEROCLIMB;
       if (!audio->muted) {
          playToneInterval(audio, audio->variof, 50, 400);
       }
@@ -202,6 +211,10 @@ void makeVarioAudio(audio_t * audio, float vario) {
     }
 
    if (vario <= (double)(conf.sinkAlarmLevel)/1000 ) { //sink alarm
+       if ( audio->transition !=AUDIOSINKALARM) {
+           switchTone(audio);
+       }
+       audio->transition =AUDIOSINKALARM;
       if (!audio->muted) {
          playTwoToneInterval(audio,1400, 1800, 40, 40);
       }
@@ -210,6 +223,10 @@ void makeVarioAudio(audio_t * audio, float vario) {
 
 #if defined(BUZZSINKALERT) //sink alert beh beh beh (-3)
     if (vario <=  BUZZSINKALERT && vario > (double)(conf.sinkAlarmLevel)/1000 ) {
+        if ( audio->transition !=AUDIOSINKALERT) {
+            switchTone(audio);
+        }
+        audio->transition =AUDIOSINKALERT;
        playTonePause(audio, 300, fabs(vario), BUZZSINKALERTPAUSE);
     }
 
@@ -217,6 +234,10 @@ void makeVarioAudio(audio_t * audio, float vario) {
 
 
   if (vario > BUZZERCLIMBING) {
+      if ( audio->transition !=AUDIOCLIMBING) {
+          switchTone(audio);
+      }
+      audio->transition =AUDIOCLIMBING;
 	  pulse = TOPPULSE / (vario * 12) + 150;
 
     if (!audio->muted) {

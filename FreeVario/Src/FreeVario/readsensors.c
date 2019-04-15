@@ -109,21 +109,23 @@ void calcSensorsKalman(BMP280_HandleTypedef *bmp280, SD_MPU6050 *mpu1){
 
 
     sensors.accel_x = mpu1->Accelerometer_X*100/MPU6050_ACCE_SENS_4;
-    sensors.accel_y = mpu1->Accelerometer_Y*100/MPU6050_ACCE_SENS_4;
+    sensors.accel_y = 0;//mpu1->Accelerometer_Y*100/MPU6050_ACCE_SENS_4;
     sensors.accel_z = ( mpu1->Accelerometer_Z*100/MPU6050_ACCE_SENS_4) - 98; //upside down
 
     sensors.gyro_x = (ACCLSMOOTH * sensors.gyro_x +  mpu1->Gyroscope_X) / (ACCLSMOOTH + 1);
     sensors.gyro_y = (ACCLSMOOTH * sensors.gyro_y +  mpu1->Gyroscope_Y) / (ACCLSMOOTH + 1);
     sensors.gyro_z = (ACCLSMOOTH * sensors.gyro_z +  mpu1->Gyroscope_Z) / (ACCLSMOOTH + 1);
 
-    MadgwickAHRSupdateIMU(sensors.gyro_x,sensors.gyro_y, sensors.gyro_z,sensors.accel_x,sensors.accel_y, sensors.accel_z);
+   // MadgwickAHRSupdateIMU(sensors.gyro_x,sensors.gyro_y, sensors.gyro_z,sensors.accel_x,sensors.accel_y, sensors.accel_z);
 
-    float accelv = (9.8f*imu_GravityCompensatedAccel(sensors.accel_x,sensors.accel_y, sensors.accel_z));
+    //float accelv = (9.8f*imu_GravityCompensatedAccel(sensors.accel_x,sensors.accel_y, sensors.accel_z));
+
+    float accelv = 9.8f * sqrtf(powf(sensors.accel_x, 2) + powf(sensors.accel_z, 2)); //just the z and x axes
 
     sensors.gforce = accelv/100;
 
     if (activity.useKalman) {
-        KalmanFilter_Update((float) sensors.VarioMsRaw/10, accelv / 10, (float) SENSORREADMS / 1000,
+        KalmanFilter_Update((float) sensors.VarioMsRaw/10, accelv / 100, (float) SENSORREADMS / 1000,
                 &zTrack, &vTrack); // values must be cm/s
         sensors.VarioMs = vTrack * 10; //from cm/s to mm/s
     } else {
@@ -174,7 +176,7 @@ float getAltitudeFeet() { //x1000
 
 float getAltitudeMeters() {
 
-	return 44330.0f * (1.0f - pow(((float)sensors.pressure/100)  / (float)conf.qnePressure, 0.1902949f)); //because Pressure is in Pa x 100
+	return 44330.0f * (1.0f - powf(((float)sensors.pressure/100)  / (float)conf.qnePressure, 0.1902949f)); //because Pressure is in Pa x 100
 
 }
 
@@ -192,6 +194,7 @@ void calculateVario50ms() {
 
     }else{
     	sensors.VarioMsRaw = 0;
+    	sensors.VarioMs = 0;
     }
 
 }

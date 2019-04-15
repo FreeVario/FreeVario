@@ -48,7 +48,7 @@ void StartSensorsTask(void const * argument)
 
 	setupKalman();
 
-	osDelay(100);
+
 
 
 
@@ -89,6 +89,7 @@ void StartSensorsTask(void const * argument)
 			}
 
 		}
+
 
 		if (sensors.barotakeoff && activity.flightstatus > FLS_GROUND) {
 			sensors.barotakeoff = 0;

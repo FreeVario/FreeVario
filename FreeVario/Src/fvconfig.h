@@ -44,7 +44,6 @@
 #define SOARDETECTION 30000 // if climbrate is constant for set milliseconds at 0 m/s the buzzer is muted
 #define BUZZERCLIMBING 0.1 // vario level to start giving climbing signal
 #define AUDIOSMOOTH 10 //smooth out audio changes
-
 #define ADAPTIVEVARIO //Adapts the vario low pass filter
 
 #define SENSORREADMS    50  //ms sensors are read
@@ -60,13 +59,13 @@
  // Z_VARIANCE is the measured sensor altitude cm noise variance, with sensor at rest, normal sampling rate, and 1-2 seconds max samples
  // I personally use a somewhat smaller value than the measured variance as I favour a faster response to step inputs and am willing to
  // tolerate a bit of jitter with the unit at rest.
- #define Z_VARIANCE          300.0f
+ #define Z_VARIANCE          800.0f
 
  // The filter models acceleration as an external environmental disturbance to the system, ZACCEL_VARIANCE is the estimated
  // variance of the perturbations. For a paragliding application, this would be the expected acceleration variance due to thermal
  // activity, how sharp the thermal edges are, etc.  This is NOT the accelerometer sensor noise variance. Increase this value and the
  // filter will respond faster to acceleration inputs.
- #define ZACCEL_VARIANCE     200.0f
+ #define ZACCEL_VARIANCE     100.0f
 
  // The accelerometer bias (offset between true acceleration and measured value) is not likely to change rapidly, so a low value
  // of ZACCELBIAS_VARIANCE will enforce that. But too low a value, and the filter will take longer on reset to settle to the estimated

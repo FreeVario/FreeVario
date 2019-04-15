@@ -484,7 +484,7 @@ void StartDefaultTask(void const * argument)
 		if (maintenanceloop > 600) { // = 1 minute
 			maintenanceloop = 0;
 
-			if (hgps.fix > 0 && hgps.is_valid && hgps.sats_in_use > 8) { //have accurate fix
+			if (hgps.fix > 0 && hgps.is_valid && hgps.sats_in_use > 6) { //have accurate fix
 			    activity.barognssdeveation = sensors.AltitudeMeters - (hgps.altitude *1000) ;
 			    activity.barognssavalid = 1;
 

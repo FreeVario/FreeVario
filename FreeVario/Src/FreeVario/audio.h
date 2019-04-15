@@ -20,6 +20,11 @@
 #include <globaldata.h>
 
 
+#define AUDIOSINKALARM 0
+#define AUDIOSINKALERT 1
+#define AUDIOZEROCLIMB 2
+#define AUDIOCLIMBING  3
+
 typedef struct{
 	int tm;
 	int rm;
@@ -31,6 +36,7 @@ typedef struct{
 	int notonetimer;
 	int multiplier;
 	float variof;
+	uint8_t transition;
 }audio_t;
 
 void setupAudio(audio_t * audio);
@@ -38,6 +44,7 @@ void makeVarioAudio(audio_t * audio,float vario);
 void tone(audio_t * audio, float freq, int period);
 void toneconstant(audio_t * audio, float freq);
 void noTone();
+void switchTone(audio_t * audio);
 int millis();
 void playTonePause(audio_t * audio,int freq, int nbeeps, int tpause);
 void playToneInterval(audio_t * audio, int freq, int period, int tinterval);
