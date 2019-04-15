@@ -37,7 +37,7 @@ typedef struct {
     int32_t VarioMsRaw; //x1000 Raw vario value from Baro
     Queue_t QAltitudeMeters;
     uint8_t barotakeoff;
-    uint16_t vbat; //bat voltage x10
+    uint32_t vbat; //bat voltage x10
     uint8_t pbat; //bat %charge
 } SensorData; //owner: sensortask.c
 

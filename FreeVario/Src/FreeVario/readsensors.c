@@ -37,7 +37,7 @@ static uint32_t vtime = 0;
 
 void setupVbatSensor() {
     HAL_ADC_Start(&FV_HALADC);
-    sensors.vbat = 35;
+    sensors.vbat = 30;
     sensors.pbat = 100;
 
 }
@@ -49,8 +49,8 @@ void readVbatSensor() {
         uint32_t cnv = HAL_ADC_GetValue(&FV_HALADC);
 
         /*TODO: in dire need of calibration, use your scope man*/
-        sensors.vbat = (sensors.vbat * 100 + (((cnv * 2 * 4800) / 0xfff) / 100))
-                / 101; //lowpassfilter
+        sensors.vbat = (sensors.vbat * 10 + (float)((cnv * 2 * 62) / 0xfff) )
+                / 11; //lowpassfilter
 
         //calculate %charge, sort of
         sensors.pbat = (uint8_t) ((37 - sensors.vbat) * 16.6);
