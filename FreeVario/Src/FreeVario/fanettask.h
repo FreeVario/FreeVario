@@ -8,14 +8,12 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #ifndef FREEVARIO_FANETTASK_H_
 #define FREEVARIO_FANETTASK_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
-
- void StartFanetTask(void const * argument);
+void StartFanetTask(void const * argument);
 
 #endif /* FREEVARIO_FANETTASK_H_ */

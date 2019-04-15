@@ -8,17 +8,16 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #ifndef FREEVARIO_H_
 #define FREEVARIO_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 #include "../fvconfig.h"
- void uart_Idle_Handler_Callback(UART_HandleTypeDef *UartHandle);
- void StandbyMode(void);
- void toggleDebugLED();
- void freeVario_RTOS_Init();
- void StartDefaultTask(void const * argument);
+void uart_Idle_Handler_Callback(UART_HandleTypeDef *UartHandle);
+void StandbyMode(void);
+void toggleDebugLED();
+void freeVario_RTOS_Init();
+void StartDefaultTask(void const * argument);
 
 #endif /* FREEVARIO_H_ */

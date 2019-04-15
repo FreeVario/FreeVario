@@ -8,17 +8,16 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #ifndef FREEVARIO_SENDATATASK_H_
 #define FREEVARIO_SENDATATASK_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
 #include "../fvconfig.h"
 
- void setupBTData();
- void StartSendDataTask(void const * argument);
+void setupBTData();
+void StartSendDataTask(void const * argument);
 
 #endif /* FREEVARIO_SENDATATASK_H_ */

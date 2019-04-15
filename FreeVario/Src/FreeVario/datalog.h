@@ -14,10 +14,9 @@
 #include "gps.h"
 #include <globaldata.h>
 
-
 void writeFlightLogSummaryFile();
 int openDataLogFile(FIL * logFile);
-void writeDataLogFile(FIL  * logFile);
-void closeDataLogFile(FIL  * logFile);
+void writeDataLogFile(FIL * logFile);
+void closeDataLogFile(FIL * logFile);
 //FRESULT set_timestamp(char * obj);
 #endif /* DATALOG_H_ */

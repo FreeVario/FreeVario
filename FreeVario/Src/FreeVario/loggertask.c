@@ -8,7 +8,6 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #include "loggertask.h"
 #include "datalog.h"
 
@@ -18,101 +17,98 @@ extern TaskHandle_t xLogDataNotify;
 extern uint8_t SDcardMounted;
 extern osMutexId sdCardMutexHandle;
 
-void StartLoggerTask(void const * argument)
-{
-  /* USER CODE BEGIN StartLoggerTask */
+void StartLoggerTask(void const * argument) {
+    /* USER CODE BEGIN StartLoggerTask */
 
-	TickType_t times;
-	const TickType_t xDelay = 1000;
-	FIL  dataLogFile;
-	uint32_t ulNotifiedValue;
-	BaseType_t xResult;
-	TickType_t xMaxBlockTime;
-	configASSERT(xLogDataNotify == NULL);
-	xLogDataNotify = xTaskGetCurrentTaskHandle();
-	datalog.isLogging=0;
-	TickType_t updateLogBooktime=0;
-	osDelay(4000); //wait for setup of environment
-	/* Infinite loop */
-	for (;;) {
+    TickType_t times;
+    const TickType_t xDelay = 1000;
+    FIL dataLogFile;
+    uint32_t ulNotifiedValue;
+    BaseType_t xResult;
+    TickType_t xMaxBlockTime;
+    configASSERT(xLogDataNotify == NULL);
+    xLogDataNotify = xTaskGetCurrentTaskHandle();
+    datalog.isLogging = 0;
+    TickType_t updateLogBooktime = 0;
+    osDelay(4000); //wait for setup of environment
+    /* Infinite loop */
+    for (;;) {
 
+        times = xTaskGetTickCount();
+        updateLogBooktime = xTaskGetTickCount();
 
-		times = xTaskGetTickCount();
-		updateLogBooktime = xTaskGetTickCount();
+        if (!SDcardMounted) { //can't continue without a SD card
+            xLogDataNotify = NULL;
+            vTaskSuspend( NULL);
+        }
 
-		if (!SDcardMounted) { //can't continue without a SD card
-			xLogDataNotify = NULL;
-			vTaskSuspend( NULL);
-		}
+        xMaxBlockTime = pdMS_TO_TICKS(500);
 
-		xMaxBlockTime = pdMS_TO_TICKS(500);
+        xResult = xTaskNotifyWait( pdFALSE, /* Don't clear bits on entry. */
+        pdTRUE, /* Clear all bits on exit. */
+        &ulNotifiedValue, /* Stores the notified value. */
+        xMaxBlockTime);
 
-		xResult = xTaskNotifyWait( pdFALSE, /* Don't clear bits on entry. */
-		pdTRUE, /* Clear all bits on exit. */
-		&ulNotifiedValue, /* Stores the notified value. */
-		xMaxBlockTime);
+        if (xResult == pdPASS) {
+            /* A notification was received.  See which bits were set. */
+            if (ulNotifiedValue == 1) { //started
 
-		if (xResult == pdPASS) {
-			/* A notification was received.  See which bits were set. */
-			if (ulNotifiedValue == 1) { //started
+                osDelay(200); //wait to stabilize data
+                if ( xSemaphoreTake(sdCardMutexHandle,
+                        (TickType_t ) 600) == pdTRUE) {
+                    writeFlightLogSummaryFile();
+                    osDelay(100);
+                    uint8_t devnotready = 1;
+                    uint8_t timeout = 0;
+                    //openDataLogFile(&dataLogFile);
+                    while (devnotready) {
 
-				osDelay(200); //wait to stabilize data
-				if ( xSemaphoreTake(sdCardMutexHandle,
-						(TickType_t ) 600) == pdTRUE) {
-					writeFlightLogSummaryFile();
-					osDelay(100);
-					uint8_t devnotready = 1;
-					uint8_t timeout=0;
-					//openDataLogFile(&dataLogFile);
-					while (devnotready) {
+                        timeout++;
+                        if (openDataLogFile(&dataLogFile)) {
+                            datalog.isLogging = 1;
+                            devnotready = 0;
+                        }
+                        osDelay(2000);
+                        if (timeout > 2)
+                            devnotready = 0;
+                    }
 
-						timeout++;
-						if(openDataLogFile(&dataLogFile)) {
-							datalog.isLogging = 1;
-							devnotready = 0;
-						}
-						osDelay(2000);
-						if (timeout > 2) devnotready = 0;
-					}
+                    xSemaphoreGive(sdCardMutexHandle);
+                }
+            }
 
-					xSemaphoreGive(sdCardMutexHandle);
-				}
-			}
+            //		if (ulNotifiedValue  == 2) { //flying (not used)
 
-	//		if (ulNotifiedValue  == 2) { //flying (not used)
+            //		}
 
-	//		}
+            if (ulNotifiedValue == 3) { //landed
+                if ( xSemaphoreTake(sdCardMutexHandle,
+                        (TickType_t ) 600) == pdTRUE) {
+                    if (datalog.isLogging) {
 
-			if (ulNotifiedValue == 3) { //landed
-				if ( xSemaphoreTake(sdCardMutexHandle,
-						(TickType_t ) 600) == pdTRUE) {
-					if (datalog.isLogging) {
+                        datalog.isLogging = 0;
+                        closeDataLogFile(&dataLogFile);
+                    }
+                    writeFlightLogSummaryFile();
+                    xSemaphoreGive(sdCardMutexHandle);
+                }
+            }
+        }
 
-						datalog.isLogging = 0;
-						closeDataLogFile(&dataLogFile);
-					}
-					writeFlightLogSummaryFile();
-					xSemaphoreGive(sdCardMutexHandle);
-				}
-			}
-		}
+        if (datalog.isLogging) {
 
-		if (datalog.isLogging) {
+            if ( xSemaphoreTake(sdCardMutexHandle,
+                    (TickType_t ) 600) == pdTRUE) {
+                writeDataLogFile(&dataLogFile);
+                if (xTaskGetTickCount() - updateLogBooktime > UPDATELOGFILETIME) { //update Summary log in case of program crash
+                    writeFlightLogSummaryFile();
+                }
 
-			if ( xSemaphoreTake(sdCardMutexHandle,
-					(TickType_t ) 600) == pdTRUE) {
-				writeDataLogFile(&dataLogFile);
-				if (xTaskGetTickCount() - updateLogBooktime > UPDATELOGFILETIME){ //update Summary log in case of program crash
-					writeFlightLogSummaryFile();
-				}
+                xSemaphoreGive(sdCardMutexHandle);
+            }
+        }
+        vTaskDelayUntil(&times, xDelay);
+    }
 
-				xSemaphoreGive(sdCardMutexHandle);
-			}
-		}
-		vTaskDelayUntil(&times, xDelay);
-	}
-
-
-
-  /* USER CODE END StartLoggerTask */
+    /* USER CODE END StartLoggerTask */
 }

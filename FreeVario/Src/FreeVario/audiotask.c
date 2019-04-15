@@ -8,7 +8,6 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #include "audiotask.h"
 #include <stdlib.h>
 #include <string.h>
@@ -18,67 +17,62 @@ extern SensorData sensors;
 extern ActivityData activity;
 extern WWDG_HandleTypeDef hwwdg;
 
-void StartAudioTask(void const * argument)
-{
+void StartAudioTask(void const * argument) {
 
-	uint8_t audioon=0;
-
-
-
+    uint8_t audioon = 0;
 
 #ifdef TESTBUZZER
 
     int step=100;
-	int t_vario=1000;
-	uint32_t times=0;
+    int t_vario=1000;
+    uint32_t times=0;
 
 #endif
-	audio_t audiorun;
+    audio_t audiorun;
 //	audiorun.multiplier = 100000000;
-	uint8_t running = 0;
+    uint8_t running = 0;
 
-	setupAudio(&audiorun);
-	/* Infinite loop */
-	for (;;) {
+    setupAudio(&audiorun);
+    /* Infinite loop */
+    for (;;) {
 
-		if (xTaskGetTickCount() > STARTDELAY) {
-			running = 1;
-		}
+        if (xTaskGetTickCount() > STARTDELAY) {
+            running = 1;
+        }
 #ifdef TESTBUZZER
-		 uint32_t i =xTaskGetTickCount() - times;
+        uint32_t i =xTaskGetTickCount() - times;
 
-	  if (i > 1000) {
-	    times = xTaskGetTickCount();
-	   // if(t_vario <= -5000) step = 100;
-		//if(t_vario >= 9000) step = -100;
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		t_vario += step;
+        if (i > 1000) {
+            times = xTaskGetTickCount();
+            // if(t_vario <= -5000) step = 100;
+            //if(t_vario >= 9000) step = -100;
+            HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+            t_vario += step;
 
-	  }
-	  //toneconstant(&audiorun, 1000);
-	  makeVarioAudio(&audiorun, t_vario);
+        }
+        //toneconstant(&audiorun, 1000);
+        makeVarioAudio(&audiorun, t_vario);
 #else
 
-		if (running) {
+        if (running) {
 
-			if (activity.flightstatus == FLS_FLYING && !activity.muted) {
+            if (activity.flightstatus == FLS_FLYING && !activity.muted) {
 
-				makeVarioAudio(&audiorun, sensors.VarioMs); //flying
+                makeVarioAudio(&audiorun, sensors.VarioMs); //flying
 
-				audioon = 1;
+                audioon = 1;
 
-			}
-			if ((activity.flightstatus == FLS_GROUND && audioon) || (activity.muted && audioon)) {
-				audioon = 0;
-				noTone();
-			}
-		}
+            }
+            if ((activity.flightstatus == FLS_GROUND && audioon)
+                    || (activity.muted && audioon)) {
+                audioon = 0;
+                noTone();
+            }
+        }
 #endif
-		osDelay(10); //do not change, need to be precise for the wdt
-		HAL_WWDG_Refresh(&hwwdg);
-	}
+        osDelay(10); //do not change, need to be precise for the wdt
+        HAL_WWDG_Refresh(&hwwdg);
+    }
 
 }
-
-
 

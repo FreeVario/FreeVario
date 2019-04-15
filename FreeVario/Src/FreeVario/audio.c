@@ -8,259 +8,241 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
-
 #include "audio.h"
-
 
 extern TIM_HandleTypeDef FV_TONETMR;
 
-
 void setupAudio(audio_t * audio) {
 
-
-	 HAL_TIM_PWM_Start(&FV_TONETMR, FV_TONECHN);
-	 HAL_TIMEx_PWMN_Start(&FV_TONETMR, FV_TONECHN);
-	 FV_TONEHALTMR->PSC  = SystemCoreClock/10000000;
-	 toneconstant(audio, 1000);
-	 osDelay(10);
-	 noTone();
-	 audio->transition =0;
+    HAL_TIM_PWM_Start(&FV_TONETMR, FV_TONECHN);
+    HAL_TIMEx_PWMN_Start(&FV_TONETMR, FV_TONECHN);
+    FV_TONEHALTMR->PSC = SystemCoreClock / 10000000;
+    toneconstant(audio, 1000);
+    osDelay(10);
+    noTone();
+    audio->transition = 0;
 }
 
 #define PWMTMRMULTIPLIER 10000000
 
-
 void noTone() {
 
-	FV_TONEHALTMR->CR1 &= ~TIM_CR1_CEN;
-	FV_TONEHALTMR->CNT = 0;
-
+    FV_TONEHALTMR->CR1 &= ~TIM_CR1_CEN;
+    FV_TONEHALTMR->CNT = 0;
 
 }
 
 #define TOPPULSE  1200
 
- void tone(audio_t * audio, float freq, int period) {
+void tone(audio_t * audio, float freq, int period) {
 
-	    audio->notonetimer = period + millis();
-	    uint16_t fv_tone_t = 1/(float)freq * PWMTMRMULTIPLIER;
-	    FV_TONEHALTMR->CR1 |= TIM_CR1_CEN;
-	    FV_TONEHALTMR->ARR  = fv_tone_t;
-		FV_TONEHALTMR->CCR1 = fv_tone_t/2;
+    audio->notonetimer = period + millis();
+    uint16_t fv_tone_t = 1 / (float) freq * PWMTMRMULTIPLIER;
+    FV_TONEHALTMR->CR1 |= TIM_CR1_CEN;
+    FV_TONEHALTMR->ARR = fv_tone_t;
+    FV_TONEHALTMR->CCR1 = fv_tone_t / 2;
 }
 
 void toneconstant(audio_t * audio, float freq) {
-    uint16_t fv_tone_t = 1/(float)freq * PWMTMRMULTIPLIER;
+    uint16_t fv_tone_t = 1 / (float) freq * PWMTMRMULTIPLIER;
     FV_TONEHALTMR->CR1 |= TIM_CR1_CEN;
-    FV_TONEHALTMR->ARR  = fv_tone_t;
-	FV_TONEHALTMR->CCR1 = fv_tone_t/2;
+    FV_TONEHALTMR->ARR = fv_tone_t;
+    FV_TONEHALTMR->CCR1 = fv_tone_t / 2;
 }
 
 //changes tone while beeping
- void dynaTone(audio_t * audio, float freq) {
-		uint16_t fv_tone_t = 1/(float)freq * PWMTMRMULTIPLIER;
-		FV_TONEHALTMR->ARR  = fv_tone_t;
-		FV_TONEHALTMR->CCR1 = fv_tone_t/2;
+void dynaTone(audio_t * audio, float freq) {
+    uint16_t fv_tone_t = 1 / (float) freq * PWMTMRMULTIPLIER;
+    FV_TONEHALTMR->ARR = fv_tone_t;
+    FV_TONEHALTMR->CCR1 = fv_tone_t / 2;
 }
 
+int millis() {
 
- int millis() {
-
-	//return HAL_GetTick();
-	return xTaskGetTickCount();
+    //return HAL_GetTick();
+    return xTaskGetTickCount();
 }
 
-void switchTone(audio_t * audio){
-    audio->muted=0;
-    audio->pause=0;
-    audio->toneOn=0;
+void switchTone(audio_t * audio) {
+    audio->muted = 0;
+    audio->pause = 0;
+    audio->toneOn = 0;
     audio->notonetimer = 0;
 }
 
- void noToneTimer(audio_t * audio) {
-   if(millis() >= audio->notonetimer && audio->notonetimer > 0) {
-     noTone();
-     audio->notonetimer = 0;
-   }
+void noToneTimer(audio_t * audio) {
+    if (millis() >= audio->notonetimer && audio->notonetimer > 0) {
+        noTone();
+        audio->notonetimer = 0;
+    }
 
 }
-
 
 // Non-Blocking beep blob beep
- void playTwoToneInterval(audio_t * audio, int freq,int freq2, int period, int intervald) {
+void playTwoToneInterval(audio_t * audio, int freq, int freq2, int period,
+        int intervald) {
 
+    if (audio->toneOn) {
+        int wait = period + audio->tm;
 
-  if (audio->toneOn) {
-    int wait = period + audio->tm;
+        if (wait < millis()) {
+            audio->toneOn = false;
+            //noTone();
+            toneconstant(audio, freq2);
+            audio->rm = millis();
+        }
 
+    } else {
+        int ndwait = intervald + audio->rm;
 
-    if ( wait < millis()) {
-    	audio->toneOn = false;
-      //noTone();
-      toneconstant(audio, freq2);
-      audio->rm = millis();
+        if (ndwait < millis()) {
+
+            toneconstant(audio, freq);
+            audio->toneOn = true;
+            audio->tm = millis();
+        }
     }
-
-  } else {
-    int ndwait = intervald + audio->rm;
-
-    if(ndwait < millis()) {
-
-    toneconstant(audio, freq);
-    audio->toneOn = true;
-    audio->tm = millis();
-    }
-  }
 
 }
-
 
 // Non-Blocking beep beep beep
- void playToneInterval(audio_t * audio, int freq, int period, int tinterval) {
+void playToneInterval(audio_t * audio, int freq, int period, int tinterval) {
 
-  if (audio->toneOn) {
-    int wait = period + tinterval + audio->tm;
+    if (audio->toneOn) {
+        int wait = period + tinterval + audio->tm;
 
-    if ( wait < millis()) {
-    	audio->toneOn = false;
-      noTone();
-      audio->tcount++; // count the amount of beeps for playTonePause
-      if (audio->tcount > 1000) { // prevent overflow
-    	  audio->tcount = 0;
-      }
+        if (wait < millis()) {
+            audio->toneOn = false;
+            noTone();
+            audio->tcount++; // count the amount of beeps for playTonePause
+            if (audio->tcount > 1000) { // prevent overflow
+                audio->tcount = 0;
+            }
+        }
+
+    } else {
+        tone(audio, freq, period);
+        audio->toneOn = true;
+        audio->tm = millis();
     }
 
-  } else {
-	  tone(audio, freq, period);
-	  audio->toneOn = true;
-	  audio->tm = millis();
-  }
-
 }
-
 
 // Plays nbeeps then pause
 
- void playTonePause(audio_t * audio, int freq, int nbeeps, int tpause) {
+void playTonePause(audio_t * audio, int freq, int nbeeps, int tpause) {
 
-   if (audio->pause < millis()) {
+    if (audio->pause < millis()) {
 
-      if (audio->tcount < nbeeps) {
-        playToneInterval(audio,freq, 500, 200);
+        if (audio->tcount < nbeeps) {
+            playToneInterval(audio, freq, 500, 200);
 
-      }else{
-    	  audio->pause = millis() + tpause;
-    	  audio->tcount=0;
+        } else {
+            audio->pause = millis() + tpause;
+            audio->tcount = 0;
 
-      }
+        }
 
-
-   }
-
+    }
 
 }
 
 //main task to poll
 void makeVarioAudio(audio_t * audio, float vario) {
-  int pulse;
-  vario = vario /1000; //TODO: change to int32
-  float varioorg = vario;
-  float variofr;
-   noToneTimer(audio);
+    int pulse;
+    vario = vario / 1000; //TODO: change to int32
+    float varioorg = vario;
+    float variofr;
+    noToneTimer(audio);
 
+    if (vario > 20) {
+        vario = 20;
 
-  if (vario > 20) {
-    vario = 20;
+    }
 
-  }
+    if (vario < -20) {
+        vario = -20;
 
-  if (vario < -20) {
-    vario = -20;
-
-  }
+    }
 
 #if defined(SOARDETECTION) && !defined(TESTBUZZER)
 
-
-  if (varioorg > -0.2 && varioorg < 0.2) { //TODO: add to conf
-    int diffe = millis() - audio->stime;
-    if (diffe >  (int)(conf.SoarDeadBandTime)) {
-    	audio->muted = true;
+    if (varioorg > -0.2 && varioorg < 0.2) { //TODO: add to conf
+        int diffe = millis() - audio->stime;
+        if (diffe > (int) (conf.SoarDeadBandTime)) {
+            audio->muted = true;
+        }
+    } else {
+        audio->stime = millis();
+        audio->muted = false;
     }
-  } else {
-	  audio->stime = millis();
-	  audio->muted = false;
-  }
 
 #endif
 
-  variofr = ((float)(fabs(vario + 1)) * 150 ) + FV_TONEBASE;
+    variofr = ((float) (fabs(vario + 1)) * 150) + FV_TONEBASE;
 
-  audio->variof = (AUDIOSMOOTH * audio->variof + variofr )/(AUDIOSMOOTH + 1);
+    audio->variof = (AUDIOSMOOTH * audio->variof + variofr) / (AUDIOSMOOTH + 1);
 
     if (vario <= BUZZERCLIMBING && vario >= BUZZERZEROCLIMB) { // prethermal audio bip bip bip
-        if ( audio->transition !=AUDIOZEROCLIMB) {
+        if (audio->transition != AUDIOZEROCLIMB) {
             switchTone(audio);
         }
-        audio->transition =AUDIOZEROCLIMB;
-      if (!audio->muted) {
-         playToneInterval(audio, audio->variof, 50, 400);
-      }
+        audio->transition = AUDIOZEROCLIMB;
+        if (!audio->muted) {
+            playToneInterval(audio, audio->variof, 50, 400);
+        }
 
     }
 
-   if (vario <= (double)(conf.sinkAlarmLevel)/1000 ) { //sink alarm
-       if ( audio->transition !=AUDIOSINKALARM) {
-           switchTone(audio);
-       }
-       audio->transition =AUDIOSINKALARM;
-      if (!audio->muted) {
-         playTwoToneInterval(audio,1400, 1800, 40, 40);
-      }
-
-   }
-
-#if defined(BUZZSINKALERT) //sink alert beh beh beh (-3)
-    if (vario <=  BUZZSINKALERT && vario > (double)(conf.sinkAlarmLevel)/1000 ) {
-        if ( audio->transition !=AUDIOSINKALERT) {
+    if (vario <= (double) (conf.sinkAlarmLevel) / 1000) { //sink alarm
+        if (audio->transition != AUDIOSINKALARM) {
             switchTone(audio);
         }
-        audio->transition =AUDIOSINKALERT;
-       playTonePause(audio, 300, fabs(vario), BUZZSINKALERTPAUSE);
+        audio->transition = AUDIOSINKALARM;
+        if (!audio->muted) {
+            playTwoToneInterval(audio, 1400, 1800, 40, 40);
+        }
+
+    }
+
+#if defined(BUZZSINKALERT) //sink alert beh beh beh (-3)
+    if (vario <= BUZZSINKALERT
+            && vario > (double) (conf.sinkAlarmLevel) / 1000) {
+        if (audio->transition != AUDIOSINKALERT) {
+            switchTone(audio);
+        }
+        audio->transition = AUDIOSINKALERT;
+        playTonePause(audio, 300, fabs(vario), BUZZSINKALERTPAUSE);
     }
 
 #endif
 
+    if (vario > BUZZERCLIMBING) {
+        if (audio->transition != AUDIOCLIMBING) {
+            switchTone(audio);
+        }
+        audio->transition = AUDIOCLIMBING;
+        pulse = TOPPULSE / (vario * 12) + 150;
 
-  if (vario > BUZZERCLIMBING) {
-      if ( audio->transition !=AUDIOCLIMBING) {
-          switchTone(audio);
-      }
-      audio->transition =AUDIOCLIMBING;
-	  pulse = TOPPULSE / (vario * 12) + 150;
-
-    if (!audio->muted) {
-      dynaTone(audio, audio->variof);
-      playToneInterval(audio, audio->variof, pulse, pulse / 2);
+        if (!audio->muted) {
+            dynaTone(audio, audio->variof);
+            playToneInterval(audio, audio->variof, pulse, pulse / 2);
+        }
+        // climbing = true;
     }
-   // climbing = true;
-  }
 
-
-
-  //else {
-  //  if (climbing ) { //dropped out of the thermal
-  //    tone( 100, OUTOFTHERMALBUZZT);
-  //    climbing = false;
-  //  }
-  //}
+    //else {
+    //  if (climbing ) { //dropped out of the thermal
+    //    tone( 100, OUTOFTHERMALBUZZT);
+    //    climbing = false;
+    //  }
+    //}
 
 }
 
 void testtone(audio_t * audio, float freq) {
 
-	FV_TONEHALTMR->ARR = 1/(float)freq * audio->multiplier;
-	FV_TONEHALTMR->CR1 |= TIM_CR1_CEN;
+    FV_TONEHALTMR->ARR = 1 / (float) freq * audio->multiplier;
+    FV_TONEHALTMR->CR1 |= TIM_CR1_CEN;
 
 }

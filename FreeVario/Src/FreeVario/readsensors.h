@@ -11,9 +11,8 @@
 #ifndef READSENSORS_H_
 #define READSENSORS_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
-
 
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
@@ -24,10 +23,9 @@
 #include <../fvconfig.h>
 #include <sd_hal_mpu6050.h>
 
-
- void setupVbatSensor();
- void readVbatSensor();
- void readInvMpuSensor();
+void setupVbatSensor();
+void readVbatSensor();
+void readInvMpuSensor();
 void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280);
 void setupReadSensorsMPU6050(SD_MPU6050 *mpu1);
 void setupKalman();
@@ -44,7 +42,5 @@ unsigned short Matrix2Scalar(const char *mtx);
 void NormalizeQuaternion(float *quat);
 
 void checkAdaptiveVario(int32_t vario, int8_t takeoff);
-
-
 
 #endif /* READSENSORS_H_ */

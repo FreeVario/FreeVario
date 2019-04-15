@@ -8,17 +8,15 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #ifndef FREEVARIO_AUDIOTASK_H_
 #define FREEVARIO_AUDIOTASK_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
 #include "../fvconfig.h"
 
- void StartAudioTask(void const * argument);
-
+void StartAudioTask(void const * argument);
 
 #endif /* FREEVARIO_AUDIOTASK_H_ */

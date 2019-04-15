@@ -8,11 +8,10 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #ifndef DISPLAYTASK_H_
 #define DISPLAYTASK_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #define COLORED      0
@@ -29,16 +28,17 @@
 #include <globaldata.h>
 
 extern SensorData sensors;
-extern gps_t  hgps;
+extern gps_t hgps;
 extern ActivityData activity;
 //TODO: Fix compiler warning
 
 void StartDisplayTask(void const * argument);
 void displayTaskSetup(Paint *paint, EPD *epd, unsigned char * frame_buffer);
-void displayRefreshMainScreen(Paint *paint, EPD *epd, unsigned char * frame_buffer);
-void displayDrawmainScreen (Paint *paint, EPD *epd, unsigned char * frame_buffer);
-void displayTaskUpdate( Paint *paint,EPD *epd, unsigned char * frame_buffer);
-void displayMessageShutdown(Paint *paint,EPD *epd, unsigned char * frame_buffer);
-
+void displayRefreshMainScreen(Paint *paint, EPD *epd,
+        unsigned char * frame_buffer);
+void displayDrawmainScreen(Paint *paint, EPD *epd, unsigned char * frame_buffer);
+void displayTaskUpdate(Paint *paint, EPD *epd, unsigned char * frame_buffer);
+void displayMessageShutdown(Paint *paint, EPD *epd,
+        unsigned char * frame_buffer);
 
 #endif /* DISPLAYTASK_H_ */

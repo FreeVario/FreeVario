@@ -8,8 +8,6 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
-
 #include "sendatatask.h"
 #include "usbd_cdc_if.h"
 #include <stdlib.h>
@@ -46,39 +44,34 @@ void setupBTData() {
 //    sprintf(buff, "AT+BAUD4");
 //    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
 
-
 }
 
-
-
-
-void StartSendDataTask(void const * argument)
-{
+void StartSendDataTask(void const * argument) {
 
 #ifdef SETUPBT
     setupBTData();
 #endif
 
-	//configASSERT(xSendDataNotify == NULL);
-	const TickType_t xMaxBlockTime = pdMS_TO_TICKS(500);
-	/* Infinite loop */
-	for (;;) {
-		uint8_t receiveqBuffer[SENDBUFFER];
+    //configASSERT(xSendDataNotify == NULL);
+    const TickType_t xMaxBlockTime = pdMS_TO_TICKS(500);
+    /* Infinite loop */
+    for (;;) {
+        uint8_t receiveqBuffer[SENDBUFFER];
 
-		xQueueReceive(uartQueueHandle, &receiveqBuffer, portMAX_DELAY);
-		uint16_t buffsize = strlen((char *) receiveqBuffer);
+        xQueueReceive(uartQueueHandle, &receiveqBuffer, portMAX_DELAY);
+        uint16_t buffsize = strlen((char *) receiveqBuffer);
 //TODO: move outside loop
-		xSendDataNotify = xTaskGetCurrentTaskHandle();
+        xSendDataNotify = xTaskGetCurrentTaskHandle();
 
-		HAL_UART_Transmit_DMA(&FV_UARTBT, (uint8_t *) &receiveqBuffer, buffsize); //Usart global interupt must be enabled for this to work
+        HAL_UART_Transmit_DMA(&FV_UARTBT, (uint8_t *) &receiveqBuffer,
+                buffsize); //Usart global interupt must be enabled for this to work
 #if !defined(DEBUGUSBOUT) && !defined(DEBUG_MODE)
-		CDC_Transmit_FS((uint8_t *) &receiveqBuffer, buffsize);
+                CDC_Transmit_FS((uint8_t *) &receiveqBuffer, buffsize);
 #endif
-		toggleDebugLED();
-		ulTaskNotifyTake( pdTRUE, xMaxBlockTime);
+        toggleDebugLED();
+        ulTaskNotifyTake( pdTRUE, xMaxBlockTime);
 
-		osDelay(1);
-	}
-
+        osDelay(1);
+    }
 
 }

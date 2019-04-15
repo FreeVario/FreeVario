@@ -8,17 +8,15 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #ifndef FREEVARIO_LOGGERTASK_H_
 #define FREEVARIO_LOGGERTASK_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
 #include "../fvconfig.h"
 
- void StartLoggerTask(void const * argument);
-
+void StartLoggerTask(void const * argument);
 
 #endif /* FREEVARIO_LOGGERTASK_H_ */

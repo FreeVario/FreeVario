@@ -11,7 +11,7 @@
 #ifndef GLOBALDATA_H_
 #define GLOBALDATA_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 #include "../fvconfig.h"
 
@@ -20,26 +20,26 @@
 #define FLS_FLYING 		2
 #define FLS_LANDED 		3
 
- typedef struct {
-	int16_t temperature;  // C x100
-	uint32_t pressure;    //Pa x100
-	uint32_t pressureraw;    //Pa x100
-	int16_t humidity;     //% x100
-	int16_t accel_x;   //x100
-	int16_t accel_y;   //x100
-	int16_t accel_z;   //x100
-	int16_t gforce;   //x100
-	int16_t gyro_x;
-	int16_t gyro_y;
-	int16_t gyro_z;
-	int32_t AltitudeMeters; //x1000
-	int32_t VarioMs; //x1000 Raw vario value from Baro
-	int32_t VarioMsRaw; //x1000 Raw vario value from Baro
-	Queue_t  QAltitudeMeters;
-	uint8_t barotakeoff;
-	uint16_t vbat; //bat voltage x10
-	uint8_t pbat; //bat %charge
-}SensorData; //owner: sensortask.c
+typedef struct {
+    int16_t temperature;  // C x100
+    uint32_t pressure;    //Pa x100
+    uint32_t pressureraw;    //Pa x100
+    int16_t humidity;     //% x100
+    int16_t accel_x;   //x100
+    int16_t accel_y;   //x100
+    int16_t accel_z;   //x100
+    int16_t gforce;   //x100
+    int16_t gyro_x;
+    int16_t gyro_y;
+    int16_t gyro_z;
+    int32_t AltitudeMeters; //x1000
+    int32_t VarioMs; //x1000 Raw vario value from Baro
+    int32_t VarioMsRaw; //x1000 Raw vario value from Baro
+    Queue_t QAltitudeMeters;
+    uint8_t barotakeoff;
+    uint16_t vbat; //bat voltage x10
+    uint8_t pbat; //bat %charge
+} SensorData; //owner: sensortask.c
 
 extern settings_t conf; //declared at fvconf.h. So yes, you must include both files
 
@@ -73,15 +73,14 @@ typedef struct {
     int32_t barognssdeveation;  //difference between baro and gnss (baro - gnss)
     uint8_t barognssavalid;    //flag if the adjusted value is usable
     uint8_t useKalman; //use kalman with accelerometer insead of a lowpass filter
-}ActivityData; //owner: freevario.c
+} ActivityData; //owner: freevario.c
 
 extern ActivityData activity;
 
 typedef struct {
-	uint8_t isLogging;
-}DataLog;
+    uint8_t isLogging;
+} DataLog;
 
 extern DataLog datalog;
-
 
 #endif /* GLOBALDATA_H_ */

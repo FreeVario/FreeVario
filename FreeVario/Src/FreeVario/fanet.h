@@ -8,12 +8,8 @@
  any later version. see <http://www.gnu.org/licenses/>
  */
 
-
 #ifndef FANET_H_
 #define FANET_H_
 #include "../fvconfig.h"
-
-
-
 
 #endif /* FANET_H_ */

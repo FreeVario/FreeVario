@@ -11,17 +11,15 @@
 #ifndef FREEVARIO_GPSTASK_H_
 #define FREEVARIO_GPSTASK_H_
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 #include "gps.h"
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
 #include "../fvconfig.h"
 
+extern gps_t hgps;
 
- extern gps_t hgps;
-
- void StartGPSTask(void const * argument);
-
+void StartGPSTask(void const * argument);
 
 #endif /* FREEVARIO_GPSTASK_H_ */
