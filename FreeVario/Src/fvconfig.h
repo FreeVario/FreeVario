@@ -24,8 +24,9 @@
 
 
 //#define SETUPBT
-
+#ifdef DEBUG_MODE
 #define DEBUGUSBOUT //use the usb for print. It disable sending data out
+#endif
 
 #define ACCLSMOOTH 10 //Lowpass filter level
 #define UPDATELOGFILETIME 30000 //time in ms to update de Log summary file
