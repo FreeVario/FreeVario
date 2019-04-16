@@ -34,12 +34,12 @@
 
 #include "math.h"
 #include "string.h"
-#include "stdio.h"
 #include "stdlib.h"
 
-#define D2R(x)              (float)((x) * 0.01745329251994f)    /*!< Degrees to radians */
-#define R2D(x)              (float)((x) * 57.29577951308232f)   /*!< Radians to degrees */
-#define EARTH_RADIUS        (6371.0f)   /*!< Earth radius in units of kilometers */
+#define FLT(x)              ((gps_float_t)(x))
+#define D2R(x)              FLT(FLT(x) * FLT(0.01745329251994)) /*!< Degrees to radians */
+#define R2D(x)              FLT(FLT(x) * FLT(57.29577951308232))/*!< Radians to degrees */
+#define EARTH_RADIUS        FLT(6371.0) /*!< Earth radius in units of kilometers */
 
 #define STAT_UNKNOWN        0
 #define STAT_GGA            1
@@ -48,7 +48,12 @@
 #define STAT_RMC            4
 
 #define CRC_ADD(_gh, ch)    (_gh)->p.crc_calc ^= (uint8_t)(ch)
-#define TERM_ADD(_gh, ch)   do { (_gh)->p.term_str[(_gh)->p.term_pos++] = (ch); (_gh)->p.term_str[(_gh)->p.term_pos] = 0; } while (0)
+#define TERM_ADD(_gh, ch)   do {    \
+    if ((_gh)->p.term_pos < (sizeof((_gh)->p.term_str) - 1)) {  \
+        (_gh)->p.term_str[(_gh)->p.term_pos++] = (ch);  \
+        (_gh)->p.term_str[(_gh)->p.term_pos] = 0;   \
+    }                               \
+} while (0)
 #define TERM_NEXT(_gh)      do { (_gh)->p.term_str[((_gh)->p.term_pos = 0)] = 0; (_gh)->p.term_num++; } while (0)
 
 #define CIN(x)              ((x) >= '0' && (x) <= '9')
@@ -88,8 +93,8 @@ parse_number(gps_t* gh, const char* t) {
  * \return          Parsed double in \ref gps_float_t format
  */
 static gps_float_t
-parse_double_number(gps_t* gh, const char* t) {
-    double res;
+parse_float_number(gps_t* gh, const char* t) {
+    gps_float_t res;
 
     if (t == NULL) {
         t = gh->p.term_str;
@@ -98,8 +103,14 @@ parse_double_number(gps_t* gh, const char* t) {
     while (t != NULL && *t == ' ') {
         t++;
     }
+	
+#if GPS_CFG_DOUBLE
     res = strtod(t, NULL);                      /* Parse string to double */
-    return (gps_float_t)res;                    /* Return casted value, based on float size */
+#else /* GPS_CFG_DOUBLE */
+    res = strtof(t, NULL);                      /* Parse string to float */
+#endif /* !GPS_CFG_DOUBLE */
+
+    return FLT(res);                            /* Return casted value, based on float size */
 }
 
 /**
@@ -113,10 +124,10 @@ static gps_float_t
 parse_lat_long(gps_t* gh) {
     gps_float_t ll, deg, min;
 
-    ll = parse_double_number(gh, NULL);         /* Parse value as double */
-    deg = ((int)ll) / 100;                      /* Get absolute degrees value */
-    min = ll - (deg * 100);                     /* Get remaining part, minutes */
-    ll = deg + min / 60.0f;                     /* Calculate latitude/longitude */
+    ll = parse_float_number(gh, NULL);          /* Parse value as double */
+    deg = ((int)ll) / FLT(100);                 /* Get absolute degrees value */
+    min = ll - (deg * FLT(100));                /* Get remaining part, minutes */
+    ll = deg + min / FLT(60.0);                 /* Calculate latitude/longitude */
     
     return ll;
 }
@@ -185,10 +196,10 @@ parse_term(gps_t* gh) {
                 gh->p.data.gga.sats_in_use = (uint8_t)parse_number(gh, NULL);
                 break;
             case 9:                             /* Altitude */
-                gh->p.data.gga.altitude = parse_double_number(gh, NULL);
+                gh->p.data.gga.altitude = parse_float_number(gh, NULL);
                 break;
             case 11:                            /* Altitude above ellipsoid */
-                gh->p.data.gga.altitude += parse_double_number(gh, NULL);
+                gh->p.data.gga.geo_sep = parse_float_number(gh, NULL);
                 break;
             default: break;
         }
@@ -200,13 +211,13 @@ parse_term(gps_t* gh) {
                 gh->p.data.gsa.fix_mode = (uint8_t)parse_number(gh, NULL);
                 break;
             case 15:                            /* Process PDOP */
-                gh->p.data.gsa.dop_p = parse_double_number(gh, NULL);
+                gh->p.data.gsa.dop_p = parse_float_number(gh, NULL);
                 break;
             case 16:                            /* Process HDOP */
-                gh->p.data.gsa.dop_h = parse_double_number(gh, NULL);
+                gh->p.data.gsa.dop_h = parse_float_number(gh, NULL);
                 break;
             case 17:                            /* Process VDOP */
-                gh->p.data.gsa.dop_v = parse_double_number(gh, NULL);
+                gh->p.data.gsa.dop_v = parse_float_number(gh, NULL);
                 break;
             default:
                 /* Parse satellite IDs */
@@ -251,13 +262,13 @@ parse_term(gps_t* gh) {
     } else if (gh->p.stat == STAT_RMC) {        /* Process GPRMC statement */
         switch (gh->p.term_num) {
             case 2:                             /* Process valid status */
-                gh->p.data.rmc.is_valid = (uint8_t)(gh->p.term_str[0] == 'A');
+                gh->p.data.rmc.is_valid = (gh->p.term_str[0] == 'A');
                 break;
             case 7:                             /* Process ground speed in knots */
-                gh->p.data.rmc.speed = parse_double_number(gh, NULL);
+                gh->p.data.rmc.speed = parse_float_number(gh, NULL);
                 break;
             case 8:                             /* Process true ground coarse */
-                gh->p.data.rmc.coarse = parse_double_number(gh, NULL);
+                gh->p.data.rmc.coarse = parse_float_number(gh, NULL);
                 break;
             case 9:                             /* Process date */
                 gh->p.data.rmc.date = (uint8_t)(10 * CTN(gh->p.term_str[0]) + CTN(gh->p.term_str[1]));
@@ -265,7 +276,12 @@ parse_term(gps_t* gh) {
                 gh->p.data.rmc.year = (uint8_t)(10 * CTN(gh->p.term_str[4]) + CTN(gh->p.term_str[5]));
                 break;
             case 10:                            /* Process magnetic variation */
-                gh->p.data.rmc.variation = parse_double_number(gh, NULL);
+                gh->p.data.rmc.variation = parse_float_number(gh, NULL);
+                break;
+            case 11:                            /* Process magnetic variation east/west */
+                if (gh->p.term_str[0] == 'W' || gh->p.term_str[0] == 'w') {
+                    gh->p.data.rmc.variation = -gh->p.data.rmc.variation;
+                }
                 break;
             default: break;
         }
@@ -299,6 +315,7 @@ copy_from_tmp_memory(gps_t* gh) {
         gh->latitude = gh->p.data.gga.latitude;
         gh->longitude = gh->p.data.gga.longitude;
         gh->altitude = gh->p.data.gga.altitude;
+        gh->geo_sep = gh->p.data.gga.geo_sep;
         gh->sats_in_use = gh->p.data.gga.sats_in_use;
         gh->fix = gh->p.data.gga.fix;
         gh->hours = gh->p.data.gga.hours;
@@ -417,8 +434,13 @@ gps_distance_bearing(gps_float_t las, gps_float_t los, gps_float_t lae, gps_floa
          * a = sin(df / 2)^2 + cos(las) * cos(lae) * sin(dfi / 2)^2
          * *d = RADIUS * 2 * atan(a / (1 - a)) * 1000 (for meters)
          */
-        a = (gps_float_t)(sin(df * 0.5f) * sin(df * 0.5f) + sin(dfi * 0.5f) * sin(dfi * 0.5f) * cos(las) * cos(lae));
-        *d = (gps_float_t)(EARTH_RADIUS * 2.0f * atan2(sqrtf(a), sqrtf(1.0f - a)) * 1000.0f);
+#if GPS_CFG_DOUBLE
+        a = FLT(sin(df * 0.5) * sin(df * 0.5) + sin(dfi * 0.5) * sin(dfi * 0.5) * cos(las) * cos(lae));
+        *d = FLT(EARTH_RADIUS * 2.0 * atan2(sqrt(a), sqrt(1.0 - a)) * 1000.0);
+#else /* GPS_CFG_DOUBLE */
+        a = FLT(sinf(df * 0.5f) * sinf(df * 0.5f) + sinf(dfi * 0.5f) * sinf(dfi * 0.5f) * cosf(las) * cosf(lae));
+        *d = FLT(EARTH_RADIUS * 2.0f * atan2f(sqrtf(a), sqrtf(1.0f - a)) * 1000.0f);
+#endif /* !GPS_CFG_DOUBLE */
     }
 
     /*
@@ -435,12 +457,19 @@ gps_distance_bearing(gps_float_t las, gps_float_t los, gps_float_t lae, gps_floa
      *      Bearing is 270 => move to west
      */
     if (b != NULL) {
-        df = (gps_float_t)(sin(loe - los) * cos(lae));
-        dfi = (gps_float_t)(cos(las) * sin(lae) - sin(las) * cos(lae) * cos(loe - los));
+#if GPS_CFG_DOUBLE
+        df = FLT(sin(loe - los) * cos(lae));
+        dfi = FLT(cos(las) * sin(lae) - sin(las) * cos(lae) * cos(loe - los));
 
         *b = R2D(atan2(df, dfi));               /* Calculate bearing and convert to degrees */
+#else /* GPS_CFG_DOUBLE */
+        df = FLT(sinf(loe - los) * cosf(lae));
+        dfi = FLT(cosf(las) * sinf(lae) - sinf(las) * cosf(lae) * cosf(loe - los));
+
+        *b = R2D(atan2f(df, dfi));              /* Calculate bearing and convert to degrees */
+#endif /* !GPS_CFG_DOUBLE */
         if (*b < 0) {                           /* Check for negative angle */
-            *b += (gps_float_t)360.0;           /* Make bearing always positive */
+            *b += FLT(360);                     /* Make bearing always positive */
         }
     }
     return 1;
@@ -455,24 +484,24 @@ gps_distance_bearing(gps_float_t las, gps_float_t los, gps_float_t lae, gps_floa
 gps_float_t
 gps_to_speed(gps_float_t sik, gps_speed_t ts) {
     switch (ts) {
-        case gps_speed_kps:     return (gps_float_t)(sik * 0.000514L);
-        case gps_speed_kph:     return (gps_float_t)(sik * 0.5144L);
-        case gps_speed_mps:     return (gps_float_t)(sik * 1.852L);
-        case gps_speed_mpm:     return (gps_float_t)(sik * 30.87L);
+        case gps_speed_kps:     return FLT(sik * FLT(0.000514));
+        case gps_speed_kph:     return FLT(sik * FLT(1.852));
+        case gps_speed_mps:     return FLT(sik * FLT(0.5144));
+        case gps_speed_mpm:     return FLT(sik * FLT(30.87));
 
-        case gps_speed_mips:    return (gps_float_t)(sik * 0.0003197L);
-        case gps_speed_mph:     return (gps_float_t)(sik * 1.151L);
-        case gps_speed_fps:     return (gps_float_t)(sik * 1.688L);
-        case gps_speed_fpm:     return (gps_float_t)(sik * 101.3L);
+        case gps_speed_mips:    return FLT(sik * FLT(0.0003197));
+        case gps_speed_mph:     return FLT(sik * FLT(1.151));
+        case gps_speed_fps:     return FLT(sik * FLT(1.688));
+        case gps_speed_fpm:     return FLT(sik * FLT(101.3));
 
-        case gps_speed_mpk:     return (gps_float_t)(sik * 32.4L);
-        case gps_speed_spk:     return (gps_float_t)(sik * 1944.0L);
-        case gps_speed_sp100m:  return (gps_float_t)(sik * 194.4L);
-        case gps_speed_mipm:    return (gps_float_t)(sik * 52.14L);
-        case gps_speed_spm:     return (gps_float_t)(sik * 3128.0L);
-        case gps_speed_sp100y:  return (gps_float_t)(sik * 177.7L);
+        case gps_speed_mpk:     return FLT(sik * FLT(32.4));
+        case gps_speed_spk:     return FLT(sik * FLT(1944.0));
+        case gps_speed_sp100m:  return FLT(sik * FLT(194.4));
+        case gps_speed_mipm:    return FLT(sik * FLT(52.14));
+        case gps_speed_spm:     return FLT(sik * FLT(3128.0));
+        case gps_speed_sp100y:  return FLT(sik * FLT(177.7));
 
-        case gps_speed_smph:    return (gps_float_t)(sik * 1.0L);
+        case gps_speed_smph:    return FLT(sik * FLT(1.0));
         default: return 0;
     }
 }

@@ -194,7 +194,7 @@ void makeVarioAudio(audio_t * audio, float vario) {
 
     }
 
-    if (vario <= (double) (conf.sinkAlarmLevel) / 1000) { //sink alarm
+    if (vario <= (float) (conf.sinkAlarmLevel) / 1000) { //sink alarm
         if (audio->transition != AUDIOSINKALARM) {
             switchTone(audio);
         }
@@ -207,7 +207,7 @@ void makeVarioAudio(audio_t * audio, float vario) {
 
 #if defined(BUZZSINKALERT) //sink alert beh beh beh (-3)
     if (vario <= BUZZSINKALERT
-            && vario > (double) (conf.sinkAlarmLevel) / 1000) {
+            && vario > (float) (conf.sinkAlarmLevel) / 1000) {
         if (audio->transition != AUDIOSINKALERT) {
             switchTone(audio);
         }

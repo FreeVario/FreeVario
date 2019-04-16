@@ -30,8 +30,8 @@
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
  */
-#ifndef __GPS_BUFF_H
-#define __GPS_BUFF_H
+#ifndef GPS_HDR_BUFF_H
+#define GPS_HDR_BUFF_H
 
 /* C++ detection */
 #ifdef __cplusplus
@@ -89,4 +89,4 @@ size_t      gps_buff_skip(gps_buff_t* buff, size_t len);
 }
 #endif /* __cplusplus */
 
-#endif /* __GPS_BUFF_H */
+#endif /* GPS_HDR_BUFF_H */
