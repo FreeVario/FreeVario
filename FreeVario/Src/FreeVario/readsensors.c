@@ -64,6 +64,9 @@ void readVbatSensor() {
 }
 
 void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280) {
+    //TODO: Replace with official drivers
+    //https://github.com/BoschSensortec/BME280_driver
+
     bmp280_init_default_params(&bmp280->params);
     bmp280->addr = BMP280_I2C_ADDRESS_0;
     bmp280->i2c = &FV_I2C;
@@ -71,8 +74,8 @@ void setupReadSensorsBMP280(BMP280_HandleTypedef *bmp280) {
     bmp280->params.mode = BMP280_MODE_NORMAL;
     bmp280->params.filter = BMP280_FILTER_2;
     bmp280->params.oversampling_pressure = BMP280_ULTRA_HIGH_RES;
-    bmp280->params.oversampling_temperature = BMP280_STANDARD;
-    bmp280->params.oversampling_humidity = BMP280_STANDARD;
+    bmp280->params.oversampling_temperature = BMP280_LOW_POWER;
+    bmp280->params.oversampling_humidity = BMP280_ULTRA_LOW_POWER;
     bmp280->params.standby = BMP280_STANDBY_05;
 
     while (!bmp280_init(bmp280, &bmp280->params)) {
