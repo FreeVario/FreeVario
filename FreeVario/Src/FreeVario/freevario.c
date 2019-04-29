@@ -29,7 +29,6 @@
 #include "fatfs.h"
 #include "usb_device.h"
 #include <displaytask.h>
-#include <globaldata.h>
 #include <stdlib.h>
 #include <string.h>
 #include "sensorstask.h"
@@ -39,6 +38,7 @@
 #include "loggertask.h"
 #include "fanettask.h"
 #include "util.h"
+#include <readsensors.h>
 
 /* FV CCM memory allocation-----------------------------------------------------*/
 
@@ -60,7 +60,6 @@ __IO uint8_t UserOkButton = 0;
 __IO uint8_t UserCancelButton = 0;
 __IO uint8_t UserNextButton = 0;
 __IO uint8_t UserPrevButton = 0;
-uint8_t SDcardMounted = 0;
 uint8_t HasSetTime = 0;
 TickType_t pwrBTtimePressed = 0;
 TickType_t OkButtonTimePressed = 0;
@@ -278,19 +277,22 @@ void StartDefaultTask(void const * argument) {
     activity.muted = 0;
     activity.flightstatus = FLS_GROUND;
     activity.useKalman = 0;
+    activity.SDcardMounted =0;
 
     memset(&activity, 0, sizeof(activity));
 
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
 
+
     if ( xSemaphoreTake( sdCardMutexHandle, ( TickType_t ) 500 ) == pdTRUE) {
         if ( xSemaphoreTake( confMutexHandle, ( TickType_t ) 100 ) == pdTRUE) {
+            osDelay(500);
             if (f_mount(&SDFatFS, SDPath, 0) == FR_OK) { //Mount SD card
-                SDcardMounted = 1;
                 osDelay(2000); //give some time to load it up
+                activity.SDcardMounted = 1; //lazy load so it is not realy loaded
             }
-
             loadConfigFromSD();
+
             xSemaphoreGive(confMutexHandle);
         }
         xSemaphoreGive(sdCardMutexHandle);
@@ -310,7 +312,7 @@ void StartDefaultTask(void const * argument) {
                 UserPowerButton = 0;
                 xTaskNotify(xDisplayNotify, 0x01, eSetValueWithOverwrite);
 
-                if (SDcardMounted) {
+                if (activity.SDcardMounted) {
                     f_mount(0, "0:", 1); //unmount SDCARD
                 }
                 osDelay(5000);

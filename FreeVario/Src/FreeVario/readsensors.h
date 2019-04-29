@@ -19,9 +19,36 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
 #include <bmp280.h>
-#include <globaldata.h>
 #include <../fvconfig.h>
 #include <sd_hal_mpu6050.h>
+
+
+
+typedef struct {
+    int16_t temperature;  // C x100
+    uint32_t pressure;    //Pa x100
+    uint32_t pressureraw;    //Pa x100
+    int16_t humidity;     //% x100
+    int16_t accel_x;   //x100
+    int16_t accel_y;   //x100
+    int16_t accel_z;   //x100
+    int16_t gforce;   //x100
+    int16_t gyro_x;
+    int16_t gyro_y;
+    int16_t gyro_z;
+    int32_t AltitudeMeters; //x1000
+    int32_t VarioMs; //x1000 Raw vario value from Baro
+    int32_t VarioMsRaw; //x1000 Raw vario value from Baro
+    Queue_t QAltitudeMeters;
+    uint8_t barotakeoff;
+    uint32_t vbat; //bat voltage x10
+    uint8_t pbat; //bat %charge
+} SensorData; //owner: sensortask.c
+
+
+extern SensorData sensors;
+
+
 
 void setupVbatSensor();
 void readVbatSensor();
@@ -36,7 +63,7 @@ float getAltitudeFeet();
 float getAltitudeMeters();
 void calculateVario50ms();
 
-static void DataReadyCallback();
+
 unsigned short Row2Scale(const char *row);
 unsigned short Matrix2Scalar(const char *mtx);
 void NormalizeQuaternion(float *quat);

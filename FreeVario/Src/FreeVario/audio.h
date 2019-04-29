@@ -16,7 +16,6 @@
 #include "../fvconfig.h"
 #include <stdlib.h>
 #include <bmp280.h>
-#include <globaldata.h>
 
 #define AUDIOSINKALARM 0
 #define AUDIOSINKALERT 1

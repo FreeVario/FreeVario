@@ -9,9 +9,9 @@
  */
 
 #include "settings.h"
+#include "freevario.h"
 
 extern char SDPath[4]; /* SD logical drive path */
-extern uint8_t SDcardMounted;
 
 /**
  * @brief  Save to SD, Mutexes must be claimed .
@@ -21,7 +21,7 @@ extern uint8_t SDcardMounted;
 void saveConfigtoSD() {
     FIL confFile;
 
-    if (SDcardMounted) {
+    if (activity.SDcardMounted) {
         FRESULT res;
         uint32_t byteswritten;
         if (f_open(&confFile, FV_CONFIGFILENAME, FA_CREATE_ALWAYS | FA_WRITE)
@@ -52,9 +52,7 @@ void loadConfigFromSD() {
     FIL confFile;
     FRESULT res;
 
-    if (SDcardMounted) {
         if (f_open(&confFile, FV_CONFIGFILENAME, FA_READ) != FR_OK) {
-
             getDefaultConfig();
             saveConfigtoSD();
 
@@ -74,9 +72,7 @@ void loadConfigFromSD() {
 
         }
 
-    } else {
-        getDefaultConfig();
-    }
+
 
 }
 

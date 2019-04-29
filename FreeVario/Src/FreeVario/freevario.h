@@ -20,4 +20,50 @@ void toggleDebugLED();
 void freeVario_RTOS_Init();
 void StartDefaultTask(void const * argument);
 
+
+#define FLS_GROUND      0
+#define FLS_TAKEOFF     1
+#define FLS_FLYING      2
+#define FLS_LANDED      3
+
+
+
+
+typedef struct {
+    uint16_t takeoffYear;
+    uint8_t takeoffMonth;
+    uint8_t takeoffDate;
+    uint8_t takeoffHour;
+    uint8_t takeoffMinute;
+    uint8_t takeoffSeconds;
+    uint32_t takeoffTemp;
+    uint32_t takeoffAltitude;
+    uint32_t takeoffLocationLAT;
+    uint32_t takeoffLocationLON;
+    uint16_t landingYear;
+    uint8_t landingMonth;
+    uint8_t landingDate;
+    uint8_t landingHour;
+    uint8_t landingMinute;
+    uint8_t landingSeconds;
+    uint32_t landingLocationLAT;
+    uint32_t landingLocationLON;
+    uint32_t landingAltitude;
+    uint8_t flightstatus;
+    int32_t MaxAltitudeMeters;
+    int32_t MaxAltitudeGainedMeters;
+    int32_t MaxVarioMs;
+    int32_t MaxVarioSinkMs;
+    int32_t currentLogID;
+    uint8_t muted;
+    int32_t barognssdeveation;  //difference between baro and gnss (baro - gnss)
+    uint8_t barognssavalid;    //flag if the adjusted value is usable
+    uint8_t useKalman; //use kalman with accelerometer insead of a lowpass filter
+    uint8_t SDcardMounted;
+} ActivityData; //owner: freevario.c
+
+extern ActivityData activity;
+
+
+
 #endif /* FREEVARIO_H_ */

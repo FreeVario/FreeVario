@@ -10,6 +10,10 @@
 
 #include <displaytask.h>
 #include "util.h"
+#include "datalog.h"
+#include <readsensors.h>
+#include "freevario.h"
+
 extern TaskHandle_t xDisplayNotify;
 
 unsigned char * frame_buffer[EPD_WIDTH * EPD_HEIGHT / 8] __attribute__((section(".ccmram")));
@@ -262,6 +266,8 @@ void displayTaskUpdate(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
     Paint_Clear(paint, UNCOLORED);
     if (datalog.isLogging) {
         Paint_DrawStringAt(paint, 0, 0, " LOG", &Font14, COLORED);
+    } else if (activity.SDcardMounted) {
+        Paint_DrawStringAt(paint, 0, 0, " SD ", &Font14, COLORED);
     } else {
         Paint_DrawStringAt(paint, 0, 0, " ---", &Font14, COLORED);
     }

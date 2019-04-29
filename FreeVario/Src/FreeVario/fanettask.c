@@ -13,7 +13,6 @@
 #include "cmsis_os.h"
 #include "../fvconfig.h"
 #include <stdlib.h>
-#include <globaldata.h>
 #include "SX1278.h"
 
 extern SPI_HandleTypeDef FV_LoRa_SPI;

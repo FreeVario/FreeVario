@@ -10,15 +10,15 @@
 
 #include "sensorstask.h"
 #include <readsensors.h>
-#include <globaldata.h>
 #include "nmea.h"
 #include <stdlib.h>
 #include <string.h>
 #include "stm32f4xx_hal.h"
+#include "freevario.h"
 
 uint8_t nmeasendbuffer[SENDBUFFER] __attribute__((section(".ccmram")));
 
-extern SensorData sensors;
+
 extern QueueHandle_t uartQueueHandle;
 
 void StartSensorsTask(void const * argument) {

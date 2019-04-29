@@ -12,9 +12,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "audio.h"
+#include <readsensors.h>
+#include "freevario.h"
 
-extern SensorData sensors;
-extern ActivityData activity;
+
 extern WWDG_HandleTypeDef hwwdg;
 
     TickType_t times;

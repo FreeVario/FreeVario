@@ -13,7 +13,7 @@
 #include "../fvconfig.h"
 #include "gps.h"
 #include "gpstask.h"
-#include <globaldata.h>
+#include "freevario.h"
 
 void setRTCFromHgps(gps_t * hgps);
 void setActivityTakeoffTime(ActivityData * activity);

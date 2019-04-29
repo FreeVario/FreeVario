@@ -10,11 +10,11 @@
 
 #include "loggertask.h"
 #include "datalog.h"
+#include "freevario.h"
 
 DataLog datalog __attribute__((section(".ccmram")));
 
 extern TaskHandle_t xLogDataNotify;
-extern uint8_t SDcardMounted;
 extern osMutexId sdCardMutexHandle;
 
 void StartLoggerTask(void const * argument) {
@@ -37,7 +37,7 @@ void StartLoggerTask(void const * argument) {
         times = xTaskGetTickCount();
         updateLogBooktime = xTaskGetTickCount();
 
-        if (!SDcardMounted) { //can't continue without a SD card
+        if (!activity.SDcardMounted) { //can't continue without a SD card
             xLogDataNotify = NULL;
             vTaskSuspend( NULL);
         }

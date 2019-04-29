@@ -25,11 +25,8 @@ extern "C" {
 #include "gps.h"
 #include "../fvconfig.h"
 #include <stdlib.h>
-#include <globaldata.h>
 
-extern SensorData sensors;
 extern gps_t hgps;
-extern ActivityData activity;
 //TODO: Fix compiler warning
 
 void StartDisplayTask(void const * argument);

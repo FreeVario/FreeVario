@@ -11,10 +11,11 @@
 #include "readsensors.h"
 #include "kalman.h"
 #include "MadgwickAHRS.h"
+#include "freevario.h"
 
 extern I2C_HandleTypeDef FV_I2C;
-extern SensorData sensors;
 extern ADC_HandleTypeDef FV_HALADC;
+
 
 #define MPU6050_ACCE_SENS_2         ((float) 16384)
 #define MPU6050_ACCE_SENS_4         ((float) 8192)

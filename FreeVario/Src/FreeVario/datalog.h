@@ -12,11 +12,19 @@
 #define DATALOG_H_
 #include "../fvconfig.h"
 #include "gps.h"
-#include <globaldata.h>
 
 void writeFlightLogSummaryFile();
 int openDataLogFile(FIL * logFile);
 void writeDataLogFile(FIL * logFile);
 void closeDataLogFile(FIL * logFile);
 //FRESULT set_timestamp(char * obj);
+
+
+
+typedef struct {
+    uint8_t isLogging;
+} DataLog;
+
+extern DataLog datalog;
+
 #endif /* DATALOG_H_ */

@@ -10,10 +10,13 @@
 
 #include "datalog.h"
 #include "fatfs.h"
+#include <readsensors.h>
+#include "freevario.h"
+#include <stdlib.h>
+#include <string.h>
 
-extern ActivityData activity;
 extern gps_t hgps;
-extern SensorData sensors;
+
 
 /**
  * @brief Rewrites the Flight log summary file
