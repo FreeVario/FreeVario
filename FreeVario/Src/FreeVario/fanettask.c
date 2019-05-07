@@ -19,6 +19,15 @@ extern SPI_HandleTypeDef FV_LoRa_SPI;
 SX1278_hw_t SX1278_hw;
 SX1278_t SX1278;
 
+/*
+ * NOT YET FANET IMPLEMENTATION
+ * This is a test implementation
+ * to simulate a FLARM radio with
+ * a private data structure. The fanet
+ * data structure will be implemented
+ * at a later stage.
+ */
+
 void StartFanetTask(void const * argument) {
 
     int ret;

@@ -753,12 +753,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PWR_EN_Pin SX_NSS_Pin DC_Pin */
-  GPIO_InitStruct.Pin = PWR_EN_Pin|SX_NSS_Pin|DC_Pin;
+  /*Configure GPIO pin : PWR_EN_Pin */
+  GPIO_InitStruct.Pin = PWR_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(PWR_EN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PWRBUTTON_Pin */
   GPIO_InitStruct.Pin = PWRBUTTON_Pin;
@@ -773,6 +773,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : SX_NSS_Pin DC_Pin */
+  GPIO_InitStruct.Pin = SX_NSS_Pin|DC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SX_INT_Pin BUSY_Pin */
   GPIO_InitStruct.Pin = SX_INT_Pin|BUSY_Pin;

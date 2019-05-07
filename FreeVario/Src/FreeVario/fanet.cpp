@@ -10,3 +10,11 @@
 
 #include "fanet.h"
 
+/*
+ * NOT YET FANET IMPLEMENTATION
+ * This is a test implementation
+ * to simulate a FLARM radio with
+ * a private data structure. The fanet
+ * data structure will be implemented
+ * at a later stage.
+ */
