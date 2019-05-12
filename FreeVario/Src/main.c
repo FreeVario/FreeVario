@@ -169,6 +169,37 @@ int main(void)
   MX_WWDG_Init();
 #endif
 
+
+//Support for previous model that uses NPN transistor for the buzzer
+  //TODO: read cpu serial as a switch
+
+
+
+#ifdef FV_NPN_CHECK
+
+
+  if ((STM32_UUID[2]) == 825503794) { //Id of the 1 board that needs this
+
+        //char buff[30];
+        //sprintf(buff, "serial %d \r\n", idPart3);
+        //CDC_Transmit_FS(buff, 30);
+
+        TIM_OC_InitTypeDef sConfigOC = { 0 };
+        sConfigOC.OCMode = TIM_OCMODE_PWM1;
+        sConfigOC.Pulse = 0;
+        sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+        sConfigOC.OCNPolarity = TIM_OCNPOLARITY_LOW;
+        sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+        sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+        sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+        if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1)
+                != HAL_OK) {
+            Error_Handler();
+        }
+
+    }
+
+#endif
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -574,7 +605,7 @@ static void MX_TIM1_Init(void)
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
@@ -588,7 +619,7 @@ static void MX_TIM1_Init(void)
   sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
   sBreakDeadTimeConfig.DeadTime = 0;
   sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_LOW;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
   sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
   if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
   {

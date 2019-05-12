@@ -489,6 +489,7 @@ void StartDefaultTask(void const * argument) {
         }
 
         vTaskDelayUntil(&times, xDelay);
+
     }
 
 }

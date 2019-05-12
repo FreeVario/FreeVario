@@ -62,9 +62,9 @@ void StartFanetTask(void const * argument) {
 
         message_length = sprintf(buffer, "Hello %d", message);
         ret = SX1278_LoRaEntryTx(&SX1278, message_length, 2000);
-        printf("Entry: %d\r\n", ret);
+       // printf("Entry: %d\r\n", ret);
         osDelay(100);
-        printf("Sending %s\r\n", buffer);
+        //printf("Sending %s\r\n", buffer);
         ret = SX1278_LoRaTxPacket(&SX1278, (uint8_t *) buffer, message_length,
                 2000);
         message += 1;

@@ -22,6 +22,12 @@
 #include "stm32f4xx_hal.h"
 #include "FreeRTOS.h"
 
+ //Read the MPU UUID
+#define STM32_UUID ((uint32_t *)0x1FFF7A10)
+
+ //For the 1.1 version board that uses NPN transistor for the buzzer
+#define FV_NPN_CHECK
+
  //FreeRtos Tasks enable
 #define FV_DISPLAY
 #define FV_SENSORS
