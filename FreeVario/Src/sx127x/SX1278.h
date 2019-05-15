@@ -172,9 +172,10 @@
  **********************************************************/
 #define SX1278_433MHZ			0
 
-static const uint8_t SX1278_Frequency[1][3] = { { 0x6C, 0x80, 0x00 }, //434MHz
-		};
+static const uint8_t SX1278_Frequency[1][3] = { { 0x6C, 0x80, 0x01 }, }; //868Mhz
 
+//static const uint8_t SX1278_Frequency[1][3] = { { 0x6C, 0x80, 0x00 }, //434MHz (default)
+//        };
 
 #define SX1278_POWER_20DBM		0
 #define SX1278_POWER_17DBM		1

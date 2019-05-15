@@ -50,13 +50,14 @@ void StartFanetTask(void const * argument) {
     SX1278.hw = &SX1278_hw;
     //SX1278_sleep(&SX1278);
     //configure module
-    SX1278_begin(&SX1278, SX1278_433MHZ, SX1278_POWER_17DBM, SX1278_LORA_SF_8,
+    SX1278_begin(&SX1278, SX1278_433MHZ, SX1278_POWER_20DBM, SX1278_LORA_SF_8,
     SX1278_LORA_BW_20_8KHZ, 10);
+
     SX1278_LoRaEntryTx(&SX1278, 16, 2000);
+    SX1278_LoRaEntryRx(&SX1278, 16, 2000);
 
     /* Infinite loop */
     for (;;) {
-        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
         osDelay(3000);
 
@@ -65,10 +66,23 @@ void StartFanetTask(void const * argument) {
        // printf("Entry: %d\r\n", ret);
         osDelay(100);
         //printf("Sending %s\r\n", buffer);
-        ret = SX1278_LoRaTxPacket(&SX1278, (uint8_t *) buffer, message_length,
-                2000);
+        ret = SX1278_LoRaTxPacket(&SX1278, (uint8_t *) buffer, message_length, 2000);
         message += 1;
 
+
+
+/*
+
+
+        ret = SX1278_LoRaRxPacket(&SX1278);
+        printf("Received: %d\r\n", ret);
+        if (ret > 0) {
+            SX1278_read(&SX1278, (uint8_t *) buffer, ret);
+            CDC_Transmit_FS((uint8_t *) &buffer, 64);
+
+        }
+
+*/
     }
 
 }
