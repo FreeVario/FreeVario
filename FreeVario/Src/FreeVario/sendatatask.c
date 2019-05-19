@@ -20,25 +20,27 @@ extern QueueHandle_t uartQueueHandle;
 void setupBTData() {
 
     char buff[30];
+    osDelay(500);
     sprintf(buff, "AT");
     HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
-    osDelay(200);
-    sprintf(buff, "AT+NAMEFreeVarioF4");
+    osDelay(500);
+    sprintf(buff, "AT+NAMEFreeVario");
     HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
-    osDelay(200);
-    sprintf(buff, "AT+NAMBFreeVarioF4LE");
+    osDelay(500);
+    sprintf(buff, "AT+NAMBFreeVarioLE");
     HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
-    osDelay(200);
-    sprintf(buff, "AT+DUAL0");
-    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
-    osDelay(200);
+    osDelay(500);
+//    sprintf(buff, "AT+DUAL0");
+//    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
+//    osDelay(500);
+
 //    sprintf(buff, "AT+ROLB0");
 //    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
 //    HAL_Delay(500);
-//    sprintf(buff, "AT+PIN1234");
+//    sprintf(buff, "AT+PINE1234");
 //    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
 //    HAL_Delay(500);
-//    sprintf(buff, "AT+PINB120730");
+//    sprintf(buff, "AT+PINB000000");
 //    HAL_UART_Transmit(&FV_UARTBT, buff, strlen(buff), 0xff);
 //    HAL_Delay(500);
 //    sprintf(buff, "AT+BAUD4");

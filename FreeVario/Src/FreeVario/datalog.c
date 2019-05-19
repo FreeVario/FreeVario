@@ -92,8 +92,8 @@ int openDataLogFile(FIL* logFile) {
     }
 
     uint8_t header[] =
-            "Date,GPS Fix, GPS Valid,Latitude,Logitude, GPS Altitude,Coarse,Speed,Variation,Sats in use, Baro Altitude, Vario,"
-                    "Accel X,Accel Y, Accel Z, Gyro X, Gyro Y, Gyro Z, G-Force ,Temperature, Humidity, Pressure, Pressure Raw, Baro GNSS Valid, Baro GNSS dif, Vario Smooth, Kelman \r\n";
+            "Date,GPS Fix, GPS Valid,Latitude,Logitude, GPS Altitude,Coarse,Speed,Sats in use, Baro Altitude, Vario,"
+                    "Accel X,Accel Y, Accel Z, Gyro X, Gyro Y, Gyro Z, G-Force ,Temperature, Humidity, Pressure, Pressure Raw, vBat, Baro GNSS Valid, Baro GNSS dif, Vario Smooth, Kelman \r\n";
     f_write(logFile, header, strlen(header), (void *) &byteswritten);
     f_sync(logFile);
     return 1;
@@ -113,17 +113,17 @@ void writeDataLogFile(FIL *logFile) {
 //	}
 
     sprintf(mtext,
-            "%u-%02u-%02u %02u:%02u:%02u,%u,%u,%ld,%ld,%ld,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%u,%ld,%ld,%d\r\n",
+            "%u-%02u-%02u %02u:%02u:%02u,%u,%u,%ld,%ld,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%u,%u,%ld,%ld,%d\r\n",
             hgps.date, hgps.month, hgps.year, hgps.hours, hgps.minutes,
             hgps.seconds, hgps.fix, hgps.is_valid,
             (int32_t) (hgps.latitude * 1000000),
             (int32_t) (hgps.longitude * 1000000),
             (int32_t) (hgps.altitude * 1000), (int32_t) (hgps.coarse * 1000),
-            (int32_t) (hgps.speed * 1000), (int32_t) (hgps.variation * 1000),
+            (int32_t) (hgps.speed * 1000),
             hgps.sats_in_use, sensors.AltitudeMeters, sensors.VarioMs,
             sensors.accel_x, sensors.accel_y, sensors.accel_z, sensors.gyro_x,
             sensors.gyro_y, sensors.gyro_z, sensors.gforce, sensors.temperature,
-            sensors.humidity, sensors.pressure, sensors.pressureraw,
+            sensors.humidity, sensors.pressure, sensors.pressureraw, sensors.vbat,
             activity.barognssavalid, activity.barognssdeveation,
             (int32_t) conf.variosmooth, activity.useKalman);
 

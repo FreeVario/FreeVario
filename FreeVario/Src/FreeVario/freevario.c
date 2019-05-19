@@ -315,7 +315,7 @@ void StartDefaultTask(void const * argument) {
                 if (activity.SDcardMounted) {
                     f_mount(0, "0:", 1); //unmount SDCARD
                 }
-                osDelay(5000);
+                osDelay(4500);
                 while (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
                         == GPIO_PIN_SET) { //wait for button to be released
                 }

@@ -55,9 +55,10 @@ void StartDisplayTask(void const * argument) {
         if (xResult == pdPASS) {
             /* A notification was received.  See which bits were set. */
             if (ulNotifiedValue == 1) {
+                clearScreen(&paint, &epd, frame_buffer);
                 displayMessageShutdown(&paint, &epd, frame_buffer);
-                displayMessageShutdown(&paint, &epd, frame_buffer); //also the second buffer
-                osDelay(8000); //just sleep till shutdown
+                //displayMessageShutdown(&paint, &epd, frame_buffer); //also the second buffer
+                osDelay(20000); //just sleep till shutdown
             }
 
             if (ulNotifiedValue == 2) {
@@ -324,7 +325,7 @@ void displayTaskUpdate(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
 
 }
 
-void displayMessageShutdown(Paint *paint, EPD *epd,
+void clearScreen(Paint *paint, EPD *epd,
         unsigned char * frame_buffer) {
 
     Paint_SetWidth(paint, epd->width);
@@ -335,6 +336,15 @@ void displayMessageShutdown(Paint *paint, EPD *epd,
     EPD_DisplayFrame(epd);
     EPD_ClearFrameMemory(epd, 0xFF);
     EPD_DisplayFrame(epd);
+
+}
+
+void displayMessageShutdown(Paint *paint, EPD *epd,
+        unsigned char * frame_buffer) {
+
+    Paint_SetWidth(paint, epd->width);
+    Paint_SetHeight(paint, epd->height);
+    Paint_Clear(paint, UNCOLORED);
 
     if (EPD_Init(epd, lut_full_update) != 0) {
         return;

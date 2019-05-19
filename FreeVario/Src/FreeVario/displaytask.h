@@ -35,6 +35,8 @@ void displayRefreshMainScreen(Paint *paint, EPD *epd,
         unsigned char * frame_buffer);
 void displayDrawmainScreen(Paint *paint, EPD *epd, unsigned char * frame_buffer);
 void displayTaskUpdate(Paint *paint, EPD *epd, unsigned char * frame_buffer);
+void clearScreen(Paint *paint, EPD *epd,
+        unsigned char * frame_buffer);
 void displayMessageShutdown(Paint *paint, EPD *epd,
         unsigned char * frame_buffer);
 

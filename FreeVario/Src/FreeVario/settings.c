@@ -133,7 +133,7 @@ void getDefaultConfig() {
     conf.advMinSmooth = 10;
 
     // highest level for conf.variosmooth
-    conf.advMaxSmooth = 20;
+    conf.advMaxSmooth = 30;
 
     //save the last logbook number
     conf.lastLogNumber = 0;
