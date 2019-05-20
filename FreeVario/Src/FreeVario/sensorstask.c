@@ -29,10 +29,11 @@ void StartSensorsTask(void const * argument) {
     const TickType_t xDelay = SENSORREADMS; //20hz
     uint8_t timetosend = 1;
     uint8_t rundelayd = 1;
+    uint8_t runoncedelayd = 1;
     BMP280_HandleTypedef bmp280;
     SD_MPU6050 mpu1;
     memset(&sensors, 0, sizeof(sensors));
-    sensors.variosmooth = conf.variosmooth;
+    sensors.variosmooth = 5;
 
     sensors.humidity = 0;
     sensors.pressure = 0;
@@ -61,6 +62,7 @@ void StartSensorsTask(void const * argument) {
         if ((timetosend >= 4)
                 & ((xTaskGetTickCount() - startTime) > STARTDELAY)) { //every 200 ticks
             timetosend = 1;
+            rundelayd = 0;
             checkAdaptiveVario(sensors.VarioMs, activity.flightstatus);
             memset(nmeasendbuffer, 0, SENDBUFFER);
             NMEA_getPTAS1(nmeasendbuffer, sensors.VarioMs, sensors.VarioMs,
@@ -77,7 +79,7 @@ void StartSensorsTask(void const * argument) {
 
         }
 
-        if ((int) xTaskGetTickCount()
+        if ((xTaskGetTickCount() - startTime)
                 > (STARTDELAY + 8000)&& activity.flightstatus == FLS_GROUND) {
 
             if (abs(sensors.VarioMs) > TAKEOFFVARIO) {
@@ -86,11 +88,15 @@ void StartSensorsTask(void const * argument) {
 
         }
 
-        if ((int) xTaskGetTickCount()
-                > (STARTDELAY + 8000)&& rundelayd) { //period between startup and start delay
+        if ((xTaskGetTickCount() - startTime)
+                < (STARTDELAY ) && rundelayd) { //period between startup and start delay
             sensors.VarioMsRaw = 0;
             sensors.VarioMs = 0;
-            rundelayd = 0;
+        }
+
+        if (!rundelayd && runoncedelayd) { //run once after startup delay
+            runoncedelayd = 0;
+            sensors.variosmooth = conf.variosmooth;
         }
 
 
