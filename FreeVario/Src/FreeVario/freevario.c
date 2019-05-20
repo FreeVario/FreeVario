@@ -426,6 +426,11 @@ void StartDefaultTask(void const * argument) {
 
         switch (activity.flightstatus) {
         case FLS_TAKEOFF:
+            //just mount the card again in case it failed at startup
+            if ( xSemaphoreTake(sdCardMutexHandle,(TickType_t ) 500) == pdTRUE) {
+                f_mount(&SDFatFS, SDPath, 0);
+                xSemaphoreGive(sdCardMutexHandle);
+            }
             activity.currentLogID = conf.lastLogNumber + 1;
             activity.takeoffLocationLAT = (int32_t) (hgps.latitude * 1000000);
             activity.takeoffLocationLON = (int32_t) (hgps.longitude * 1000000);
@@ -434,6 +439,7 @@ void StartDefaultTask(void const * argument) {
             activity.flightstatus = FLS_FLYING;
             xTaskNotify(xLogDataNotify, 0x01, eSetValueWithOverwrite);
             landedcheck = xTaskGetTickCount();
+
             break;
 
         case FLS_FLYING:

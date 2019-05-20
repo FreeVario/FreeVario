@@ -125,7 +125,7 @@ void writeDataLogFile(FIL *logFile) {
             sensors.gyro_y, sensors.gyro_z, sensors.gforce, sensors.temperature,
             sensors.humidity, sensors.pressure, sensors.pressureraw, sensors.vbat,
             activity.barognssavalid, activity.barognssdeveation,
-            (int32_t) conf.variosmooth, activity.useKalman);
+            (int32_t) sensors.variosmooth, activity.useKalman);
 
     f_write(logFile, mtext, strlen(mtext), (void *) &byteswritten);
     f_sync(logFile);

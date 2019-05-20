@@ -28,9 +28,11 @@ void StartSensorsTask(void const * argument) {
     TickType_t startTime = xTaskGetTickCount();
     const TickType_t xDelay = SENSORREADMS; //20hz
     uint8_t timetosend = 1;
+    uint8_t rundelayd = 1;
     BMP280_HandleTypedef bmp280;
     SD_MPU6050 mpu1;
     memset(&sensors, 0, sizeof(sensors));
+    sensors.variosmooth = conf.variosmooth;
 
     sensors.humidity = 0;
     sensors.pressure = 0;
@@ -77,11 +79,20 @@ void StartSensorsTask(void const * argument) {
 
         if ((int) xTaskGetTickCount()
                 > (STARTDELAY + 8000)&& activity.flightstatus == FLS_GROUND) {
+
             if (abs(sensors.VarioMs) > TAKEOFFVARIO) {
                 sensors.barotakeoff = true;
             }
 
         }
+
+        if ((int) xTaskGetTickCount()
+                > (STARTDELAY + 8000)&& rundelayd) { //period between startup and start delay
+            sensors.VarioMsRaw = 0;
+            sensors.VarioMs = 0;
+            rundelayd = 0;
+        }
+
 
         if (sensors.barotakeoff && activity.flightstatus > FLS_GROUND) {
             sensors.barotakeoff = 0;

@@ -89,7 +89,7 @@ void getDefaultConfig() {
     //send data via serial port
     conf.SerialOut = true;
 
-    //send data via bluetooth. BT uses alot of power if not linked. Better to disable if not used.
+    //send data via bluetooth. BT uses power if not linked. Better to disable if not used.
     //BT will be available during startup, if the config menu is used, it will not be disabled.
     conf.SerialOutBT = true;
 
@@ -112,7 +112,7 @@ void getDefaultConfig() {
     conf.xcs = false;
 
     //low pass filter, the higher the number the slower the raw vario reading changes.
-    conf.variosmooth = 10;
+    conf.variosmooth = 20; //starting level
 
     // turn vario audio on or off
     conf.buzzer = true;
@@ -134,6 +134,9 @@ void getDefaultConfig() {
 
     // highest level for conf.variosmooth
     conf.advMaxSmooth = 30;
+
+    // x1000 Glider sink rate
+    conf.gliderSinkRate = -900;
 
     //save the last logbook number
     conf.lastLogNumber = 0;

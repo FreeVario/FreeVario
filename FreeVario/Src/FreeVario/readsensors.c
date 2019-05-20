@@ -150,8 +150,8 @@ void readSensorsBMP280(BMP280_HandleTypedef *bmp280) {
     if (activity.useKalman) {
         sensors.pressure = pressure;
     } else {
-        sensors.pressure = (conf.variosmooth * sensors.pressure + pressure)
-                / (conf.variosmooth + 1);
+        sensors.pressure = (sensors.variosmooth * sensors.pressure + pressure)
+                / (sensors.variosmooth + 1);
 
     }
 
@@ -229,6 +229,8 @@ unsigned short Matrix2Scalar(const char *mtx) {
     return scalar;
 }
 
+
+
 void checkAdaptiveVario(int32_t vario, int8_t takeoff) { //sensors.VarioMs as parameter
 #if defined(ADAPTIVEVARIO)
 
@@ -248,8 +250,8 @@ void checkAdaptiveVario(int32_t vario, int8_t takeoff) { //sensors.VarioMs as pa
     //Vario level goes back to zero within TriggerTime, increase the filter
     if (vTriggerd && fabs(vario) < triggerLevel
             && diff < (int) (conf.advTriggerTime)) {
-        if (conf.variosmooth <= conf.advMaxSmooth) {
-            conf.variosmooth++;
+        if (sensors.variosmooth <= conf.advMaxSmooth) {
+            sensors.variosmooth++;
             vTriggerd = false;
             vtime = xTaskGetTickCount();
 
@@ -265,8 +267,8 @@ void checkAdaptiveVario(int32_t vario, int8_t takeoff) { //sensors.VarioMs as pa
     //Vario stays below trigger level for advRelaxTime, decrease the filter
     if (fabs(vario) < (float) (triggerLevel) && !vTriggerd
             && diff > conf.advRelaxTime) {
-        if (conf.variosmooth > conf.advMinSmooth) {
-            conf.variosmooth--;
+        if (sensors.variosmooth > conf.advMinSmooth) {
+            sensors.variosmooth--;
             vtime = xTaskGetTickCount();
         }
     }
