@@ -42,6 +42,8 @@
 
 //Use GPS time instead of RTC
 #define USEGPSDATETIME
+//Logging is sync to the GPS but limited to 1 sec
+#define GPSFREQUENCY 1
 
 //Set RTC clock via GPS
 #define SETRTCBYGPS

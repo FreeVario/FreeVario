@@ -16,6 +16,7 @@ gps_t hgps __attribute__((section(".ccmram")));
 extern TaskHandle_t xReceiveNotify;
 extern UART_HandleTypeDef FV_UARTGPS;
 extern QueueHandle_t uartQueueHandle;
+extern TaskHandle_t xLogDataNotify;
 
 void StartGPSTask(void const * argument) {
 
@@ -23,6 +24,7 @@ void StartGPSTask(void const * argument) {
     uint8_t flag = 0;
     uint16_t y = 0;
     size_t len;
+    uint8_t gpspulse=0;
 
     gps_init(&hgps);
     configASSERT(xReceiveNotify == NULL);
@@ -40,6 +42,7 @@ void StartGPSTask(void const * argument) {
         xReceiveNotify = xTaskGetCurrentTaskHandle();
         ulTaskNotifyTake( pdTRUE, portMAX_DELAY);
         HAL_UART_DMAStop(&FV_UARTGPS);
+        gpspulse++;
 
         /*
          * The sendbuffer was getting to big with the new GNSS modules
@@ -77,6 +80,13 @@ void StartGPSTask(void const * argument) {
         }
 
         gps_process(&hgps, &buffer, GPSRXBUFFER);
+
+
+        //if the GPS is 10Hz, this will limit the logging to 1Hz
+        if (gpspulse >= GPSFREQUENCY) {
+            xTaskNotify(xLogDataNotify, 0x01, eSetValueWithoutOverwrite); //sync to GPS
+            gpspulse=0;
+        }
 
     }
 

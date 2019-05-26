@@ -57,7 +57,7 @@ void StartDisplayTask(void const * argument) {
             if (ulNotifiedValue == 1) {
                 clearScreen(&paint, &epd, frame_buffer);
                 displayMessageShutdown(&paint, &epd, frame_buffer);
-                //displayMessageShutdown(&paint, &epd, frame_buffer); //also the second buffer
+
                 osDelay(20000); //just sleep till shutdown
             }
 

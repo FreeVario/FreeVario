@@ -22,6 +22,7 @@ void StartLoggerTask(void const * argument) {
 
     TickType_t times;
     const TickType_t xDelay = 1000;
+    TickType_t timesdif;
     FIL dataLogFile;
     uint32_t ulNotifiedValue;
     BaseType_t xResult;
@@ -34,7 +35,7 @@ void StartLoggerTask(void const * argument) {
     /* Infinite loop */
     for (;;) {
 
-        times = xTaskGetTickCount();
+
         updateLogBooktime = xTaskGetTickCount();
 
         if (!activity.SDcardMounted) { //can't continue without a SD card
@@ -42,12 +43,13 @@ void StartLoggerTask(void const * argument) {
             vTaskSuspend( NULL);
         }
 
-        xMaxBlockTime = pdMS_TO_TICKS(500);
+        xMaxBlockTime = pdMS_TO_TICKS(1000 - timesdif );
 
         xResult = xTaskNotifyWait( pdFALSE, /* Don't clear bits on entry. */
         pdTRUE, /* Clear all bits on exit. */
         &ulNotifiedValue, /* Stores the notified value. */
         xMaxBlockTime);
+        times = xTaskGetTickCount();
 
         if (xResult == pdPASS) {
             /* A notification was received.  See which bits were set. */
@@ -77,9 +79,10 @@ void StartLoggerTask(void const * argument) {
                 }
             }
 
-            //		if (ulNotifiedValue  == 2) { //flying (not used)
+            if (ulNotifiedValue  == 2) { //flying (used by gps tick)
 
-            //		}
+
+      		}
 
             if (ulNotifiedValue == 3) { //landed
                 if ( xSemaphoreTake(sdCardMutexHandle,
@@ -107,7 +110,8 @@ void StartLoggerTask(void const * argument) {
                 xSemaphoreGive(sdCardMutexHandle);
             }
         }
-        vTaskDelayUntil(&times, xDelay);
+
+        timesdif = xTaskGetTickCount() - times;
     }
 
     /* USER CODE END StartLoggerTask */
