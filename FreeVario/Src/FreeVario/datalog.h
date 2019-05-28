@@ -21,10 +21,6 @@ void closeDataLogFile(FIL * logFile);
 
 
 
-typedef struct {
-    uint8_t isLogging;
-} DataLog;
 
-extern DataLog datalog;
 
 #endif /* DATALOG_H_ */

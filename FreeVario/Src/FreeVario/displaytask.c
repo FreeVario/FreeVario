@@ -10,7 +10,7 @@
 
 #include <displaytask.h>
 #include "util.h"
-#include "datalog.h"
+#include "loggertask.h"
 #include <readsensors.h>
 #include "freevario.h"
 

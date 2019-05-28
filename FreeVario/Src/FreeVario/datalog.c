@@ -103,10 +103,10 @@ int openDataLogFile(FIL* logFile) {
 void writeDataLogFile(FIL *logFile) {
     uint32_t byteswritten = 0;
     uint8_t mtext[256];
-    char filename[32];
+   // char filename[32];
 //	FIL  logFile;
 
-    sprintf(filename, "%06d.csv", activity.currentLogID);
+   /// sprintf(filename, "%06d.csv", activity.currentLogID);
 //	if (f_open(&logFile, filename,
 //			FA_OPEN_APPEND | FA_WRITE) != FR_OK) {
 //		return;

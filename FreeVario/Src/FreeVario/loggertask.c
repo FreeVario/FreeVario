@@ -10,6 +10,7 @@
 
 #include "loggertask.h"
 #include "datalog.h"
+#include "gpxlog.h"
 #include "freevario.h"
 
 DataLog datalog __attribute__((section(".ccmram")));
@@ -20,16 +21,15 @@ extern osMutexId sdCardMutexHandle;
 void StartLoggerTask(void const * argument) {
     /* USER CODE BEGIN StartLoggerTask */
 
-    TickType_t times;
-    const TickType_t xDelay = 1000;
-    TickType_t timesdif;
     FIL dataLogFile;
+    FIL gpxLogFile;
     uint32_t ulNotifiedValue;
     BaseType_t xResult;
     TickType_t xMaxBlockTime;
     configASSERT(xLogDataNotify == NULL);
     xLogDataNotify = xTaskGetCurrentTaskHandle();
     datalog.isLogging = 0;
+    datalog.gpxIsLogging = 0;
     TickType_t updateLogBooktime = 0;
     osDelay(4000); //wait for setup of environment
     /* Infinite loop */
@@ -43,13 +43,13 @@ void StartLoggerTask(void const * argument) {
             vTaskSuspend( NULL);
         }
 
-        xMaxBlockTime = pdMS_TO_TICKS(1000 - timesdif );
+        xMaxBlockTime = pdMS_TO_TICKS(1000);
 
         xResult = xTaskNotifyWait( pdFALSE, /* Don't clear bits on entry. */
         pdTRUE, /* Clear all bits on exit. */
         &ulNotifiedValue, /* Stores the notified value. */
         xMaxBlockTime);
-        times = xTaskGetTickCount();
+
 
         if (xResult == pdPASS) {
             /* A notification was received.  See which bits were set. */
@@ -62,14 +62,18 @@ void StartLoggerTask(void const * argument) {
                     osDelay(100);
                     uint8_t devnotready = 1;
                     uint8_t timeout = 0;
-                    //openDataLogFile(&dataLogFile);
                     while (devnotready) {
 
                         timeout++;
-                        if (openDataLogFile(&dataLogFile)) {
+                        if (openDataLogFile(&dataLogFile)) { //datalog is the default logger
                             datalog.isLogging = 1;
                             devnotready = 0;
                         }
+
+                        if (openGPXLogFile(&gpxLogFile)) {
+                            datalog.gpxIsLogging = 1;
+                        }
+
                         osDelay(2000);
                         if (timeout > 2)
                             devnotready = 0;
@@ -92,10 +96,20 @@ void StartLoggerTask(void const * argument) {
                         datalog.isLogging = 0;
                         closeDataLogFile(&dataLogFile);
                     }
+
+                    if (datalog.gpxIsLogging) {
+                        closeGPXLogFile(&gpxLogFile);
+                        datalog.gpxIsLogging = 0;
+                    }
                     writeFlightLogSummaryFile();
                     xSemaphoreGive(sdCardMutexHandle);
                 }
             }
+        }
+
+        if (ulNotifiedValue  == 9) { //gps signal
+
+
         }
 
         if (datalog.isLogging) {
@@ -103,6 +117,11 @@ void StartLoggerTask(void const * argument) {
             if ( xSemaphoreTake(sdCardMutexHandle,
                     (TickType_t ) 600) == pdTRUE) {
                 writeDataLogFile(&dataLogFile);
+
+                if (datalog.gpxIsLogging) {
+                    writeGPXLogFile(&gpxLogFile);
+                }
+
                 if (xTaskGetTickCount() - updateLogBooktime > UPDATELOGFILETIME) { //update Summary log in case of program crash
                     writeFlightLogSummaryFile();
                 }
@@ -111,7 +130,7 @@ void StartLoggerTask(void const * argument) {
             }
         }
 
-        timesdif = xTaskGetTickCount() - times;
+
     }
 
     /* USER CODE END StartLoggerTask */

@@ -17,6 +17,15 @@ extern "C" {
 #include "cmsis_os.h"
 #include "../fvconfig.h"
 
+typedef struct {
+    uint8_t isLogging;
+    uint8_t gpxIsLogging;
+
+} DataLog;
+
+extern DataLog datalog;
+
+
 void StartLoggerTask(void const * argument);
 
 #endif /* FREEVARIO_LOGGERTASK_H_ */

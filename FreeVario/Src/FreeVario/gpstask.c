@@ -84,7 +84,7 @@ void StartGPSTask(void const * argument) {
 
         //if the GPS is 10Hz, this will limit the logging to 1Hz
         if (gpspulse >= GPSFREQUENCY) {
-            xTaskNotify(xLogDataNotify, 0x01, eSetValueWithoutOverwrite); //sync to GPS
+            xTaskNotify(xLogDataNotify, 0x09, eSetValueWithoutOverwrite); //sync to GPS
             gpspulse=0;
         }
 
