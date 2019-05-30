@@ -61,7 +61,7 @@ void StartAudioTask(void const * argument) {
 
         if (running) {
 
-            if (activity.flightstatus == FLS_FLYING && !activity.muted) {
+            if ((activity.flightstatus == FLS_FLYING) && !activity.muted) {
 
                 makeVarioAudio(&audiorun, sensors.VarioMs); //flying
 

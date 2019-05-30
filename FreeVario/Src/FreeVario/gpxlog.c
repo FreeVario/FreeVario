@@ -19,11 +19,12 @@
 #include <readsensors.h>
 #include "freevario.h"
 #include "gps.h"
+#include "datalog.h"
 
 extern gps_t hgps;
 
-char  gpxheader[] = "﻿<?xml version=\"1.0\" encoding=\"utf-8\"?><gpx creator=\"FreeVario\" version=\"1.0\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" >\r\n\r\n";
-char gpxtail[] = "</gpx>";
+char  gpxheader[] = "﻿<?xml version=\"1.0\" encoding=\"utf-8\"?><gpx creator=\"FreeVario\" version=\"1.0\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" >\r\n <trk>\r\n<trkseg>\r\n";
+char gpxtail[] = "</trkseg>\r\n</trk>\r\n</gpx>";
 
 
 
@@ -52,12 +53,19 @@ int openGPXLogFile(FIL* gpxFile) {
 void writeGPXLogFile(FIL *gpxFile) {
     uint32_t byteswritten = 0;
     uint8_t gpxtrkpt[128];
+    char gpxlon[11];
+    char gpxlat[11];
+    char alt[11];
+
+    floa(gpxlon, hgps.longitude);
+    floa(gpxlat, hgps.latitude);
+    floa(alt, hgps.altitude);
 
 
-    sprintf(gpxtrkpt, "<trkpt lat=\"%f\" lon=\"%f\">\r\n<ele>%f</ele>\r\n<time>20%u-%02u-%02uT%02u:%02u:%02uZ</time>\r\n</trkpt>\r\n",
-            hgps.latitude,
-            hgps.longitude,
-            hgps.altitude,
+    sprintf(gpxtrkpt, "<trkpt lat=\"%s\" lon=\"%s\">\r\n<ele>%s</ele>\r\n<time>20%u-%02u-%02uT%02u:%02u:%02uZ</time>\r\n</trkpt>\r\n",
+            gpxlat,
+            gpxlon,
+            alt,
             hgps.year,
             hgps.month,
             hgps.date,

@@ -137,6 +137,9 @@ void intTocharFloat(char *buffer, int value, uint16_t div, uint16_t dif,
 
 }
 
+
+
+
 void RTC_CalcDOW(RTC_DateTypeDef *date) {
     int16_t adjustment, mm, yy;
 

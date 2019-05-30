@@ -279,6 +279,8 @@ void StartDefaultTask(void const * argument) {
     activity.useKalman = 0;
     activity.SDcardMounted =0;
 
+    uint8_t UserOkButtonLp = 0;
+
     memset(&activity, 0, sizeof(activity));
 
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
@@ -335,6 +337,7 @@ void StartDefaultTask(void const * argument) {
                     & (HAL_GPIO_ReadPin(BTN_OK_GPIO_Port, BTN_OK_Pin)
                             == GPIO_PIN_SET)) {
                 UserOkButton = 0;
+                UserOkButtonLp = 1;
                 if (activity.flightstatus == FLS_FLYING) {
                     activity.flightstatus = FLS_LANDED;
                 } else {
@@ -345,6 +348,10 @@ void StartDefaultTask(void const * argument) {
             if (HAL_GPIO_ReadPin(BTN_OK_GPIO_Port, BTN_OK_Pin)
                     == GPIO_PIN_RESET) {
                 UserOkButton = 0;
+
+                if (!UserOkButtonLp) {
+
+                }
             }
 
         }
@@ -432,8 +439,8 @@ void StartDefaultTask(void const * argument) {
                 xSemaphoreGive(sdCardMutexHandle);
             }
             activity.currentLogID = conf.lastLogNumber + 1;
-            activity.takeoffLocationLAT = (int32_t) (hgps.latitude * 1000000);
-            activity.takeoffLocationLON = (int32_t) (hgps.longitude * 1000000);
+            activity.takeoffLocationLAT = hgps.latitude ;
+            activity.takeoffLocationLON = hgps.longitude;
             activity.takeoffTemp = sensors.temperature;
             setActivityTakeoffTime(&activity); //util.c
             activity.flightstatus = FLS_FLYING;
@@ -467,8 +474,8 @@ void StartDefaultTask(void const * argument) {
 
         case FLS_LANDED:
             activity.landingAltitude = sensors.AltitudeMeters;
-            activity.landingLocationLAT = (int32_t) (hgps.latitude * 1000000);
-            activity.landingLocationLON = (int32_t) (hgps.longitude * 1000000);
+            activity.landingLocationLAT = hgps.latitude;
+            activity.landingLocationLON = hgps.longitude;
             activity.MaxAltitudeGainedMeters = activity.MaxAltitudeMeters
                     - activity.takeoffAltitude;
             setActivityLandTime(&activity); //util.c

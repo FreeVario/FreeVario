@@ -18,7 +18,7 @@ int openDataLogFile(FIL * logFile);
 void writeDataLogFile(FIL * logFile);
 void closeDataLogFile(FIL * logFile);
 //FRESULT set_timestamp(char * obj);
-
+void floa(char * buff, float value);
 
 
 

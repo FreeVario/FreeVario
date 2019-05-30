@@ -26,7 +26,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  *
- * This file is part of GPS NMEA parser.
+ * This file is part of GPS NMEA parser library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
  */
@@ -54,7 +54,7 @@ extern "C" {
  *                  `double` is used as variable type when enabled, `float` when disabled.
  */
 #ifndef GPS_CFG_DOUBLE
-#define GPS_CFG_DOUBLE                      0
+#define GPS_CFG_DOUBLE                      1
 #endif
 
 /**

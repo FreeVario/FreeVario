@@ -45,9 +45,25 @@ void writeFlightLogSummaryFile() {
         //Error_Handler();
     } else {
         /* Write data to the text file */
+        char gpxtlon[11];
+        char gpxtlat[11];
+
+        floa(gpxtlon, activity.takeoffLocationLON);
+        floa(gpxtlat, activity.takeoffLocationLAT);
+
+        char gpxlon[11];
+        char gpxlat[11];
+
+        floa(gpxlon, activity.landingLocationLON);
+        floa(gpxlat, activity.landingLocationLAT);
+
+        uint8_t header[] = "Log ID, Takeoff Time, Takeoff Altitude, Temp, Landing Time, Landing Altitude, Max Altitude, Max gained, Max Vario, Max sink, Takeoff Lat, Takeoff Lon, Landing Lat, Landing Lon\r\n";
+
+        res = f_write(&logSumFile, header, strlen(header),
+                        (void *) &byteswritten);
 
         sprintf(wtext,
-                "%d,%u-%02u-%02u %02u:%02u:%02u,%d,%d,%u-%02u-%02u %02u:%02u:%02u,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
+                "%d,%u-%02u-%02u %02u:%02u:%02u,%d,%d,%u-%02u-%02u %02u:%02u:%02u,%d,%d,%d,%d,%d,%s,%s,%s,%s\r\n",
                 activity.currentLogID, activity.takeoffDate,
                 activity.takeoffMonth, activity.takeoffYear,
                 activity.takeoffHour, activity.takeoffMinute,
@@ -58,8 +74,8 @@ void writeFlightLogSummaryFile() {
                 activity.landingSeconds, activity.landingAltitude,
                 activity.MaxAltitudeMeters, activity.MaxAltitudeGainedMeters,
                 activity.MaxVarioMs, activity.MaxVarioSinkMs,
-                activity.takeoffLocationLAT, activity.takeoffLocationLON,
-                activity.landingLocationLAT, activity.landingLocationLON);
+                gpxtlat, gpxtlon,
+                gpxlat, gpxlon);
 
         res = f_write(&logSumFile, wtext, strlen(wtext),
                 (void *) &byteswritten);
@@ -112,12 +128,18 @@ void writeDataLogFile(FIL *logFile) {
 //		return;
 //	}
 
+    char gpxlon[11];
+    char gpxlat[11];
+
+    floa(gpxlon, hgps.longitude);
+    floa(gpxlat, hgps.latitude);
+
     sprintf(mtext,
-            "%u-%02u-%02u %02u:%02u:%02u,%u,%u,%ld,%ld,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%u,%u,%ld,%ld,%d\r\n",
+            "%u-%02u-%02u %02u:%02u:%02u,%u,%u,%s,%s,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%u,%u,%ld,%ld,%d\r\n",
             hgps.date, hgps.month, hgps.year, hgps.hours, hgps.minutes,
             hgps.seconds, hgps.fix, hgps.is_valid,
-            (int32_t) (hgps.latitude * 1000000),
-            (int32_t) (hgps.longitude * 1000000),
+            gpxlat,
+            gpxlon,
             (int32_t) (hgps.altitude * 1000), (int32_t) (hgps.coarse * 1000),
             (int32_t) (hgps.speed * 1000),
             hgps.sats_in_use, sensors.AltitudeMeters, sensors.VarioMs,
@@ -134,6 +156,25 @@ void writeDataLogFile(FIL *logFile) {
 
 void closeDataLogFile(FIL *logFile) {
     f_close(logFile);
+}
+
+
+
+void floa(char * buff, float value) {
+
+    int fpart;
+    uint32_t bpart;
+
+   uint32_t avalue = value * 1000000;
+
+    char *tmpSign = (value < 0) ? "-" : "";
+    fpart = abs(value);
+    bpart = avalue % 1000000;
+
+        sprintf(buff, "%s%d.%06u", tmpSign, fpart, bpart);
+
+
+
 }
 
 //FRESULT set_timestamp(char * obj) {

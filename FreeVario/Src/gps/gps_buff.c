@@ -1,6 +1,6 @@
 /**	
  * \file            gps_buff.c
- * \brief           Buffer manager
+ * \brief           Ring buffer manager
  */
  
 /*
@@ -26,264 +26,305 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  *
- * This file is part of GPS NMEA parser.
+ * This file is part of GPS NMEA parser library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
  */
 #include "gps_buff.h"
 
+/* --- Buffer unique part starts --- */
+/* Prefix for all buffer functions and typedefs */
+#define BUF_PREF(x)                     gps_ ## x
+/* --- Buffer unique part ends --- */
+
+/* Memory set and copy functions */
+#define BUF_MEMSET                      memset
+#define BUF_MEMCPY                      memcpy
+#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
+#define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
+#define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
+
 /**
- * \brief           Initialize buffer
- * \param[in]       buff: Pointer to buffer structure
- * \param[in]       data: Array for buffer data
- * \param[in]       size: Size of buffer. This parameter must match length of memory used on memory param
+ * \brief           Initialize buffer handle to default values with size and buffer data array
+ * \param[in]       buff: Buffer handle
+ * \param[in]       buffdata: Pointer to memory to use as buffer data
+ * \param[in]       size: Size of `buffdata` in units of bytes
+ *                  Maximum number of bytes buffer can hold is `size - 1`
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
-gps_buff_init(gps_buff_t* buff, void* data, size_t size) {
-    if (buff == NULL) {                         /* Check buffer structure */
+BUF_PREF(buff_init)(BUF_PREF(buff_t)* buff, void* buffdata, size_t size) {
+    if (buff == NULL || size == 0 || buffdata == NULL) {
         return 0;
     }
-    memset(buff, 0, sizeof(*buff));             /* Set buffer values to all zeros */
 
-    buff->size = size;                          /* Set default values */
-    buff->buff = data;
-    if (buff->buff == NULL) {                   /* Check allocation */
-        return 0;
-    }
-    return 1;                                   /* Initialized OK */
+    BUF_MEMSET(buff, 0x00, sizeof(*buff));
+
+    buff->size = size;
+    buff->buff = buffdata;
+
+    return 1;
 }
 
 /**
- * \brief           Free dynamic allocation if used on memory
- * \param[in]       buff: Pointer to buffer structure
+ * \brief           Free buffer memory
+ * \note            Since implementation does not use dynamic allocation,
+ *                  it just sets buffer handle to `NULL`
+ * \param[in]       buff: Buffer handle
  */
 void
-gps_buff_free(gps_buff_t* buff) {
-    buff->buff = NULL;
+BUF_PREF(buff_free)(BUF_PREF(buff_t)* buff) {
+    if (BUF_IS_VALID(buff)) {
+        buff->buff = NULL;
+    }
 }
 
 /**
  * \brief           Write data to buffer
- * \param[in]       buff: Pointer to buffer structure
- * \param[in]       data: Pointer to data to copy memory from
+ *                  Copies data from `data` array to buffer and marks buffer as full for maximum `count` number of bytes
+ * \param[in]       buff: Buffer handle
+ * \param[in]       data: Pointer to data to write into buffer
  * \param[in]       count: Number of bytes to write
- * \return          Number of bytes actually written to buffer
+ * \return          Number of bytes written to buffer.
+ *                  When value is less than `count`, there was no enough memory available
+ *                  to copy full data array
  */
 size_t
-gps_buff_write(gps_buff_t* buff, const void* data, size_t count) {
-    size_t i = 0, free, tocopy;
+BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t count) {
+    size_t tocopy, free;
     const uint8_t* d = data;
 
-    if (buff == NULL || count == 0) {           /* Check buffer structure */
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
-    if (buff->in >= buff->size) {               /* Check input pointer */
-        buff->in = 0;
-    }
-    free = gps_buff_get_free(buff);             /* Get free memory */
-    if (free < count) {                         /* Check available memory */	
-        if (free == 0) {                        /* If no memory, stop execution */
-            return 0;
-        }
-        count = free;                           /* Set values for write */
+
+    if (buff->w >= buff->size) {                /* Check input pointer */
+        buff->w = 0;                            /* On normal use, this should never happen */
     }
 
-    /* We have calculated memory for write */
-    tocopy = buff->size - buff->in;             /* Calculate number of elements we can put at the end of buffer */
-    if (tocopy > count) {                       /* Check for copy count */
-        tocopy = count;
+    /* Calculate maximum number of bytes available to write */
+    free = BUF_PREF(buff_get_free)(buff);
+    count = BUF_MIN(free, count);
+    if (!count) {
+        return 0;
     }
-    memcpy(&buff->buff[buff->in], d, tocopy);   /* Copy content to buffer */
-    i += tocopy;                                /* Increase number of bytes we copied already */
-    buff->in += tocopy;	
+
+    /* Step 1: Write data to linear part of buffer */
+    tocopy = BUF_MIN(buff->size - buff->w, count);
+    BUF_MEMCPY(&buff->buff[buff->w], d, tocopy);
+    buff->w += tocopy;
     count -= tocopy;
-    if (count > 0) {                            /* Check if anything to write */	
-        memcpy(buff->buff, (void *)&d[i], count);   /* Copy content */
-        buff->in = count;                       /* Set input pointer */
+
+    /* Step 2: Write data to beginning of buffer (overflow part) */
+    if (count > 0) {
+        BUF_MEMCPY(buff->buff, (void *)&d[tocopy], count);
+        buff->w = count;
     }
-    if (buff->in >= buff->size) {               /* Check input overflow */
-        buff->in = 0;
+
+    if (buff->w >= buff->size) {                /* Check input overflow */
+        buff->w = 0;
     }
-    return (i + count);                         /* Return number of elements stored in memory */
+    return tocopy + count;                      /* Number of elements written */
 }
 
 /**
  * \brief           Read data from buffer
- * \param[in]       buff: Pointer to buffer structure
- * \param[out]      data: Pointer to data to copy memory to
+ *                  Copies data from buffer to `data` array and marks buffer as free for maximum `count` number of bytes
+ * \param[in]       buff: Buffer handle
+ * \param[out]      data: Pointer to output memory to copy buffer data to
  * \param[in]       count: Number of bytes to read
- * \return          Number of bytes actually read and saved to data variable
+ * \return          Number of bytes read and copied to data array
  */
 size_t
-gps_buff_read(gps_buff_t* buff, void* data, size_t count) {
+BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t count) {
+    size_t tocopy, full;
     uint8_t *d = data;
-    size_t i = 0, full, tocopy;
 
-    if (buff == NULL || count == 0) {           /* Check buffer structure */
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
-    if (buff->out >= buff->size) {              /* Check output pointer */
-        buff->out = 0;
-    }
-    full = gps_buff_get_full(buff);             /* Get free memory */
-    if (full < count) {                         /* Check available memory */
-        if (full == 0) {                        /* If no memory, stop execution */
-            return 0;
-        }
-        count = full;                           /* Set values for write */
+
+    if (buff->r >= buff->size) {                /* Check output pointer */
+        buff->r = 0;                            /* On normal use, this should never happen */
     }
 
-    tocopy = buff->size - buff->out;            /* Calculate number of elements we can read from end of buffer */
-    if (tocopy > count) {                       /* Check for copy count */
-        tocopy = count;
+    /* Calculate maximum number of bytes available to read */
+    full = BUF_PREF(buff_get_full)(buff);
+    count = BUF_MIN(full, count);
+    if (!count) {
+        return 0;
     }
-    memcpy(d, &buff->buff[buff->out], tocopy);  /* Copy content from buffer */
-    i += tocopy;                                /* Increase number of bytes we copied already */
-    buff->out += tocopy;
+
+    /* Step 1: Read data from linear part of buffer */
+    tocopy = BUF_MIN(buff->size - buff->r, count);
+    BUF_MEMCPY(d, &buff->buff[buff->r], tocopy);
+    buff->r += tocopy;
     count -= tocopy;
-    if (count > 0) {                            /* Check if anything to read */
-        memcpy(&d[i], buff->buff, count);       /* Copy content */
-        buff->out = count;                      /* Set input pointer */
+
+    /* Step 2: Read data from beginning of buffer (overflow part) */
+    if (count > 0) {
+        BUF_MEMCPY(&d[tocopy], buff->buff, count);
+        buff->r = count;
     }
-    if (buff->out >= buff->size) {              /* Check output overflow */
-        buff->out = 0;
+
+    if (buff->r >= buff->size) {                /* Check output overflow */
+        buff->r = 0;
     }
-    return i + count;                           /* Return number of elements stored in memory */
+    return tocopy + count;                      /* Number of elements read */
 }
 
 /**
- * \brief           Read from buffer but do not change read and write pointers
- * \param[in]       buff: Pointer to buffer structure
- * \param[in]       skip_count: Number of bytes to skip before reading peek data
- * \param[out]      data: Pointer to data to save read memory
+ * \brief           Read from buffer without changing read pointer (peek only)
+ * \param[in]       buff: Buffer handle
+ * \param[in]       skip_count: Number of bytes to skip before reading data
+ * \param[out]      data: Pointer to output memory to copy buffer data to
  * \param[in]       count: Number of bytes to peek
- * \return          Number of bytes written to data array
+ * \return          Number of bytes peeked and written to output array
  */
 size_t
-gps_buff_peek(gps_buff_t* buff, size_t skip_count, void* data, size_t count) {
+BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t count) {
+    size_t full, tocopy, r;
     uint8_t *d = data;
-    size_t i = 0, full, tocopy, out;
 
-    if (buff == NULL || count == 0) {           /* Check buffer structure */
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
-    out = buff->out;
-    if (buff->out >= buff->size) {              /* Check output pointer */
-        buff->out = 0;
+
+    if (buff->r >= buff->size) {                /* Check output pointer */
+        buff->r = 0;                            /* On normal use, this should never happen */
     }
-    full = gps_buff_get_full(buff);             /* Get free memory */
-    if (skip_count >= full) {                   /* We cannot skip for more than we have in buffer */
+    r = buff->r;
+
+    /* Calculate maximum number of bytes available to read */
+    full = BUF_PREF(buff_get_full)(buff);
+
+    /* Skip beginning of buffer */
+    if (skip_count >= full) {
         return 0;
     }
-    out += skip_count;                          /* Skip buffer data */
-    full -= skip_count;                         /* Effective full is less than before */
-    if (out >= buff->size) {                    /* Check overflow */
-        out -= buff->size;                      /* Go to beginning */
-    }
-    if (full < count) {                         /* Check available memory */
-        if (full == 0) {                        /* If no memory, stop execution */
-            return 0;
-        }
-        count = full;                           /* Set values for write */
+    r += skip_count;
+    full -= skip_count;
+    if (r >= buff->size) {
+        r -= buff->size;
     }
 
-    tocopy = buff->size - out;                  /* Calculate number of elements we can read from end of buffer */
-    if (tocopy > count) {                       /* Check for copy count */
-        tocopy = count;
+    /* Check maximum number of bytes available to read after skip */
+    count = BUF_MIN(full, count);
+    if (!count) {
+        return 0;
     }
-    memcpy(d, &buff->buff[out], tocopy);        /* Copy content from buffer */
-    i += tocopy;                                /* Increase number of bytes we copied already */
+
+    /* Step 1: Read data from linear part of buffer */
+    tocopy = BUF_MIN(buff->size - r, count);
+    BUF_MEMCPY(d, &buff->buff[r], tocopy);
     count -= tocopy;
-    if (count > 0) {                            /* Check if anything to read */
-        memcpy(&d[i], buff->buff, count);       /* Copy content */
+
+    /* Step 2: Read data from beginning of buffer (overflow part) */
+    if (count > 0) {
+        BUF_MEMCPY(&d[tocopy], buff->buff, count);
     }
-    return i + count;                           /* Return number of elements stored in memory */
+    return tocopy + count;                      /* Number of elements read */
 }
 
 /**
- * \brief           Get length of free space
- * \param[in]       buff: Pointer to buffer structure
+ * \brief           Get number of bytes in buffer available to write
+ * \param[in]       buff: Buffer handle
  * \return          Number of free bytes in memory
  */
 size_t
-gps_buff_get_free(gps_buff_t* buff) {
-    size_t size, in, out;
+BUF_PREF(buff_get_free)(BUF_PREF(buff_t)* buff) {
+    size_t size, w, r;
 
-    if (buff == NULL) {                         /* Check buffer structure */
+    if (!BUF_IS_VALID(buff)) {
         return 0;
     }
-    in = buff->in;                              /* Save values */
-    out = buff->out;
-    if (in == out) {                            /* Check if the same */
+
+    /* Use temporary values in case they are changed during operations */
+    w = buff->w;
+    r = buff->r;
+    if (w == r) {
         size = buff->size;
-    } else if (out > in) {                      /* Check normal mode */
-        size = out - in;
-    } else {                                    /* Check if overflow mode */
-        size = buff->size - (in - out);
+    } else if (r > w) {
+        size = r - w;
+    } else {
+        size = buff->size - (w - r);
     }
-    return size - 1;                            /* Return free memory */
+
+    /* Buffer free size is always 1 less than actual size */
+    return size - 1;
 }
 
 /**
- * \brief           Get length of buffer currently being used
- * \param[in]       buff: Pointer to buffer structure
+ * \brief           Get number of bytes in buffer available to read
+ * \param[in]       buff: Buffer handle
  * \return          Number of bytes ready to be read
  */
 size_t
-gps_buff_get_full(gps_buff_t* buff) {
-    size_t in, out, size;
+BUF_PREF(buff_get_full)(BUF_PREF(buff_t)* buff) {
+    size_t w, r, size;
 
-    if (buff == NULL) {                         /* Check buffer structure */
+    if (!BUF_IS_VALID(buff)) {
         return 0;
     }
-    in = buff->in;                              /* Save values */
-    out = buff->out;
-    if (in == out) {                            /* Pointer are same? */
+
+    /* Use temporary values in case they are changed during operations */
+    w = buff->w;
+    r = buff->r;
+    if (w == r) {
         size = 0;
-    } else if (in > out) {                      /* buff is not in overflow mode */
-        size = in - out;
-    } else {                                    /* buff is in overflow mode */
-        size = buff->size - (out - in);
+    } else if (w > r) {
+        size = w - r;
+    } else {
+        size = buff->size - (r - w);
     }
-    return size;                                /* Return number of elements in buffer */
+    return size;
 }
 
 /**
- * \brief           Resets and clears buffer
- * \param[in]       buff: Pointer to buffer structure
+ * \brief           Resets buffer to default values. Buffer size is not modified
+ * \param[in]       buff: Buffer handle
  */
 void
-gps_buff_reset(gps_buff_t* buff) {
-    if (buff == NULL) {                         /* Check buffer structure */
-        return;
+BUF_PREF(buff_reset)(BUF_PREF(buff_t)* buff) {
+    if (BUF_IS_VALID(buff)) {
+        buff->w = 0;
+        buff->r = 0;
     }
-    buff->in = 0;                               /* Reset values */
-    buff->out = 0;
 }
 
 /**
  * \brief           Get linear address for buffer for fast read
- * \param[in]       buff: Pointer to buffer
- * \return          Pointer to start of linear address
+ * \param[in]       buff: Buffer handle
+ * \return          Linear buffer start address
  */
 void *
-gps_buff_get_linear_block_address(gps_buff_t* buff) {
-    return &buff->buff[buff->out];              /* Return read address */
+BUF_PREF(buff_get_linear_block_read_address)(BUF_PREF(buff_t)* buff) {
+    if (!BUF_IS_VALID(buff)) {
+        return NULL;
+    }
+    return &buff->buff[buff->r];
 }
 
 /**
- * \brief           Get length of linear block address before it overflows
- * \param[in]       buff: Pointer to buffer
- * \return          Length of linear address
+ * \brief           Get length of linear block address before it overflows for read operation
+ * \param[in]       buff: Buffer handle
+ * \return          Linear buffer size in units of bytes for read operation
  */
 size_t
-gps_buff_get_linear_block_length(gps_buff_t* buff) {
-    size_t len;
-    if (buff->in > buff->out) {
-        len = buff->in - buff->out;
-    } else if (buff->out > buff->in) {
-        len = buff->size - buff->out;
+BUF_PREF(buff_get_linear_block_read_length)(BUF_PREF(buff_t)* buff) {
+    size_t w, r, len;
+
+    if (!BUF_IS_VALID(buff)) {
+        return 0;
+    }
+
+    /* Use temporary values in case they are changed during operations */
+    w = buff->w;
+    r = buff->r;
+    if (w > r) {
+        len = w - r;
+    } else if (r > w) {
+        len = buff->size - r;
     } else {
         len = 0;
     }
@@ -291,22 +332,100 @@ gps_buff_get_linear_block_length(gps_buff_t* buff) {
 }
 
 /**
- * \brief           Skip (ignore) buffer data.
+ * \brief           Skip (ignore; advance read pointer) buffer data
+ *                  Marks data as read in the buffer and increases free memory up to `len` bytes
  * \note            Useful at the end of streaming transfer such as DMA
- * \param[in]       buff: Pointer to buffer structure
- * \param[in]       len: Length of bytes we want to skip
+ * \param[in]       buff: Buffer handle
+ * \param[in]       len: Number of bytes to skip and mark as read
  * \return          Number of bytes skipped
  */
 size_t
-gps_buff_skip(gps_buff_t* buff, size_t len) {
+BUF_PREF(buff_skip)(BUF_PREF(buff_t)* buff, size_t len) {
     size_t full;
-    full = gps_buff_get_full(buff);             /* Get buffer used length */
-    if (len > full) {
-        len = full;
+
+    if (!BUF_IS_VALID(buff) || len == 0) {
+        return 0;
     }
-    buff->out += len;                           /* Advance buffer */
-    if (buff->out >= buff->size) {              /* Subtract possible overflow */
-        buff->out -= buff->size;                /* Do subtract */
+
+    full = BUF_PREF(buff_get_full)(buff);       /* Get buffer used length */
+    buff->r += BUF_MIN(len, full);              /* Advance read pointer */
+    if (buff->r >= buff->size) {                /* Subtract possible overflow */
+        buff->r -= buff->size;
+    }
+    return len;
+}
+
+/**
+ * \brief           Get linear address for buffer for fast read
+ * \param[in]       buff: Buffer handle
+ * \return          Linear buffer start address
+ */
+void *
+BUF_PREF(buff_get_linear_block_write_address)(BUF_PREF(buff_t)* buff) {
+    if (!BUF_IS_VALID(buff)) {
+        return NULL;
+    }
+    return &buff->buff[buff->w];
+}
+
+/**
+ * \brief           Get length of linear block address before it overflows for write operation
+ * \param[in]       buff: Buffer handle
+ * \return          Linear buffer size in units of bytes for write operation
+ */
+size_t
+BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
+    size_t w, r, len;
+
+    if (!BUF_IS_VALID(buff)) {
+        return 0;
+    }
+
+    /* Use temporary values in case they are changed during operations */
+    w = buff->w;
+    r = buff->r;
+    if (w >= r) {
+        len = buff->size - w;
+        /*
+         * When read pointer == 0,
+         * maximal length is one less as if too many bytes 
+         * are written, buffer would be considered empty again (r == w)
+         */
+        if (r == 0) {
+            /*
+             * Cannot overflow:
+             * - If r != 0, statement does not get called
+             * - buff->size cannot be 0 and if r == 0, len is > 0
+             */
+            len--;
+        }
+    } else {
+        len = r - w - 1;
+    }
+    return len;
+}
+
+/**
+ * \brief           Advance write pointer in the buffer.
+ *                  Similar to skip function but modifies write pointer instead of read
+ * \note            Useful when hardware is writing to buffer and application needs to increase number
+ *                  of bytes written to buffer by hardware
+ * \param[in]       buff: Buffer handle
+ * \param[in]       len: Number of bytes to advance
+ * \return          Number of bytes advanced for write operation
+ */
+size_t
+BUF_PREF(buff_advance)(BUF_PREF(buff_t)* buff, size_t len) {
+    size_t free;
+
+    if (!BUF_IS_VALID(buff) || len == 0) {
+        return 0;
+    }
+
+    free = BUF_PREF(buff_get_free)(buff);       /* Get buffer free length */
+    buff->w += BUF_MIN(len, free);              /* Advance write pointer */
+    if (buff->w >= buff->size) {                /* Subtract possible overflow */
+        buff->w -= buff->size;
     }
     return len;
 }
