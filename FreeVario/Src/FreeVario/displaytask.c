@@ -16,6 +16,8 @@
 
 extern TaskHandle_t xDisplayNotify;
 
+DisplayActivity displayactivity;
+
 unsigned char * frame_buffer[EPD_WIDTH * EPD_HEIGHT / 8] __attribute__((section(".ccmram")));
 Paint paint __attribute__((section(".ccmram")));
 
@@ -23,6 +25,7 @@ void StartDisplayTask(void const * argument) {
 
     //unsigned char * frame_buffer = (unsigned char*)malloc(EPD_WIDTH * EPD_HEIGHT / 8);
     memset(frame_buffer, 0, EPD_WIDTH * EPD_HEIGHT / 8);
+    displayactivity.StatusDisplayMode = 1;
     configASSERT(xDisplayNotify == NULL);
     uint32_t ulNotifiedValue;
     BaseType_t xResult;
@@ -41,7 +44,6 @@ void StartDisplayTask(void const * argument) {
             refreshcount = 0;
             displayRefreshMainScreen(&paint, &epd, frame_buffer);
         }
-        displayTaskUpdate(&paint, &epd, frame_buffer);
 
         TickType_t waittime = abs(500 - (xTaskGetTickCount() - times));
         if (waittime > 500)
@@ -54,17 +56,20 @@ void StartDisplayTask(void const * argument) {
         xMaxBlockTime);
         if (xResult == pdPASS) {
             /* A notification was received.  See which bits were set. */
-            if (ulNotifiedValue == 1) {
+            if (ulNotifiedValue == PWRBTNDSPSIGNAL) {
                 clearScreen(&paint, &epd, frame_buffer);
                 displayMessageShutdown(&paint, &epd, frame_buffer);
 
                 osDelay(20000); //just sleep till shutdown
             }
 
-            if (ulNotifiedValue == 2) {
+            if (ulNotifiedValue == OKBTNDSPSIGNAL) {
+                    displayactivity.StatusDisplayMode = (displayactivity.StatusDisplayMode == 0) ? 1 : 0;
 
             }
         }
+
+        displayTaskUpdate(&paint, &epd, frame_buffer);
         refreshcount++;
 
     }
@@ -169,6 +174,7 @@ void displayTaskUpdate(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
     char BmpBat[6];
     char BmpGforce[6];
     char GPSSpeed[9];
+
 
     Paint_SetWidth(paint, 112);
     Paint_SetHeight(paint, 41);
@@ -275,51 +281,73 @@ void displayTaskUpdate(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
     EPD_SetFrameMemory(epd, frame_buffer, epd->width - 58, 230,
             Paint_GetWidth(paint), Paint_GetHeight(paint));
 
-    //temp
-    Paint_SetWidth(paint, 45);
-    Paint_Clear(paint, UNCOLORED);
-    //intTocharFloat(BmpTemp, sensors.temperature,100,1);
-    sprintf(BmpTemp, "%dC", (int) sensors.temperature / 100);
-    Paint_DrawStringAt(paint, 0, 0, BmpTemp, &Font14, COLORED);
-    EPD_SetFrameMemory(epd, frame_buffer, 8, 252, Paint_GetWidth(paint),
-            Paint_GetHeight(paint));
+    if (displayactivity.StatusDisplayMode == 0) {
+        //temp
+        Paint_SetWidth(paint, 45);
+        Paint_Clear(paint, UNCOLORED);
+        //intTocharFloat(BmpTemp, sensors.temperature,100,1);
+        sprintf(BmpTemp, "%dC", (int) sensors.temperature / 100);
+        Paint_DrawStringAt(paint, 0, 0, BmpTemp, &Font14, COLORED);
+        EPD_SetFrameMemory(epd, frame_buffer, 8, 252, Paint_GetWidth(paint),
+                Paint_GetHeight(paint));
 
-    //Muted
-    Paint_SetWidth(paint, 12);
-    Paint_Clear(paint, UNCOLORED);
-    if (activity.muted > 0) {
-        Paint_DrawStringAt(paint, 0, 0, "m", &Font14, COLORED);
-    } else {
-        Paint_DrawStringAt(paint, 0, 0, ".", &Font14, COLORED);
+        //Muted
+        Paint_SetWidth(paint, 12);
+        Paint_Clear(paint, UNCOLORED);
+        if (activity.muted > 0) {
+            Paint_DrawStringAt(paint, 0, 0, "m", &Font14, COLORED);
+        } else {
+            Paint_DrawStringAt(paint, 0, 0, ".", &Font14, COLORED);
+        }
+        EPD_SetFrameMemory(epd, frame_buffer, epd->width - 74, 252,
+                Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+        //humid
+        Paint_SetWidth(paint, 50);
+        Paint_Clear(paint, UNCOLORED);
+        sprintf(BmpHumid, " %d%%", sensors.humidity / 100);
+        Paint_DrawStringAt(paint, 0, 0, BmpHumid, &Font14, COLORED);
+        EPD_SetFrameMemory(epd, frame_buffer, epd->width - 58, 252,
+                Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+        //battery
+        Paint_SetWidth(paint, 50);
+        Paint_Clear(paint, UNCOLORED);
+        intTocharFloat(BmpBat, sensors.vbat, 10, 1, 0);
+        strncat(BmpBat, "V", 1);
+        Paint_DrawStringAt(paint, 0, 0, BmpBat, &Font14, COLORED);
+        EPD_SetFrameMemory(epd, frame_buffer, 8, 275, Paint_GetWidth(paint),
+                Paint_GetHeight(paint));
+
+        //gforce
+        Paint_SetWidth(paint, 50);
+        Paint_Clear(paint, UNCOLORED);
+        intTocharFloat(BmpGforce, sensors.gforce, 100, 10, 1);
+        strncat(BmpGforce, "G", 1);
+        Paint_DrawStringAt(paint, 0, 0, BmpGforce, &Font14, COLORED);
+        EPD_SetFrameMemory(epd, frame_buffer, epd->width - 58, 275,
+                Paint_GetWidth(paint), Paint_GetHeight(paint));
+    } else { //alternative display
+
+        //pressure
+        char BmpPressure[10];
+        Paint_SetWidth(paint, 112);
+        Paint_Clear(paint, UNCOLORED);
+        intTocharFloat(BmpPressure, sensors.pressure,10000,1000,0);
+        strncat(BmpPressure, " hPa", 4);
+        Paint_DrawStringAt(paint, 0, 0, BmpPressure, &Font14, COLORED);
+        EPD_SetFrameMemory(epd, frame_buffer, 8, 252, Paint_GetWidth(paint),
+                Paint_GetHeight(paint));
+        //time
+        char DspTime[9];
+        Paint_SetWidth(paint, 112);
+        Paint_Clear(paint, UNCOLORED);
+        sprintf(DspTime, " %02u:%02u:%02u", hgps.hours + conf.gmtoffset, hgps.minutes,hgps.seconds);
+        Paint_DrawStringAt(paint, 0, 0, DspTime, &Font14, COLORED);
+        EPD_SetFrameMemory(epd, frame_buffer, 8, 275, Paint_GetWidth(paint),
+                Paint_GetHeight(paint));
+
     }
-    EPD_SetFrameMemory(epd, frame_buffer, epd->width - 74, 252,
-            Paint_GetWidth(paint), Paint_GetHeight(paint));
-
-    //humid
-    Paint_SetWidth(paint, 50);
-    Paint_Clear(paint, UNCOLORED);
-    -sprintf(BmpHumid, " %d%%", sensors.humidity / 100);
-    Paint_DrawStringAt(paint, 0, 0, BmpHumid, &Font14, COLORED);
-    EPD_SetFrameMemory(epd, frame_buffer, epd->width - 58, 252,
-            Paint_GetWidth(paint), Paint_GetHeight(paint));
-
-    //battery
-    Paint_SetWidth(paint, 50);
-    Paint_Clear(paint, UNCOLORED);
-    intTocharFloat(BmpBat, sensors.vbat, 10, 1, 0);
-    strncat(BmpBat, "V", 1);
-    Paint_DrawStringAt(paint, 0, 0, BmpBat, &Font14, COLORED);
-    EPD_SetFrameMemory(epd, frame_buffer, 8, 275, Paint_GetWidth(paint),
-            Paint_GetHeight(paint));
-
-    //gforce
-    Paint_SetWidth(paint, 50);
-    Paint_Clear(paint, UNCOLORED);
-    intTocharFloat(BmpGforce, sensors.gforce, 100, 10, 1);
-    strncat(BmpGforce, "G", 1);
-    Paint_DrawStringAt(paint, 0, 0, BmpGforce, &Font14, COLORED);
-    EPD_SetFrameMemory(epd, frame_buffer, epd->width - 58, 275,
-            Paint_GetWidth(paint), Paint_GetHeight(paint));
 
     EPD_DisplayFrame(epd);
 

@@ -26,7 +26,8 @@ void StartDefaultTask(void const * argument);
 #define FLS_FLYING      2
 #define FLS_LANDED      3
 
-
+#define PWRBTNDSPSIGNAL    0x01
+#define OKBTNDSPSIGNAL     0x0A
 
 
 typedef struct {

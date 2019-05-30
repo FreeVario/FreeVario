@@ -26,8 +26,16 @@ extern "C" {
 #include "../fvconfig.h"
 #include <stdlib.h>
 
+
+
 extern gps_t hgps;
-//TODO: Fix compiler warning
+
+
+typedef struct {
+    uint8_t StatusDisplayMode;
+} DisplayActivity;
+
+extern DisplayActivity displayactivity;
 
 void StartDisplayTask(void const * argument);
 void displayTaskSetup(Paint *paint, EPD *epd, unsigned char * frame_buffer);

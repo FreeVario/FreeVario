@@ -312,7 +312,7 @@ void StartDefaultTask(void const * argument) {
                     & (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
                             == GPIO_PIN_SET)) {
                 UserPowerButton = 0;
-                xTaskNotify(xDisplayNotify, 0x01, eSetValueWithOverwrite);
+                xTaskNotify(xDisplayNotify, PWRBTNDSPSIGNAL, eSetValueWithOverwrite);
 
                 if (activity.SDcardMounted) {
                     f_mount(0, "0:", 1); //unmount SDCARD
@@ -350,8 +350,9 @@ void StartDefaultTask(void const * argument) {
                 UserOkButton = 0;
 
                 if (!UserOkButtonLp) {
-
+                    xTaskNotify(xDisplayNotify, OKBTNDSPSIGNAL, eSetValueWithOverwrite);
                 }
+                UserOkButtonLp = 0;
             }
 
         }

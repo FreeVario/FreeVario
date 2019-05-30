@@ -34,7 +34,7 @@ int openGPXLogFile(FIL* gpxFile) {
 
     sprintf(filename, "%02u-%02u-%u-%02u%02u-Log-%06ld.gpx",
             activity.takeoffYear, activity.takeoffMonth, activity.takeoffDate,
-            activity.takeoffHour, activity.takeoffMinute,
+            activity.takeoffHour + conf.gmtoffset, activity.takeoffMinute,
             activity.currentLogID);
 
     if (f_open(gpxFile, filename,

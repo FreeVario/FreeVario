@@ -36,7 +36,7 @@ void writeFlightLogSummaryFile() {
 
     sprintf(filename, "%02u-%02u-%u-%02u%02u-Log-%06ld.log",
             activity.takeoffYear, activity.takeoffMonth, activity.takeoffDate,
-            activity.takeoffHour, activity.takeoffMinute,
+            activity.takeoffHour + conf.gmtoffset, activity.takeoffMinute,
             activity.currentLogID);
 
     if (f_open(&logSumFile, filename,
@@ -66,11 +66,11 @@ void writeFlightLogSummaryFile() {
                 "%d,%u-%02u-%02u %02u:%02u:%02u,%d,%d,%u-%02u-%02u %02u:%02u:%02u,%d,%d,%d,%d,%d,%s,%s,%s,%s\r\n",
                 activity.currentLogID, activity.takeoffDate,
                 activity.takeoffMonth, activity.takeoffYear,
-                activity.takeoffHour, activity.takeoffMinute,
+                activity.takeoffHour + conf.gmtoffset, activity.takeoffMinute,
                 activity.takeoffSeconds, activity.takeoffAltitude,
                 activity.takeoffTemp, activity.landingDate,
                 activity.landingMonth, activity.landingYear,
-                activity.landingHour, activity.landingMinute,
+                activity.landingHour + conf.gmtoffset, activity.landingMinute,
                 activity.landingSeconds, activity.landingAltitude,
                 activity.MaxAltitudeMeters, activity.MaxAltitudeGainedMeters,
                 activity.MaxVarioMs, activity.MaxVarioSinkMs,
@@ -99,7 +99,7 @@ int openDataLogFile(FIL* logFile) {
 
     sprintf(filename, "%02u-%02u-%u-%02u%02u-Log-%06ld.csv",
             activity.takeoffYear, activity.takeoffMonth, activity.takeoffDate,
-            activity.takeoffHour, activity.takeoffMinute,
+            activity.takeoffHour + conf.gmtoffset, activity.takeoffMinute,
             activity.currentLogID);
 
     if (f_open(logFile, filename,
@@ -136,7 +136,7 @@ void writeDataLogFile(FIL *logFile) {
 
     sprintf(mtext,
             "%u-%02u-%02u %02u:%02u:%02u,%u,%u,%s,%s,%ld,%ld,%ld,%u,%ld,%ld,%d,%d,%d,%d,%d,%d,%d,%d,%u,%lu,%lu,%u,%u,%ld,%ld,%d\r\n",
-            hgps.date, hgps.month, hgps.year, hgps.hours, hgps.minutes,
+            hgps.date, hgps.month, hgps.year, hgps.hours + conf.gmtoffset, hgps.minutes,
             hgps.seconds, hgps.fix, hgps.is_valid,
             gpxlat,
             gpxlon,
