@@ -46,14 +46,23 @@ typedef struct {
     int gliderSinkRate;
     int lastLogNumber;
     int gmtoffset;
-} settings_t;
 
-extern settings_t conf;
+} conf_t;
+
+extern conf_t conf;
 
 typedef enum {
 
-    s_SaveVersion = 1, s_qnePressure = 2
+    s_SaveVersion = 2, s_qnePressure = 2
 
 } Settings_headers;
+
+
+typedef struct {
+    uint8_t SettingsFromSD; //flag if the settings were loaded from SD
+
+}settings_t;
+
+extern settings_t settings;
 
 #endif /* SETTINGS_H_ */

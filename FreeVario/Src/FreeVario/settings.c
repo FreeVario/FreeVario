@@ -12,6 +12,7 @@
 #include "freevario.h"
 
 extern char SDPath[4]; /* SD logical drive path */
+settings_t settings;
 
 /**
  * @brief  Save to SD, Mutexes must be claimed .
@@ -51,6 +52,7 @@ void loadConfigFromSD() {
     uint32_t bytesread;
     FIL confFile;
     FRESULT res;
+    settings.SettingsFromSD = 0;
 
         if (f_open(&confFile, FV_CONFIGFILENAME, FA_READ) != FR_OK) {
             getDefaultConfig();
@@ -60,12 +62,15 @@ void loadConfigFromSD() {
 
             res = f_read(&confFile, &conf, sizeof(conf), (void *) &bytesread);
 
+
             if ((bytesread == 0) || (res != FR_OK)) {
                 getDefaultConfig();
                 saveConfigtoSD();
             } else if (conf.SaveVersion != FV_CONFIGVERSION) {
                 getDefaultConfig();
                 saveConfigtoSD();
+            }else{
+                settings.SettingsFromSD = 1;
             }
 
             f_close(&confFile);
@@ -143,5 +148,7 @@ void getDefaultConfig() {
 
     //GMT hours from median
     conf.gmtoffset = 2;
+
+
 }
 

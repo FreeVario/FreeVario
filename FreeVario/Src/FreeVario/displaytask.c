@@ -273,7 +273,7 @@ void displayTaskUpdate(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
     Paint_Clear(paint, UNCOLORED);
     if (datalog.isLogging) {
         Paint_DrawStringAt(paint, 0, 0, " LOG", &Font14, COLORED);
-    } else if (activity.SDcardMounted) {
+    } else if (settings.SettingsFromSD) {
         Paint_DrawStringAt(paint, 0, 0, " SD ", &Font14, COLORED);
     } else {
         Paint_DrawStringAt(paint, 0, 0, " ---", &Font14, COLORED);

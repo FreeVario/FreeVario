@@ -44,7 +44,7 @@
 
 SensorData sensors __attribute__((section(".ccmram")));
 ActivityData activity __attribute__((section(".ccmram")));
-settings_t conf __attribute__((section(".ccmram")));
+conf_t conf __attribute__((section(".ccmram")));
 
 /*  Standard Vars---------------------------------------------------------------*/
 
