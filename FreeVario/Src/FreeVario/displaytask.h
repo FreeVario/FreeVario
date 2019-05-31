@@ -47,5 +47,5 @@ void clearScreen(Paint *paint, EPD *epd,
         unsigned char * frame_buffer);
 void displayMessageShutdown(Paint *paint, EPD *epd,
         unsigned char * frame_buffer);
-
+uint8_t showPictureFromFile (Paint *paint, EPD *epd, char * filename);
 #endif /* DISPLAYTASK_H_ */

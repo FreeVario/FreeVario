@@ -15,6 +15,7 @@
 #include "freevario.h"
 
 extern TaskHandle_t xDisplayNotify;
+extern osMutexId sdCardMutexHandle;
 
 DisplayActivity displayactivity;
 
@@ -58,7 +59,11 @@ void StartDisplayTask(void const * argument) {
             /* A notification was received.  See which bits were set. */
             if (ulNotifiedValue == PWRBTNDSPSIGNAL) {
                 clearScreen(&paint, &epd, frame_buffer);
-                displayMessageShutdown(&paint, &epd, frame_buffer);
+
+               // char sfilename[] = "sleep.bmp";
+               // if (!showPictureFromFile (&paint, &epd, sfilename)) {
+                   displayMessageShutdown(&paint, &epd, frame_buffer);
+               // }
 
                 osDelay(20000); //just sleep till shutdown
             }
@@ -70,6 +75,7 @@ void StartDisplayTask(void const * argument) {
         }
 
         displayTaskUpdate(&paint, &epd, frame_buffer);
+
         refreshcount++;
 
     }
@@ -445,6 +451,39 @@ void displayMessageShutdown(Paint *paint, EPD *epd,
     EPD_SetFrameMemory(epd, frame_buffer, 4, sp += 18, Paint_GetWidth(paint),
             Paint_GetHeight(paint));
     EPD_DisplayFrame(epd);
+
+}
+
+uint8_t showPictureFromFile (Paint *paint, EPD *epd, char * filename) {
+
+    FIL file;
+    FRESULT res;
+    uint32_t bytesread;
+    uint8_t result=1;
+
+    unsigned char  image_buffer[4798];
+
+    if ( xSemaphoreTake(sdCardMutexHandle,
+                            (TickType_t ) 2000) == pdTRUE) {
+        if (f_open(&file, filename, FA_READ) == FR_OK) {
+            res = f_read(&file, &image_buffer, 4798, (void *) &bytesread);
+            if ((bytesread > 0) || (res == FR_OK)) {
+                EPD_SetFrameMemory(epd, image_buffer, 0, 0, epd->width, epd->height);
+                EPD_DisplayFrame(epd);
+
+            }else{
+                result = 0;
+            }
+        } else {
+            result =0;
+        }
+
+
+    }
+
+    xSemaphoreGive(sdCardMutexHandle);
+
+    return result;
 
 }
 
