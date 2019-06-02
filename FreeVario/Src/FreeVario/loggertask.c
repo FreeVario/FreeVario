@@ -70,7 +70,7 @@ void StartLoggerTask(void const * argument) {
                             devnotready = 0;
                         }
 
-                        if (openGPXLogFile(&gpxLogFile)) {
+                        if (openGPXLogFile(&gpxLogFile) && datalog.isLogging) {
                             datalog.gpxIsLogging = 1;
                         }
 
