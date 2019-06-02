@@ -104,6 +104,9 @@ int openDataLogFile(FIL* logFile) {
 
     if (f_open(logFile, filename,
     FA_OPEN_APPEND | FA_WRITE) != FR_OK) {
+        f_mount(0, SDPath, 1); //unmount SDCARD
+        osDelay(200);
+        f_mount(&SDFatFS, SDPath, 0);
         return 0;
     }
 

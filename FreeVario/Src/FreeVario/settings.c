@@ -13,6 +13,9 @@
 
 extern char SDPath[4]; /* SD logical drive path */
 settings_t settings;
+extern osMutexId confMutexHandle;
+extern osMutexId sdCardMutexHandle;
+
 
 /**
  * @brief  Save to SD, Mutexes must be claimed .
@@ -78,6 +81,30 @@ void loadConfigFromSD() {
         }
 
 
+
+}
+
+//load config by claiming a mutex
+void loadConfigFromSDClaimMutex() {
+
+    if ( xSemaphoreTake( confMutexHandle, ( TickType_t ) 200 ) == pdTRUE) {
+
+        loadConfigFromSD();
+
+        xSemaphoreGive(confMutexHandle);
+    }
+
+}
+
+//save to SD card by claiming a mutex
+void saveConfigtoSDClaimMutex() {
+
+    if ( xSemaphoreTake( confMutexHandle, ( TickType_t ) 500 ) == pdTRUE) {
+
+        saveConfigtoSD();
+
+        xSemaphoreGive(confMutexHandle);
+    }
 
 }
 

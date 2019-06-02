@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sensorstask.h"
-#include "gpstask.h"
+#include "gpstask.h"saveConfigtoSD
 #include "sendatatask.h"
 #include "audiotask.h"
 #include "loggertask.h"
@@ -287,16 +287,14 @@ void StartDefaultTask(void const * argument) {
 
 
     if ( xSemaphoreTake( sdCardMutexHandle, ( TickType_t ) 500 ) == pdTRUE) {
-        if ( xSemaphoreTake( confMutexHandle, ( TickType_t ) 100 ) == pdTRUE) {
-            osDelay(500);
+        osDelay(500);
             if (f_mount(&SDFatFS, SDPath, 0) == FR_OK) { //Mount SD card
+
                 osDelay(2000); //give some time to load it up
                 activity.SDcardMounted = 1; //lazy load so it is not realy loaded
             }
-            loadConfigFromSD();
+            loadConfigFromSDClaimMutex();
 
-            xSemaphoreGive(confMutexHandle);
-        }
         xSemaphoreGive(sdCardMutexHandle);
     }
 
@@ -315,7 +313,7 @@ void StartDefaultTask(void const * argument) {
                 xTaskNotify(xDisplayNotify, PWRBTNDSPSIGNAL, eSetValueWithOverwrite);
 
                 if (activity.SDcardMounted) {
-                    f_mount(0, "0:", 1); //unmount SDCARD
+                    f_mount(0, SDPath, 1); //unmount SDCARD
                 }
                 osDelay(4500);
                 while (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
@@ -481,8 +479,13 @@ void StartDefaultTask(void const * argument) {
                     - activity.takeoffAltitude;
             setActivityLandTime(&activity); //util.c
             activity.flightstatus = FLS_GROUND;
-            conf.lastLogNumber = activity.currentLogID;
-            saveConfigtoSD();
+
+            if ( xSemaphoreTake( confMutexHandle, ( TickType_t ) 200 ) == pdTRUE) {
+                conf.lastLogNumber = activity.currentLogID;
+                xSemaphoreGive(confMutexHandle);
+            }
+            saveConfigtoSDClaimMutex();
+
             xTaskNotify(xLogDataNotify, 0x03, eSetValueWithOverwrite);
             break;
 

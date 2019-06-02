@@ -22,6 +22,8 @@
 void saveConfigtoSD();
 void loadConfigFromSD();
 void getDefaultConfig();
+void loadConfigFromSDClaimMutex();
+void saveConfigtoSDClaimMutex();
 
 typedef struct {
     int SaveVersion;

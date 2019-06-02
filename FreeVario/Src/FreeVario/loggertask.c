@@ -38,10 +38,10 @@ void StartLoggerTask(void const * argument) {
 
         updateLogBooktime = xTaskGetTickCount();
 
-        if (!activity.SDcardMounted) { //can't continue without a SD card
-            xLogDataNotify = NULL;
-            vTaskSuspend( NULL);
-        }
+   //     if (!activity.SDcardMounted) { //can't continue without a SD card
+    //        xLogDataNotify = NULL;
+   //         vTaskSuspend( NULL);
+   //     }
 
         xMaxBlockTime = pdMS_TO_TICKS(1000);
 
@@ -75,7 +75,7 @@ void StartLoggerTask(void const * argument) {
                         }
 
                         osDelay(2000);
-                        if (timeout > 2)
+                        if (timeout > 4)
                             devnotready = 0;
                     }
 

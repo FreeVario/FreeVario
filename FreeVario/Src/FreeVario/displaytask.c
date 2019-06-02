@@ -26,7 +26,7 @@ void StartDisplayTask(void const * argument) {
 
     //unsigned char * frame_buffer = (unsigned char*)malloc(EPD_WIDTH * EPD_HEIGHT / 8);
     memset(frame_buffer, 0, EPD_WIDTH * EPD_HEIGHT / 8);
-    displayactivity.StatusDisplayMode = 1;
+    displayactivity.StatusDisplayMode = 0;
     configASSERT(xDisplayNotify == NULL);
     uint32_t ulNotifiedValue;
     BaseType_t xResult;
