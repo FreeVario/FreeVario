@@ -214,7 +214,7 @@ void freeVario_RTOS_Init() {
 
 #ifdef FV_DISPLAY
     /* definition and creation of displayTask */
-    osThreadDef(displayTask, StartDisplayTask, osPriorityBelowNormal, 0, 2048);
+    osThreadDef(displayTask, StartDisplayTask, osPriorityBelowNormal, 0, 3072);
     displayTaskHandle = osThreadCreate(osThread(displayTask), NULL);
 #endif
 
@@ -251,7 +251,7 @@ void freeVario_RTOS_Init() {
 
 #ifdef FV_LOGGER
     /* definition and creation of loggerTask */
-    osThreadDef(loggerTask, StartLoggerTask, osPriorityNormal, 0, 2048);
+    osThreadDef(loggerTask, StartLoggerTask, osPriorityNormal, 0, 3072);
     loggerTaskHandle = osThreadCreate(osThread(loggerTask), NULL);
 #endif
 
