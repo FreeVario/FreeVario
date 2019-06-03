@@ -68,15 +68,19 @@ void StartLoggerTask(void const * argument) {
                         if (openDataLogFile(&dataLogFile)) { //datalog is the default logger
                             datalog.isLogging = 1;
                             devnotready = 0;
+
+                            if (openGPXLogFile(&gpxLogFile)) {
+                                datalog.gpxIsLogging = 1;
+                            }
+
+                        } else{
+
+                            osDelay(2000);
                         }
 
-                        if (openGPXLogFile(&gpxLogFile) && datalog.isLogging) {
-                            datalog.gpxIsLogging = 1;
-                        }
-
-                        osDelay(2000);
                         if (timeout > 4)
                             devnotready = 0;
+
                     }
 
                     xSemaphoreGive(sdCardMutexHandle);
@@ -92,22 +96,42 @@ void StartLoggerTask(void const * argument) {
                 if ( xSemaphoreTake(sdCardMutexHandle,
                         (TickType_t ) 600) == pdTRUE) {
                     if (datalog.isLogging) {
-
                         datalog.isLogging = 0;
                         closeDataLogFile(&dataLogFile);
+                        writeFlightLogSummaryFile();
                     }
 
                     if (datalog.gpxIsLogging) {
                         closeGPXLogFile(&gpxLogFile);
                         datalog.gpxIsLogging = 0;
                     }
-                    writeFlightLogSummaryFile();
+
                     xSemaphoreGive(sdCardMutexHandle);
                 }
             }
         }
 
-        if (ulNotifiedValue  == 9) { //gps signal
+        if (ulNotifiedValue == 4) { //Shutdown or reset signal, close all files and unmount
+            if ( xSemaphoreTake(sdCardMutexHandle,
+                    (TickType_t ) 600) == pdTRUE) {
+                if (datalog.isLogging) {
+                    closeDataLogFile(&dataLogFile);
+                    writeFlightLogSummaryFile();
+                }
+
+                if (datalog.gpxIsLogging) {
+                    closeGPXLogFile(&gpxLogFile);
+                }
+                xSemaphoreGive(sdCardMutexHandle);
+            }
+
+            f_mount(0, SDPath, 1); //unmount SDCARD
+
+        }
+
+
+
+        if (ulNotifiedValue  == 9) { //reserved gps sync signal
 
 
         }

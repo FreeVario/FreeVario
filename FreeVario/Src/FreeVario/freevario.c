@@ -310,11 +310,11 @@ void StartDefaultTask(void const * argument) {
                     & (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
                             == GPIO_PIN_SET)) {
                 UserPowerButton = 0;
+                saveConfigtoSDClaimMutex();
                 xTaskNotify(xDisplayNotify, PWRBTNDSPSIGNAL, eSetValueWithOverwrite);
+                //tell datalogger we have landed so it will close all files and unmount the sdcard
+                xTaskNotify(xLogDataNotify, 0x04, eSetValueWithOverwrite);
 
-                if (activity.SDcardMounted) {
-                    f_mount(0, SDPath, 1); //unmount SDCARD
-                }
                 osDelay(4500);
                 while (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
                         == GPIO_PIN_SET) { //wait for button to be released
@@ -362,6 +362,9 @@ void StartDefaultTask(void const * argument) {
                     & (HAL_GPIO_ReadPin(BTN_CANCEL_GPIO_Port, BTN_CANCEL_Pin)
                             == GPIO_PIN_SET)) {
                 __disable_irq();
+
+                xTaskNotify(xLogDataNotify, 0x04, eSetValueWithOverwrite); //tell datalogger we have landed so it will close all files
+                osDelay(500);
                 NVIC_SystemReset();
                 while (1) {
                     __nop();
