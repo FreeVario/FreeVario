@@ -14,6 +14,8 @@
 #include "gps.h"
 
 void writeFlightLogSummaryFile();
+void writeErrorlogFile(uint8_t * wtext, uint8_t len);
+void writeErrorlogFileClaimMutex(uint8_t * wtext, uint8_t len);
 int openDataLogFile(FIL * logFile);
 void writeDataLogFile(FIL * logFile);
 void closeDataLogFile(FIL * logFile);

@@ -26,6 +26,7 @@ void StartLoggerTask(void const * argument) {
     uint32_t ulNotifiedValue;
     BaseType_t xResult;
     TickType_t xMaxBlockTime;
+    uint8_t twoMincounter = 0;
     configASSERT(xLogDataNotify == NULL);
     xLogDataNotify = xTaskGetCurrentTaskHandle();
     datalog.isLogging = 0;
@@ -35,13 +36,15 @@ void StartLoggerTask(void const * argument) {
     /* Infinite loop */
     for (;;) {
 
-
+        twoMincounter++;
         updateLogBooktime = xTaskGetTickCount();
 
-   //     if (!activity.SDcardMounted) { //can't continue without a SD card
-    //        xLogDataNotify = NULL;
-   //         vTaskSuspend( NULL);
-   //     }
+        if (!activity.SDcardMounted) {
+            xLogDataNotify = NULL;
+            vTaskSuspend( NULL);
+        }
+
+
 
         xMaxBlockTime = pdMS_TO_TICKS(1000);
 
@@ -58,14 +61,14 @@ void StartLoggerTask(void const * argument) {
                 osDelay(200); //wait to stabilize data
                 if ( xSemaphoreTake(sdCardMutexHandle,
                         (TickType_t ) 600) == pdTRUE) {
-                    writeFlightLogSummaryFile();
-                    osDelay(100);
+
                     uint8_t devnotready = 1;
                     uint8_t timeout = 0;
                     while (devnotready) {
 
                         timeout++;
                         if (openDataLogFile(&dataLogFile)) { //datalog is the default logger
+                            writeFlightLogSummaryFile();
                             datalog.isLogging = 1;
                             devnotready = 0;
 
@@ -74,14 +77,16 @@ void StartLoggerTask(void const * argument) {
                             }
 
                         } else{
-
                             osDelay(2000);
                         }
+
 
                         if (timeout > 4)
                             devnotready = 0;
 
                     }
+
+
 
                     xSemaphoreGive(sdCardMutexHandle);
                 }
@@ -132,7 +137,13 @@ void StartLoggerTask(void const * argument) {
 
 
         if (ulNotifiedValue  == 9) { //reserved gps sync signal
+            if (twoMincounter >= 120) { //Bugfix: write to a file to keep SDcard alive
+                //TODO: Fix this bug
+                uint8_t stext[] = "kp\r\n";
+                writeErrorlogFile(stext,4);
+                twoMincounter = 0;
 
+            }
 
         }
 

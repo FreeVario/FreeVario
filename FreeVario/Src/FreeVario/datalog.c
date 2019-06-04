@@ -16,7 +16,8 @@
 #include <string.h>
 
 extern gps_t hgps;
-
+extern SD_HandleTypeDef hsd;
+extern osMutexId sdCardMutexHandle;
 
 /**
  * @brief Rewrites the Flight log summary file
@@ -43,6 +44,7 @@ void writeFlightLogSummaryFile() {
     FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) {
         /* 'STM32.TXT' file Open for write Error */
         //Error_Handler();
+
     } else {
         /* Write data to the text file */
         char gpxtlon[11];
@@ -93,6 +95,39 @@ void writeFlightLogSummaryFile() {
 
 }
 
+void writeErrorlogFile(uint8_t * wtext, uint8_t len) { //aka keep alive file
+    //not implemented but will be used to log errors
+    FIL sysLogFile;
+    FRESULT res;
+    uint32_t byteswritten;
+    char filename[]= "error.log";
+
+    if (f_open(&sysLogFile, filename,
+            FA_OPEN_APPEND | FA_WRITE) != FR_OK) {
+          /* 'STM32.TXT' file Open for write Error */
+          //Error_Handler();
+
+      } else {
+
+          res = f_write(&sysLogFile, wtext, len,
+                          (void *) &byteswritten);
+
+          f_close(&sysLogFile);
+
+      }
+
+}
+
+void writeErrorlogFileClaimMutex(uint8_t * wtext, uint8_t len) {
+    if ( xSemaphoreTake(sdCardMutexHandle,
+            (TickType_t ) 600) == pdTRUE) {
+        writeErrorlogFile(wtext, len);
+        xSemaphoreGive(sdCardMutexHandle);
+    }
+}
+
+
+
 int openDataLogFile(FIL* logFile) {
     char filename[32];
     uint32_t byteswritten = 0;
@@ -101,12 +136,21 @@ int openDataLogFile(FIL* logFile) {
             activity.takeoffYear, activity.takeoffMonth, activity.takeoffDate,
             activity.takeoffHour + conf.gmtoffset, activity.takeoffMinute,
             activity.currentLogID);
-
+//TODO: put sdcard fix at the summary file creation
+    //TODO: Add Card insert detection
     if (f_open(logFile, filename,
     FA_OPEN_APPEND | FA_WRITE) != FR_OK) {
         f_mount(0, SDPath, 1); //unmount SDCARD
-        osDelay(200);
+        FATFS_UnLinkDriver(SDPath);
+        osDelay(100);
+        FATFS_LinkDriver(&SD_Driver, SDPath);
+        osDelay(100);
+        HAL_SD_DeInit(&hsd);
+        osDelay(100);
+        MX_FATFS_Init();
+        osDelay(100);
         f_mount(&SDFatFS, SDPath, 0);
+
         return 0;
     }
 

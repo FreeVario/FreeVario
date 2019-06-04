@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sensorstask.h"
-#include "gpstask.h"saveConfigtoSD
+#include "gpstask.h"
 #include "sendatatask.h"
 #include "audiotask.h"
 #include "loggertask.h"
@@ -312,8 +312,7 @@ void StartDefaultTask(void const * argument) {
                 UserPowerButton = 0;
                 saveConfigtoSDClaimMutex();
                 xTaskNotify(xDisplayNotify, PWRBTNDSPSIGNAL, eSetValueWithOverwrite);
-                //tell datalogger we have landed so it will close all files and unmount the sdcard
-                xTaskNotify(xLogDataNotify, 0x04, eSetValueWithOverwrite);
+                xTaskNotify(xLogDataNotify, 0x04, eSetValueWithOverwrite);//tell datalogger to close all files
 
                 osDelay(4500);
                 while (HAL_GPIO_ReadPin(PWRBUTTON_GPIO_Port, PWRBUTTON_Pin)
@@ -363,7 +362,7 @@ void StartDefaultTask(void const * argument) {
                             == GPIO_PIN_SET)) {
                 __disable_irq();
 
-                xTaskNotify(xLogDataNotify, 0x04, eSetValueWithOverwrite); //tell datalogger we have landed so it will close all files
+                xTaskNotify(xLogDataNotify, 0x04, eSetValueWithOverwrite); //tell datalogger to close all files
                 osDelay(500);
                 NVIC_SystemReset();
                 while (1) {
