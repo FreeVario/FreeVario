@@ -13,8 +13,9 @@
 #include <stdio.h>
 
 const char *hex = "0123456789ABCDEF";
-char t_check[3];
+
 char t_newline[3] = "\r\n";
+
 
 //NOTE: add -u _printf_float to C linker for Sprintf to work with floats
 // See: http://www.openstm32.org/forumthread954
@@ -37,6 +38,7 @@ void NMEA_getPTAS1(uint8_t * buffer, int32_t vario, int32_t varioAv,
      * TAS knots 0-200
      */
     char nmeaPTAS1[44];
+    char crc[3];
     vario = ((vario * 3.28084) / 100) + 200;
     varioAv = (varioAv * 3.28084) / 100 + 200;
     altitude = (altitude * 3.28084) / 1000 + 2000;
@@ -44,9 +46,10 @@ void NMEA_getPTAS1(uint8_t * buffer, int32_t vario, int32_t varioAv,
     sprintf(nmeaPTAS1, "$PTAS1,%d,%d,%d,*", (int) vario, (int) varioAv,
             (int) altitude);
 
-    getCRC(nmeaPTAS1);
-    strcat((char*) buffer, nmeaPTAS1);
+    getCRC(nmeaPTAS1,crc);
 
+    strcat((char*) buffer, nmeaPTAS1);
+    strcat((char*) buffer, crc);
     strncat((char*) buffer, "\r\n", 2);
 
 }
@@ -68,17 +71,18 @@ void NMEA_getnmeaShortLXWP0(uint8_t * buffer, int32_t varioAlt,
     // e.g.:
     // $LXWP0,Y,222.3,1665.5,1.71,,,,,,239,174,10.1
     char nmeaVario[50];
-
+    char  crc[3];
     sprintf(nmeaVario, "$LXWP0,N,,");
     appendCharNum(nmeaVario, varioAlt, 1000, 10, 2);
     appendCharNum(nmeaVario, varioMts, 1000, 10, 2);
 
     strcat(nmeaVario, ",,,,,,,,,*");
 
-    getCRC(nmeaVario);
+    getCRC(nmeaVario,crc);
+
 
     strcat((char*) buffer, nmeaVario);
-
+    strcat((char*) buffer, crc);
     strncat((char*) buffer, "\r\n", 2);
 
 }
@@ -106,7 +110,7 @@ void NMEA_getNmeaLK8EX1(uint8_t * buffer, int32_t rawPressure, int32_t varioAlt,
      */
 
     char nmeaVario[50];
-
+    char  crc[3];
     sprintf(nmeaVario, "$LK8EX1,");
 
     appendCharNum(nmeaVario, rawPressure, 100, 1, 0);
@@ -116,8 +120,10 @@ void NMEA_getNmeaLK8EX1(uint8_t * buffer, int32_t rawPressure, int32_t varioAlt,
     appendCharNum(nmeaVario, pbat, 100, 1, 0);
 
     strcat(nmeaVario, "*");
-    getCRC(nmeaVario);
+    getCRC(nmeaVario,crc);
+
     strcat((char*) buffer, nmeaVario);
+    strcat((char*) buffer, crc);
     strncat((char*) buffer, "\r\n", 2);
 
 }
@@ -141,28 +147,31 @@ void NMEA_getNmeaPcProbe(uint8_t * buffer, int16_t aax, int16_t aay,
     // - C: is transmitted only if the C-Probe is being charged. In this case, heat produced by the charging
     //    process is likely to affect the readings of the temperature and humidity sensors.
 
-    uint8_t ch;
-    char nmeaVario[44];
 
+    char nmeaVario[44];
+    char crc[3];
     //sprintf(nmeaVario, "$PCPROBE,T,,,,,");
 
     sprintf(nmeaVario, "$PCPROBE,T,,,,,%02x,%02x,%02x,%02x,%02x,,,,*",
             (int) aax / 1000, (int) aay / 1000, (int) aaz / 1000,
             (int) temperature / 10, (int) humidity / 10);
 
-    getCRC(nmeaVario);
+    getCRC(nmeaVario, crc);
+
     strcat((char*) buffer, nmeaVario);
+    strcat((char*) buffer, crc);
     strncat((char*) buffer, "\r\n", 2);
 
 }
 
-void getCRC(char *buff) {
+void getCRC(char *buff, char * t_check) {
     // NMEA CRC: XOR each byte with previous for all chars between '$' and '*'
     char c;
     uint8_t i;
     uint8_t start_with = 0;
     uint8_t end_with = 0;
     char crca = 0;
+
 
     for (i = 0; i < 128; i++) {
         c = buff[i];
@@ -182,11 +191,10 @@ void getCRC(char *buff) {
 
     }
 
-    //Single threaded, so this is allowed
     t_check[0] = hex[(crca >> 4) & 0xF];
     t_check[1] = hex[(crca) & 0xF];
     t_check[2] = '\0';
-    strcat(buff, t_check);
+
 
     //based on code by Elimeléc López - July-19th-2013
 }

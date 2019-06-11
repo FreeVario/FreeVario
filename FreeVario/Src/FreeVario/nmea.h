@@ -20,7 +20,7 @@ void NMEA_getNmeaLK8EX1(uint8_t * buffer, int32_t rawPressure, int32_t varioAlt,
         int32_t climbRate, int32_t temperature, int32_t pbat);
 void NMEA_getNmeaPcProbe(uint8_t * buffer, int16_t aax, int16_t aay,
         int16_t aaz, int16_t temperature, int16_t humidity);
-void getCRC(char * buff);
+void getCRC(char *buff, char * t_check);
 void appendCharNum(char * buff, int32_t value, uint16_t div, uint16_t dif,
         uint8_t type);
 

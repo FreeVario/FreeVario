@@ -21,6 +21,7 @@
 #endif
 #include "stm32f4xx_hal.h"
 #include "FreeRTOS.h"
+extern UART_HandleTypeDef huart1;
 
  //Read the MPU UUID
 #define STM32_UUID ((uint32_t *)0x1FFF7A10)

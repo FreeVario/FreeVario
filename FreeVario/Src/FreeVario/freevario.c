@@ -282,6 +282,9 @@ void StartDefaultTask(void const * argument) {
     uint8_t UserOkButtonLp = 0;
 
     memset(&activity, 0, sizeof(activity));
+    char buffer[] = "$PMTK886,3*2B\r\n"; //set gps balloon mode
+    HAL_UART_Transmit(&FV_UARTGPS, buffer, strlen(buffer), 0xff);
+
 
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
 
