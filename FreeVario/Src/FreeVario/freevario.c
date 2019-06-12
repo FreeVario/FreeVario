@@ -278,11 +278,15 @@ void StartDefaultTask(void const * argument) {
     activity.flightstatus = FLS_GROUND;
     activity.useKalman = 0;
     activity.SDcardMounted =0;
+    activity.BlockGPSspeedTakeoff = 0;
 
     uint8_t UserOkButtonLp = 0;
 
     memset(&activity, 0, sizeof(activity));
-    char buffer[] = "$PMTK886,3*2B\r\n"; //set gps balloon mode
+    char buffer[] = "$PMTK886,0*28\r\n"; //set gps mode
+    //$PMTK886,0*28 standard mode
+    //$PMTK886,2*2A avionic mode
+    //$PMTK886,3*2B balloon mode
     HAL_UART_Transmit(&FV_UARTGPS, buffer, strlen(buffer), 0xff);
 
 
@@ -376,6 +380,14 @@ void StartDefaultTask(void const * argument) {
             if (HAL_GPIO_ReadPin(BTN_CANCEL_GPIO_Port, BTN_CANCEL_Pin)
                     == GPIO_PIN_RESET) {
                 UserCancelButton = 0;
+                //long press detection not needed as it restarts the MCU
+
+                    activity.BlockGPSspeedTakeoff = (activity.BlockGPSspeedTakeoff == 0) ? 1 : 0;
+
+
+
+
+
             }
 
         }
@@ -442,6 +454,7 @@ void StartDefaultTask(void const * argument) {
                 f_mount(&SDFatFS, SDPath, 0);
                 xSemaphoreGive(sdCardMutexHandle);
             }
+            activity.BlockGPSspeedTakeoff = 0;
             activity.currentLogID = conf.lastLogNumber + 1;
             activity.takeoffLocationLAT = hgps.latitude ;
             activity.takeoffLocationLON = hgps.longitude;

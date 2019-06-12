@@ -51,7 +51,7 @@ extern UART_HandleTypeDef huart1;
 
 //Save config to SDCard
 #define FV_CONFIGFILENAME "settings.cfg"
-#define FV_CONFIGVERSION 3
+#define FV_CONFIGVERSION  4
 
 //Board LED
 #define FV_LED PB9_Pin

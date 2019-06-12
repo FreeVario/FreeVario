@@ -61,6 +61,7 @@ typedef struct {
     uint8_t barognssavalid;    //flag if the adjusted value is usable
     uint8_t useKalman; //use kalman with accelerometer insead of a lowpass filter
     uint8_t SDcardMounted;
+    uint8_t BlockGPSspeedTakeoff;
 } ActivityData; //owner: freevario.c
 
 extern ActivityData activity;

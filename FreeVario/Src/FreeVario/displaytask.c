@@ -241,6 +241,25 @@ void displayTaskUpdate(Paint *paint, EPD *epd, unsigned char * frame_buffer) {
             Paint_GetHeight(paint));
 
     /* --------------------Speed-----------------------------*/
+    Paint_SetWidth(paint, 16);
+    Paint_SetHeight(paint, 14);
+    Paint_Clear(paint, UNCOLORED);
+
+    if (activity.BlockGPSspeedTakeoff) {
+
+        Paint_DrawStringAt(paint, 0, 0, "L", &Font10, COLORED);
+
+    } else {
+
+        Paint_DrawStringAt(paint, 0, 0, " ", &Font10, COLORED);
+    }
+
+    EPD_SetFrameMemory(epd, frame_buffer, epd->width - 65, 152,
+            Paint_GetWidth(paint), Paint_GetHeight(paint));
+
+    Paint_SetWidth(paint, 112);
+    Paint_SetHeight(paint, 41);
+
 
     intTocharFloat(GPSSpeed, hgps.speed * 1.85, 1, 10, 1);
     Paint_Clear(paint, UNCOLORED);

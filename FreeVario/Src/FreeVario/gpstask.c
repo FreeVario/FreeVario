@@ -10,6 +10,7 @@
 #include "gpstask.h"
 #include <stdlib.h>
 #include <string.h>
+#include "freevario.h"
 
 gps_t hgps __attribute__((section(".ccmram")));
 
@@ -25,6 +26,7 @@ void StartGPSTask(void const * argument) {
     uint16_t y = 0;
     size_t len;
     uint8_t gpspulse=0;
+    uint8_t skipsend=0;
 
     gps_init(&hgps);
     configASSERT(xReceiveNotify == NULL);
@@ -73,8 +75,22 @@ void StartGPSTask(void const * argument) {
             if (flag) {       // test for end of line and if the right GPSbuffer
                 flag = 0;                                 // reset for next time
 
-                xQueueSendToBack(uartQueueHandle, sendBuffer, 100);
+                if (activity.BlockGPSspeedTakeoff ) {
 
+
+                    if (strncmp(sendBuffer,"$GPRMC",6) == 0 || strncmp(sendBuffer,"$GNRMC",6) == 0) {
+                        skipsend =1;
+
+                    }
+
+                }
+
+                if (!skipsend) {
+                    xQueueSendToBack(uartQueueHandle, sendBuffer, 100);
+
+                } else {
+                    skipsend = 0;
+                }
             }
             q++;
         }
