@@ -1,0 +1,24 @@
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2019-05-05T12:40:22Z",
+        "GenerationSoftware": {
+            "Application": "EAGLE",
+            "Vendor": "Autodesk",
+            "Version": "9.2.2"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.57,
+        "LayerNumber": 2,
+        "Name": {
+            "ProjectId": "FreeVario F4 V1.2"
+        },
+        "Owner": "Marco Marco <marco@rootnl.net>",
+        "Size": {
+            "X": 46,
+            "Y": 86
+        }
+    }
+}
