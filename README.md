@@ -1,5 +1,5 @@
 # FreeVario
-Freevario is an opensource vario that provides telemetry data to any vario based program such as XCSoar or XCTrack via bluetooth or USB in the form of NMEA sentences. It's a custom build pcb board featuring:
+Freevario is an opensource vario that provides telemetry data to any vario based program such as XCSoar or XCTrack via bluetooth or USB in the form of NMEA sentences. It's a custom build pcb board* featuring:
  <br>
   STM32F405 processor  <br>
   E-Ink display  <br>
@@ -15,6 +15,7 @@ Freevario is an opensource vario that provides telemetry data to any vario based
   Signal LED
   CN3055 LiPo charger  
 <br>
+*The board is development status and there are some errors, don't use it for production or anything
 
 The firmware runs on FreeRtos and STM32 HAL drivers. 
 
